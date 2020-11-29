@@ -2,16 +2,14 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 defaultTasks("clean", "build", "installDist")
 
-version = "2.0.2"
-
-val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9"
-
-fun yass2(module: String) = "ch.softappeal.yass2:yass2-$module:7.0.0"
+version = "2.0.3"
 
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.4.20"
     application
 }
+val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
+fun yass2(module: String) = "ch.softappeal.yass2:yass2-$module:7.0.1"
 
 dependencies {
     implementation(yass2("core"))
@@ -32,5 +30,5 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClassName = "ch.softappeal.but.MainKt"
+    mainClass.set("ch.softappeal.but.MainKt")
 }
