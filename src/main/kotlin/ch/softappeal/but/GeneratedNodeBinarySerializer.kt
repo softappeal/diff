@@ -2,7 +2,7 @@ package ch.softappeal.but
 
 @Suppress("UNCHECKED_CAST", "RemoveRedundantQualifierName", "SpellCheckingInspection", "RedundantVisibilityModifier")
 public fun generatedNodeBinarySerializer(
-    baseEncoders: List<ch.softappeal.yass2.serialize.binary.BaseEncoder<*>>
+    baseEncoders: List<ch.softappeal.yass2.serialize.binary.BaseEncoder<*>>,
 ): ch.softappeal.yass2.serialize.binary.BinarySerializer =
     ch.softappeal.yass2.serialize.binary.BinarySerializer(baseEncoders + listOf(
         ch.softappeal.yass2.serialize.binary.ClassEncoder(ch.softappeal.but.FileNode::class, false,
