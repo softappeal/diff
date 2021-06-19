@@ -13,6 +13,7 @@ fun backup(directory: String, archivePrefix: String) {
     ZipOutputStream(FileOutputStream(zipFile)).use { out ->
         Files.walkFileTree(folder, object : SimpleFileVisitor<Path>() {
             override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                if (DsStore == file.toFile().name) return FileVisitResult.CONTINUE
                 out.putNextEntry(ZipEntry(folder.relativize(file).toString()))
                 Files.copy(file, out)
                 out.closeEntry()

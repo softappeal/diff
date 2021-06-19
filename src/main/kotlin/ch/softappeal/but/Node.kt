@@ -27,6 +27,8 @@ class DirectoryNode(
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
+const val DsStore = ".DS_Store"
+
 fun create(digestAlgorithm: String, directory: String): DirectoryNode {
     fun CoroutineScope.fileNode(file: File) = FileNode(file.name).apply {
         launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(file.readBytes()) }
@@ -36,7 +38,11 @@ fun create(digestAlgorithm: String, directory: String): DirectoryNode {
         directory.name,
         mutableListOf<Node>().apply {
             (directory.listFiles() ?: throw IOException(directory.toString())).forEach { file ->
-                add(if (file.isFile) fileNode(file) else directoryNode(file))
+                if (file.isFile) {
+                    if (DsStore != file.name) add(fileNode(file))
+                } else {
+                    add(directoryNode(file))
+                }
             }
         }.sortedBy { it.name }
     )
