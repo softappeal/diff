@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 defaultTasks("clean", "build", "installDist")
 
-version = "2.0.6"
+version = "2.0.7"
 
 plugins {
     kotlin("jvm") version "1.5.20"

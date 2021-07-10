@@ -14,10 +14,10 @@ class NodeTest {
     fun test() {
         assertEquals(
             """
-                - / test
-                    - a.txt 0cc175b9c0f1b6a831c399e269772661
-                    - / dir
-                        - d.txt 8277e0910d750195b448797616e091ad
+                - test
+                    - a.txt `0cc175b9c0f1b6a831c399e269772661`
+                    - dir
+                        - d.txt `8277e0910d750195b448797616e091ad`
             """
         ) {
             create("MD5", "src/test/resources/test").dump(it)

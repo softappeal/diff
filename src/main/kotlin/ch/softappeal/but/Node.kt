@@ -57,10 +57,11 @@ fun create(digestAlgorithm: String, directory: String): DirectoryNode {
 fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
     fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
     print("    ".repeat(indent))
+    print("- $name")
     when (this) {
-        is FileNode -> print("- $name ${digest.toHex()}\n")
+        is FileNode -> print(" `${digest.toHex()}`\n")
         is DirectoryNode -> {
-            print("- / $name\n")
+            print("\n")
             nodes.forEach { it.dump(print, indent + 1) }
         }
     }

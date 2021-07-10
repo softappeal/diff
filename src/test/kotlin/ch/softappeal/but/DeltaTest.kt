@@ -7,11 +7,11 @@ class DeltaTest {
     fun addNodeTypeChanged1() {
         assertEquals(
             """
-                - / . Equal
-                    - / a ChangedToDir
-                        - d Created
-                        - / d2 Created
-                            - d2 Created
+                - . `Equal`
+                    - a `ChangedToDir`
+                        - d `Created`
+                        - d2 `Created`
+                            - d2 `Created`
             """
         ) {
             create(
@@ -34,11 +34,11 @@ class DeltaTest {
     fun addNodeTypeChanged2() {
         assertEquals(
             """
-                - / . Equal
-                    - / a ChangedToFile
-                        - d Deleted
-                        - / d2 Deleted
-                            - d2 Deleted
+                - . `Equal`
+                    - a `ChangedToFile`
+                        - d `Deleted`
+                        - d2 `Deleted`
+                            - d2 `Deleted`
             """
         ) {
             create(
@@ -61,10 +61,10 @@ class DeltaTest {
     fun addDelta1() {
         assertEquals(
             """
-                - / . Equal
-                    - a Created
-                    - / d Created
-                        - d Created
+                - . `Equal`
+                    - a `Created`
+                    - d `Created`
+                        - d `Created`
             """
         ) {
             create(
@@ -83,10 +83,10 @@ class DeltaTest {
     fun addDelta2() {
         assertEquals(
             """
-                - / . Equal
-                    - a Deleted
-                    - / d Deleted
-                        - d Deleted
+                - . `Equal`
+                    - a `Deleted`
+                    - d `Deleted`
+                        - d `Deleted`
             """
         ) {
             create(
@@ -105,7 +105,7 @@ class DeltaTest {
     fun prune1() {
         assertEquals(
             """
-                - / . Equal
+                - . `Equal`
             """
         ) {
             create(
@@ -129,8 +129,8 @@ class DeltaTest {
     fun prune2() {
         assertEquals(
             """
-                - / . Equal
-                    - a Differ
+                - . `Equal`
+                    - a `Differ`
             """
         ) {
             create(
@@ -154,8 +154,8 @@ class DeltaTest {
     fun prune3() {
         assertEquals(
             """
-                - / . Equal
-                    - / a ChangedToDir
+                - . `Equal`
+                    - a `ChangedToDir`
             """
         ) {
             create(
