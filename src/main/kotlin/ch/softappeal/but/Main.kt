@@ -15,12 +15,12 @@ private fun usage() {
     """.trimIndent())
 }
 
-private val NodeSerializer = generatedNodeBinarySerializer(NodeBaseEncoders)
+private val NodeSerializer = generatedNodeBinarySerializer(::nodeBaseEncoders)
 
 private fun readNode(file: String): DirectoryNode {
     val reader = BytesReader(File(file).readBytes())
     val node = NodeSerializer.read(reader) as DirectoryNode
-    check(reader.drained)
+    check(reader.isDrained)
     return node
 }
 
