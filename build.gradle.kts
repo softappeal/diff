@@ -2,14 +2,14 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 defaultTasks("clean", "build", "installDist")
 
-version = "2.0.9"
+version = "2.0.10"
 
 plugins {
     kotlin("jvm") version "1.6.10"
     application
 }
-val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC3"
-fun yass2(module: String) = "ch.softappeal.yass2:yass2-$module:9.0.0-RC"
+val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
+fun yass2(module: String) = "ch.softappeal.yass2:yass2-$module:9.0.0"
 
 dependencies {
     implementation(yass2("core"))
