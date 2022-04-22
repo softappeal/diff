@@ -24,7 +24,7 @@ class DirectoryNode(
     val nodes: List<Node>,
 ) : Node(name)
 
-fun nodeBaseEncoders() = listOf(StringEncoder, ByteArrayEncoder)
+val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
 const val DsStore = ".DS_Store"

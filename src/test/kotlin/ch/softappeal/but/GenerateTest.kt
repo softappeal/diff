@@ -15,7 +15,7 @@ class GenerateTest {
     fun generateBinarySerializer() {
         generate(
             "GeneratedNodeBinarySerializer.kt",
-            generateBinarySerializer(::nodeBaseEncoders, NodeConcreteClasses, name = "generatedNodeBinarySerializer")
+            generateBinarySerializer(NodeBaseEncoders, NodeConcreteClasses, name = "generatedNodeBinarySerializer")
         )
     }
 }
