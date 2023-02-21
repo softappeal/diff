@@ -30,7 +30,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
                     advance()
                 }
 
-                fun done() = node == null
+                @Suppress("BooleanMethodIsAlwaysInverted") fun done() = node == null
                 fun node() = node!!
                 fun advance() {
                     node = if (iterator.hasNext()) iterator.next() else null

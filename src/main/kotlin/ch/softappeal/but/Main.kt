@@ -15,7 +15,8 @@ private fun usage() {
     """.trimIndent())
 }
 
-private val NodeSerializer = generatedNodeBinarySerializer(NodeBaseEncoders)
+@Suppress("PrivatePropertyName")
+private val NodeSerializer = generatedBinarySerializer(NodeBaseEncoders)
 
 private fun readNode(file: String): DirectoryNode {
     val reader = BytesReader(File(file).readBytes())
@@ -54,7 +55,7 @@ fun main(args: Array<String>) {
                 delta.dump(::print)
                 println()
                 print("type <y> to overwrite nodeFile (else abort): ")
-                val answer = readLine()
+                val answer = readln()
                 if ("y" != answer) return
             }
             println()
@@ -67,7 +68,7 @@ fun main(args: Array<String>) {
             }
             println()
             print("press <return> ")
-            readLine()
+            readln()
         }
         else -> usage()
     }
