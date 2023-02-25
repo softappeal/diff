@@ -4,7 +4,7 @@ import ch.softappeal.yass2.generate.*
 
 internal fun GenerateAction.execute() {
     execute(
-        "src/main/kotlin/ch/softappeal/but/GeneratedBinarySerializer.kt",
+        "src/main/kotlin/GeneratedBinarySerializer.kt",
         "package ch.softappeal.but\n\n${generateBinarySerializer(NodeBaseEncoders, NodeConcreteClasses)}",
     )
 }

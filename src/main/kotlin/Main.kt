@@ -40,15 +40,14 @@ fun main(args: Array<String>) {
     val command = args[0]
     when {
         command == "backup" && args.size == 3 -> backup(args[1], args[2])
-        command == "node" && args.size == 4 -> writeNode(args[3], create(args[1], args[2]))
+        command == "node" && args.size == 4 -> writeNode(args[3], create(args[1], args[2], ::print))
         command == "print" && args.size == 2 -> readNode(args[1]).dump(::print)
         command == "delta" && args.size == 4 -> writeFile(args[3]) { create(readNode(args[1]), readNode(args[2])).dump(it) }
         command == "workflow" && (args.size == 4 || args.size == 5) -> {
             val algorithm = args[1]
             val directory = args[2]
             val nodeFile = args[3]
-            val newNode = create(algorithm, directory)
-            newNode.printDuplicates()
+            val newNode = create(algorithm, directory, ::print)
             if (File(nodeFile).exists()) {
                 val oldNode = readNode(nodeFile)
                 val delta = create(oldNode, newNode)

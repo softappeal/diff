@@ -27,9 +27,30 @@ class DirectoryNode(
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
+private fun ByteArray.toHex() = joinToString("") { "%02X".format(it) }
+
+private fun DirectoryNode.printDuplicates(print: (s: String) -> Unit) {
+    val fileDigests = mutableListOf<Pair<String, String>>()
+    fun Node.visit(path: String) {
+        val nextPath = "$path/$name"
+        when (this) {
+            is FileNode -> fileDigests.add(Pair(nextPath, digest.toHex()))
+            is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
+        }
+    }
+    visit(".")
+    val duplicates = fileDigests.groupBy({ it.second }, { it.first }).values.filter { it.size != 1 }
+    if (duplicates.isEmpty()) {
+        print("<no duplicates>\n")
+    } else {
+        print("duplicates:\n")
+        duplicates.forEach { print("    $it\n") }
+    }
+}
+
 const val DsStore = ".DS_Store"
 
-fun create(digestAlgorithm: String, directory: String): DirectoryNode {
+fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Unit): DirectoryNode {
     fun CoroutineScope.fileNode(file: File) = FileNode(file.name).apply {
         launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(file.readBytes()) }
     }
@@ -51,37 +72,18 @@ fun create(digestAlgorithm: String, directory: String): DirectoryNode {
     runBlocking {
         CoroutineScope(Dispatchers.Default).launch { node = directoryNode(File(directory)) }.join()
     }
+    node.printDuplicates(print)
     return node
 }
 
 fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
-    fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
     print("    ".repeat(indent))
-    print("$name")
+    print(name)
     when (this) {
-        is FileNode -> print(" `${digest.toHex()}`\n")
+        is FileNode -> print(" ${digest.toHex()}\n")
         is DirectoryNode -> {
             print("\n")
             nodes.forEach { it.dump(print, indent + 1) }
         }
-    }
-}
-
-fun DirectoryNode.printDuplicates() {
-    val fileDigests = mutableListOf<Pair<String, String>>()
-    fun Node.visit(path: String) {
-        val nextPath = "$path/$name"
-        when (this) {
-            is FileNode -> fileDigests.add(Pair(nextPath, digest.contentToString()))
-            is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
-        }
-    }
-    visit(".")
-    val duplicates = fileDigests.groupBy({ it.second }, { it.first }).values.filter { it.size != 1 }
-    if (duplicates.isEmpty()) {
-        println("<no duplicates>")
-    } else {
-        println("duplicates:")
-        duplicates.forEach { println("    $it") }
     }
 }

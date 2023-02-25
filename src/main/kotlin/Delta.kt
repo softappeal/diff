@@ -64,10 +64,9 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
                     compareTo == 0 -> {
                         when (val oldNode = old.node()) {
                             is FileNode -> when (val newNode = new.node()) {
-                                is FileNode -> deltas.add(FileDelta(
-                                    newNode.name,
-                                    if (oldNode.digest.contentEquals(newNode.digest)) DeltaState.Equal else DeltaState.Differ
-                                ))
+                                is FileNode -> if (!oldNode.digest.contentEquals(newNode.digest)) {
+                                    deltas.add(FileDelta(newNode.name, DeltaState.Differ))
+                                }
                                 is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.ChangedToDir, DeltaState.Created)
                             }
                             is DirectoryNode -> when (val newNode = new.node()) {
@@ -91,28 +90,25 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
                 }
             }
         }
-
         diff(oldDirectoryNode, newDirectoryNode)
 
-        fun DirectoryDelta.prune(): Boolean {
+        fun DirectoryDelta.pruneEqualDirectories(): Boolean {
             deltas.removeIf { delta ->
                 when (delta) {
-                    is FileDelta -> delta.state == DeltaState.Equal
-                    is DirectoryDelta -> delta.prune()
+                    is FileDelta -> false
+                    is DirectoryDelta -> delta.pruneEqualDirectories()
                 }
             }
             return deltas.isEmpty() && state == DeltaState.Equal
         }
-
-        prune()
+        pruneEqualDirectories()
     }
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))
-    print("$name `$state`\n")
+    print("$name $state\n")
     when (this) {
-        is FileDelta -> {
-        }
+        is FileDelta -> {}
         is DirectoryDelta -> deltas.forEach { it.dump(print, indent + 1) }
     }
 }

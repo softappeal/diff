@@ -4,14 +4,14 @@ import kotlin.test.*
 
 class DeltaTest {
     @Test
-    fun addNodeTypeChanged1() {
+    fun addNodeChangedToDir() {
         assertEquals(
             """
-                . `Equal`
-                    a `ChangedToDir`
-                        d `Created`
-                        d2 `Created`
-                            d2 `Created`
+                . Equal
+                    a ChangedToDir
+                        d Created
+                        d2 Created
+                            d2 Created
             """
         ) {
             create(
@@ -25,20 +25,20 @@ class DeltaTest {
                             FileNode("d2", byteArrayOf(1))
                         ))
                     ))
-                ))
+                )),
             ).dump(it)
         }
     }
 
     @Test
-    fun addNodeTypeChanged2() {
+    fun addNodeChangedToFile() {
         assertEquals(
             """
-                . `Equal`
-                    a `ChangedToFile`
-                        d `Deleted`
-                        d2 `Deleted`
-                            d2 `Deleted`
+                . Equal
+                    a ChangedToFile
+                        d Deleted
+                        d2 Deleted
+                            d2 Deleted
             """
         ) {
             create(
@@ -52,19 +52,19 @@ class DeltaTest {
                 )),
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1))
-                ))
+                )),
             ).dump(it)
         }
     }
 
     @Test
-    fun addDelta1() {
+    fun addDeltaCreated() {
         assertEquals(
             """
-                . `Equal`
-                    a `Created`
-                    d `Created`
-                        d `Created`
+                . Equal
+                    a Created
+                    d Created
+                        d Created
             """
         ) {
             create(
@@ -74,19 +74,19 @@ class DeltaTest {
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(1))
                     ))
-                ))
+                )),
             ).dump(it)
         }
     }
 
     @Test
-    fun addDelta2() {
+    fun addDeltaDeleted() {
         assertEquals(
             """
-                . `Equal`
-                    a `Deleted`
-                    d `Deleted`
-                        d `Deleted`
+                . Equal
+                    a Deleted
+                    d Deleted
+                        d Deleted
             """
         ) {
             create(
@@ -96,16 +96,16 @@ class DeltaTest {
                         FileNode("d", byteArrayOf(1))
                     ))
                 )),
-                DirectoryNode("", listOf())
+                DirectoryNode("", listOf()),
             ).dump(it)
         }
     }
 
     @Test
-    fun prune1() {
+    fun pruneEqualDirectories1() {
         assertEquals(
             """
-                . `Equal`
+                . Equal
             """
         ) {
             create(
@@ -120,17 +120,17 @@ class DeltaTest {
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(1))
                     ))
-                ))
+                )),
             ).dump(it)
         }
     }
 
     @Test
-    fun prune2() {
+    fun pruneEqualDirectories2() {
         assertEquals(
             """
-                . `Equal`
-                    a `Differ`
+                . Equal
+                    a Differ
             """
         ) {
             create(
@@ -145,17 +145,17 @@ class DeltaTest {
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(1))
                     ))
-                ))
+                )),
             ).dump(it)
         }
     }
 
     @Test
-    fun prune3() {
+    fun pruneEqualDirectories3() {
         assertEquals(
             """
-                . `Equal`
-                    a `ChangedToDir`
+                . Equal
+                    a ChangedToDir
             """
         ) {
             create(
@@ -164,7 +164,7 @@ class DeltaTest {
                 )),
                 DirectoryNode("", listOf(
                     DirectoryNode("a", listOf())
-                ))
+                )),
             ).dump(it)
         }
     }
