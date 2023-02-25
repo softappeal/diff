@@ -57,12 +57,31 @@ fun create(digestAlgorithm: String, directory: String): DirectoryNode {
 fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
     fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
     print("    ".repeat(indent))
-    print("- $name")
+    print("$name")
     when (this) {
         is FileNode -> print(" `${digest.toHex()}`\n")
         is DirectoryNode -> {
             print("\n")
             nodes.forEach { it.dump(print, indent + 1) }
         }
+    }
+}
+
+fun DirectoryNode.printDuplicates() {
+    val fileDigests = mutableListOf<Pair<String, String>>()
+    fun Node.visit(path: String) {
+        val nextPath = "$path/$name"
+        when (this) {
+            is FileNode -> fileDigests.add(Pair(nextPath, digest.contentToString()))
+            is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
+        }
+    }
+    visit(".")
+    val duplicates = fileDigests.groupBy({ it.second }, { it.first }).values.filter { it.size != 1 }
+    if (duplicates.isEmpty()) {
+        println("<no duplicates>")
+    } else {
+        println("duplicates:")
+        duplicates.forEach { println("    $it") }
     }
 }

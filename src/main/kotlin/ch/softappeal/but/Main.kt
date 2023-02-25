@@ -48,6 +48,7 @@ fun main(args: Array<String>) {
             val directory = args[2]
             val nodeFile = args[3]
             val newNode = create(algorithm, directory)
+            newNode.printDuplicates()
             if (File(nodeFile).exists()) {
                 val oldNode = readNode(nodeFile)
                 val delta = create(oldNode, newNode)

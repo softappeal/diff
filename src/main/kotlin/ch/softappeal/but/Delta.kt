@@ -109,7 +109,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))
-    print("- $name `$state`\n")
+    print("$name `$state`\n")
     when (this) {
         is FileDelta -> {
         }
