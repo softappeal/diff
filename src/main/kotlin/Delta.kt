@@ -19,8 +19,9 @@ class DirectoryDelta(
     val deltas: MutableList<Delta> = mutableListOf()
 }
 
-fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): DirectoryDelta =
-    DirectoryDelta(".", DeltaState.Equal).apply {
+fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: DirectoryNodeDigestToPaths): DirectoryDelta {
+    val newDirectoryNode = newDirectoryNodeDigestToPaths.directoryNode
+    return DirectoryDelta(".", DeltaState.Equal).apply {
         fun DirectoryDelta.diff(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
             class DeltaIterator(node: DirectoryNode) {
                 private val iterator = node.nodes.iterator()
@@ -103,6 +104,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
         }
         pruneEqualDirectories()
     }
+}
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))

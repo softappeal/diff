@@ -2,6 +2,10 @@ package ch.softappeal.but
 
 import kotlin.test.*
 
+private fun dump(print: (s: String) -> Unit, oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
+    create(oldDirectoryNode, DirectoryNodeDigestToPaths(newDirectoryNode)).dump(print)
+}
+
 class DeltaTest {
     @Test
     fun diff() {
@@ -14,7 +18,8 @@ class DeltaTest {
                     "e" file Created
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(2)),
@@ -25,7 +30,7 @@ class DeltaTest {
                     FileNode("d", byteArrayOf(4)),
                     FileNode("e", byteArrayOf(5)),
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -40,7 +45,8 @@ class DeltaTest {
                             "d2" file Created
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1))
                 )),
@@ -52,7 +58,7 @@ class DeltaTest {
                         ))
                     ))
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -67,7 +73,8 @@ class DeltaTest {
                             "f" file Deleted
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("d", byteArrayOf(1)),
@@ -79,7 +86,7 @@ class DeltaTest {
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1))
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -93,7 +100,8 @@ class DeltaTest {
                         "d" file Created
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf()),
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
@@ -101,7 +109,7 @@ class DeltaTest {
                         FileNode("d", byteArrayOf(2))
                     ))
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -115,7 +123,8 @@ class DeltaTest {
                         "d" file Deleted
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
@@ -123,7 +132,7 @@ class DeltaTest {
                     ))
                 )),
                 DirectoryNode("", listOf()),
-            ).dump(it)
+            )
         }
     }
 
@@ -134,7 +143,8 @@ class DeltaTest {
                 "." dir Equal
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
@@ -147,7 +157,7 @@ class DeltaTest {
                         FileNode("d", byteArrayOf(2))
                     ))
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -161,7 +171,8 @@ class DeltaTest {
                         "z" file Deleted
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("c", listOf()),
@@ -185,7 +196,7 @@ class DeltaTest {
                     )),
                     DirectoryNode("x", listOf()),
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -198,7 +209,8 @@ class DeltaTest {
                     "b" file Differ
             """
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(10)),
@@ -207,7 +219,7 @@ class DeltaTest {
                     FileNode("a", byteArrayOf(2)),
                     FileNode("b", byteArrayOf(20)),
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -227,7 +239,8 @@ class DeltaTest {
                     "d" file MovedFrom "./b"
              */
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(2)),
@@ -236,7 +249,7 @@ class DeltaTest {
                     FileNode("c", byteArrayOf(1)),
                     FileNode("d", byteArrayOf(2)),
                 )),
-            ).dump(it)
+            )
         }
     }
 
@@ -260,7 +273,8 @@ class DeltaTest {
                     "x" file MovedFrom "./a"
              */
         ) {
-            create(
+            dump(
+                it,
                 DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("c", listOf(
@@ -273,7 +287,7 @@ class DeltaTest {
                     )),
                     FileNode("x", byteArrayOf(1)),
                 )),
-            ).dump(it)
+            )
         }
     }
 }

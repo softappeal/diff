@@ -29,28 +29,24 @@ val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
 private fun ByteArray.toHex() = joinToString("") { "%02X".format(it) }
 
-private fun DirectoryNode.printDuplicates(print: (s: String) -> Unit) {
-    val fileDigests = mutableListOf<Pair<String, String>>()
+private typealias DigestToPaths = Map<String, List<String>>
+
+private fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
+    val pathDigests = mutableListOf<Pair<String, String>>()
     fun Node.visit(path: String) {
         val nextPath = "$path/$name"
         when (this) {
-            is FileNode -> fileDigests.add(Pair(nextPath, digest.toHex()))
+            is FileNode -> pathDigests.add(Pair(nextPath, digest.toHex()))
             is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
         }
     }
     visit(".")
-    val duplicates = fileDigests.groupBy({ it.second }, { it.first }).values.filter { it.size != 1 }
-    if (duplicates.isEmpty()) {
-        print("<no duplicates>\n")
-    } else {
-        print("duplicates:\n")
-        duplicates.forEach { print("    ${it.map { name -> "\"$name\"" }}\n") }
-    }
+    return pathDigests.groupBy({ it.second }, { it.first })
 }
 
 const val DsStore = ".DS_Store"
 
-fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Unit): DirectoryNode {
+private fun createDirectoryNode(digestAlgorithm: String, directory: String): DirectoryNode {
     fun CoroutineScope.fileNode(file: File) = FileNode(file.name).apply {
         launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(file.readBytes()) }
     }
@@ -72,8 +68,27 @@ fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Uni
     runBlocking {
         CoroutineScope(Dispatchers.Default).launch { node = directoryNode(File(directory)) }.join()
     }
-    node.printDuplicates(print)
     return node
+}
+
+private fun printDuplicates(digestToPaths: DigestToPaths, print: (s: String) -> Unit) {
+    val duplicates = digestToPaths.values.filter { it.size != 1 }
+    if (duplicates.isEmpty()) {
+        print("<no duplicates>\n")
+    } else {
+        print("duplicates:\n")
+        duplicates.forEach { print("    ${it.map { name -> "\"$name\"" }}\n") }
+    }
+}
+
+class DirectoryNodeDigestToPaths(val directoryNode: DirectoryNode) {
+    val digestToPaths = directoryNode.calculateDigestToPaths()
+}
+
+fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Unit): DirectoryNodeDigestToPaths {
+    val directoryNodeDigestToPaths = DirectoryNodeDigestToPaths(createDirectoryNode(digestAlgorithm, directory))
+    printDuplicates(directoryNodeDigestToPaths.digestToPaths, print)
+    return directoryNodeDigestToPaths
 }
 
 fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {

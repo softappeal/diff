@@ -20,7 +20,7 @@ class NodeTest {
                         "d.txt" 8277E0910D750195B448797616E091AD
             """
         ) {
-            create("MD5", "src/test/resources/test", it).dump(it)
+            create("MD5", "src/test/resources/test", it).directoryNode.dump(it)
         }
     }
 
@@ -36,7 +36,7 @@ class NodeTest {
                         "d.txt" 8277E0910D750195B448797616E091AD
             """
         ) {
-            create("MD5", "src/test/resources/test2", it).dump(it)
+            create("MD5", "src/test/resources/test2", it).directoryNode.dump(it)
         }
     }
 }
