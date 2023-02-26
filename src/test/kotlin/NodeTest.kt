@@ -14,10 +14,10 @@ class NodeTest {
         assertEquals(
             """
                 <no duplicates>
-                test
-                    a.txt 0CC175B9C0F1B6A831C399E269772661
-                    dir
-                        d.txt 8277E0910D750195B448797616E091AD
+                "test"
+                    "a.txt" 0CC175B9C0F1B6A831C399E269772661
+                    "dir"
+                        "d.txt" 8277E0910D750195B448797616E091AD
             """
         ) {
             create("MD5", "src/test/resources/test", it).dump(it)
@@ -29,11 +29,11 @@ class NodeTest {
         assertEquals(
             """
                 duplicates:
-                    [./test2/a.txt, ./test2/dir/d.txt]
-                test2
-                    a.txt 8277E0910D750195B448797616E091AD
-                    dir
-                        d.txt 8277E0910D750195B448797616E091AD
+                    ["./test2/a.txt", "./test2/dir/d.txt"]
+                "test2"
+                    "a.txt" 8277E0910D750195B448797616E091AD
+                    "dir"
+                        "d.txt" 8277E0910D750195B448797616E091AD
             """
         ) {
             create("MD5", "src/test/resources/test2", it).dump(it)

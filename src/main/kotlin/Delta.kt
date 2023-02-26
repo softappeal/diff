@@ -1,6 +1,6 @@
 package ch.softappeal.but
 
-enum class DeltaState { Equal, Created, Deleted, Differ, ChangedToDir, ChangedToFile }
+enum class DeltaState { Equal, Created, Deleted, Differ, FileToDir, DirToFile }
 
 sealed class Delta(
     val name: String,
@@ -67,10 +67,10 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
                                 is FileNode -> if (!oldNode.digest.contentEquals(newNode.digest)) {
                                     deltas.add(FileDelta(newNode.name, DeltaState.Differ))
                                 }
-                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.ChangedToDir, DeltaState.Created)
+                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.Created)
                             }
                             is DirectoryNode -> when (val newNode = new.node()) {
-                                is FileNode -> addNodeTypeChanged(oldNode, DeltaState.ChangedToFile, DeltaState.Deleted)
+                                is FileNode -> addNodeTypeChanged(oldNode, DeltaState.DirToFile, DeltaState.Deleted)
                                 is DirectoryNode -> deltas.add(DirectoryDelta(newNode.name, DeltaState.Equal).apply {
                                     diff(oldNode, newNode)
                                 })
@@ -106,9 +106,12 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode): Di
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))
-    print("$name $state\n")
+    print("\"$name\" ")
     when (this) {
-        is FileDelta -> {}
-        is DirectoryDelta -> deltas.forEach { it.dump(print, indent + 1) }
+        is FileDelta -> print("file $state\n")
+        is DirectoryDelta -> {
+            print("${if (state == DeltaState.DirToFile) "file" else "dir"} $state\n")
+            deltas.forEach { it.dump(print, indent + 1) }
+        }
     }
 }

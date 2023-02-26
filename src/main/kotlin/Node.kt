@@ -44,7 +44,7 @@ private fun DirectoryNode.printDuplicates(print: (s: String) -> Unit) {
         print("<no duplicates>\n")
     } else {
         print("duplicates:\n")
-        duplicates.forEach { print("    $it\n") }
+        duplicates.forEach { print("    ${it.map { name -> "\"$name\"" }}\n") }
     }
 }
 
@@ -78,7 +78,7 @@ fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Uni
 
 fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))
-    print(name)
+    print("\"$name\"")
     when (this) {
         is FileNode -> print(" ${digest.toHex()}\n")
         is DirectoryNode -> {
