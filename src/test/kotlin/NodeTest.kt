@@ -29,7 +29,7 @@ class NodeTest {
         assertEquals(
             """
                 duplicates:
-                    ["./test2/a.txt", "./test2/dir/d.txt"]
+                    ["/test2/a.txt", "/test2/dir/d.txt"]
                 "test2"
                     "a.txt" 8277E0910D750195B448797616E091AD
                     "dir"

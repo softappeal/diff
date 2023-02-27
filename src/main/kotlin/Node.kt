@@ -27,11 +27,11 @@ class DirectoryNode(
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
-private fun ByteArray.toHex() = joinToString("") { "%02X".format(it) }
+fun ByteArray.toHex() = joinToString("") { "%02X".format(it) }
 
 private typealias DigestToPaths = Map<String, List<String>>
 
-private fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
+fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
     val pathDigests = mutableListOf<Pair<String, String>>()
     fun Node.visit(path: String) {
         val nextPath = "$path/$name"
@@ -40,7 +40,7 @@ private fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
             is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
         }
     }
-    visit(".")
+    visit("")
     return pathDigests.groupBy({ it.second }, { it.first })
 }
 
@@ -81,9 +81,10 @@ private fun printDuplicates(digestToPaths: DigestToPaths, print: (s: String) -> 
     }
 }
 
-class DirectoryNodeDigestToPaths(val directoryNode: DirectoryNode) {
-    val digestToPaths = directoryNode.calculateDigestToPaths()
-}
+data class DirectoryNodeDigestToPaths(
+    val directoryNode: DirectoryNode,
+    val digestToPaths: DigestToPaths = directoryNode.calculateDigestToPaths(),
+)
 
 fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Unit): DirectoryNodeDigestToPaths {
     val directoryNodeDigestToPaths = DirectoryNodeDigestToPaths(createDirectoryNode(digestAlgorithm, directory))
