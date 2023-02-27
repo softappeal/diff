@@ -20,12 +20,12 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(2)),
                     FileNode("c", byteArrayOf(3)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("c", byteArrayOf(3)),
                     FileNode("d", byteArrayOf(4)),
                     FileNode("e", byteArrayOf(5)),
@@ -47,10 +47,10 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("d", byteArrayOf(2)),
                         DirectoryNode("c", listOf(
@@ -73,10 +73,10 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                     )),
@@ -98,11 +98,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("c", byteArrayOf(1)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("d", byteArrayOf(1)),
@@ -125,7 +125,7 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("d", byteArrayOf(1)),
                         DirectoryNode("e", listOf(
@@ -133,7 +133,7 @@ class DeltaTest {
                         )),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(3)),
                 )),
             )
@@ -151,13 +151,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
             )
@@ -177,14 +177,14 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                         FileNode("x", byteArrayOf(1)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
             )
@@ -204,13 +204,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("x", byteArrayOf(1)),
                 )),
@@ -232,14 +232,14 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                         FileNode("y", byteArrayOf(1)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("x", byteArrayOf(1)),
                 )),
@@ -257,11 +257,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf()),
                     FileNode("b", byteArrayOf(1)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
             )
@@ -281,7 +281,7 @@ class DeltaTest {
             dump(
                 it,
                 DirectoryNode("", listOf()),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
@@ -303,13 +303,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("", listOf()),
+                DirectoryNode("/", listOf()),
             )
         }
     }
@@ -323,13 +323,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
@@ -351,7 +351,7 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("c", listOf()),
                     DirectoryNode("g", listOf(
@@ -364,7 +364,7 @@ class DeltaTest {
                         FileNode("z", byteArrayOf(4)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("g", listOf(
                         FileNode("d", byteArrayOf(2)),
@@ -389,11 +389,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(10)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(2)),
                     FileNode("b", byteArrayOf(20)),
                 )),
@@ -412,11 +412,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(2)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("c", byteArrayOf(1)),
                     FileNode("d", byteArrayOf(2)),
                 )),
@@ -436,10 +436,10 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("c", byteArrayOf(1)),
                     FileNode("d", byteArrayOf(1)),
                 )),
@@ -459,11 +459,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(1)),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("c", byteArrayOf(1)),
                 )),
             )
@@ -471,7 +471,7 @@ class DeltaTest {
     }
 
     @Test
-    fun moved() {
+    fun moved1() {
         assertEquals(
             """
                 "/"
@@ -483,17 +483,81 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("c", listOf(
                         FileNode("f", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("", listOf(
+                DirectoryNode("/", listOf(
                     DirectoryNode("d", listOf(
                         FileNode("q", byteArrayOf(2)),
                     )),
                     FileNode("x", byteArrayOf(1)),
+                )),
+            )
+        }
+    }
+
+    @Test
+    fun moved2() {
+        assertEquals(
+            """
+                "/"
+                    "a"
+                        "s" <- "/r"
+                        "y" <- "x"
+                    "c" <- "/a/b"
+                    "i"
+                        "ii"
+                            "iii"
+                                "iiii"
+                                    "j" <- "/i/j"
+                                    "n" <- "m"
+                        "jjjj" <- "/i/ii/iii/iiii/jjjj"
+            """
+        ) {
+            dump(
+                it,
+                DirectoryNode("/", listOf(
+                    DirectoryNode("a", listOf(
+                        FileNode("b", byteArrayOf(1)),
+                        FileNode("x", byteArrayOf(2)),
+                    )),
+                    DirectoryNode("i", listOf(
+                        DirectoryNode("ii", listOf(
+                            DirectoryNode("iii", listOf(
+                                DirectoryNode("iiii", listOf(
+                                    FileNode("jjjj", byteArrayOf(10)),
+                                    FileNode("m", byteArrayOf(99)),
+                                )),
+                                FileNode("jjj", byteArrayOf(11)),
+                            )),
+                            FileNode("jj", byteArrayOf(12)),
+                        )),
+                        FileNode("j", byteArrayOf(13)),
+                    )),
+                    FileNode("r", byteArrayOf(3)),
+                )),
+                DirectoryNode("/", listOf(
+                    DirectoryNode("a", listOf(
+                        FileNode("s", byteArrayOf(3)),
+                        FileNode("y", byteArrayOf(2)),
+                    )),
+                    FileNode("c", byteArrayOf(1)),
+                    DirectoryNode("i", listOf(
+                        DirectoryNode("ii", listOf(
+                            DirectoryNode("iii", listOf(
+                                DirectoryNode("iiii", listOf(
+                                    FileNode("j", byteArrayOf(13)),
+                                    FileNode("n", byteArrayOf(99)),
+                                )),
+                                FileNode("jjj", byteArrayOf(11)),
+                            )),
+                            FileNode("jj", byteArrayOf(12)),
+                        )),
+                        FileNode("jjjj", byteArrayOf(10)),
+                    )),
                 )),
             )
         }

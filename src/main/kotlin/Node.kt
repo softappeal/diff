@@ -34,7 +34,7 @@ private typealias DigestToPaths = Map<String, List<String>>
 fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
     val pathDigests = mutableListOf<Pair<String, String>>()
     fun Node.visit(path: String) {
-        val nextPath = "$path/$name"
+        val nextPath = if (name == "/") "" else "$path/$name"
         when (this) {
             is FileNode -> pathDigests.add(Pair(nextPath, digest.toHex()))
             is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
@@ -51,14 +51,14 @@ private fun createDirectoryNode(digestAlgorithm: String, directory: String): Dir
         launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(file.readBytes()) }
     }
 
-    fun CoroutineScope.directoryNode(directory: File): DirectoryNode = DirectoryNode(
-        directory.name,
+    fun CoroutineScope.directoryNode(directory: File, name: String): DirectoryNode = DirectoryNode(
+        name,
         mutableListOf<Node>().apply {
             (directory.listFiles() ?: throw IOException(directory.toString())).forEach { file ->
                 if (file.isFile) {
                     if (DsStore != file.name) add(fileNode(file))
                 } else {
-                    add(directoryNode(file))
+                    add(directoryNode(file, file.name))
                 }
             }
         }.sortedBy { it.name }
@@ -66,7 +66,7 @@ private fun createDirectoryNode(digestAlgorithm: String, directory: String): Dir
 
     lateinit var node: DirectoryNode
     runBlocking {
-        CoroutineScope(Dispatchers.Default).launch { node = directoryNode(File(directory)) }.join()
+        CoroutineScope(Dispatchers.Default).launch { node = directoryNode(File(directory), "/") }.join()
     }
     return node
 }

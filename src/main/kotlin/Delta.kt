@@ -57,7 +57,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
     }
 
     return DirectoryDelta("/", DeltaState.Same, null).apply {
-        fun DirectoryDelta.diff(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
+        fun DirectoryDelta.diff(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode, path: String) {
             class DeltaIterator(node: DirectoryNode) {
                 private val iterator = node.nodes.iterator()
                 private var node: Node? = null
@@ -88,12 +88,12 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
                                 is FileNode -> if (!oldNode.digest.contentEquals(newNode.digest)) {
                                     deltas.add(FileDelta(newNode.name, DeltaState.Changed, null))
                                 }
-                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.New, "", null)
+                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.New, path, null)
                             }
                             is DirectoryNode -> when (val newNode = new.node()) {
-                                is FileNode -> addNodeTypeChanged(oldNode, DeltaState.DirToFile, DeltaState.Deleted, "", newNode.digest.toHex())
+                                is FileNode -> addNodeTypeChanged(oldNode, DeltaState.DirToFile, DeltaState.Deleted, path, newNode.digest.toHex())
                                 is DirectoryNode -> deltas.add(DirectoryDelta(newNode.name, DeltaState.Same, null).apply {
-                                    diff(oldNode, newNode)
+                                    diff(oldNode, newNode, "$path/${newNode.name}")
                                 })
                             }
                         }
@@ -101,17 +101,17 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
                         new.advance()
                     }
                     compareTo < 0 -> {
-                        addDelta(old.node(), DeltaState.Deleted, "")
+                        addDelta(old.node(), DeltaState.Deleted, path)
                         old.advance()
                     }
                     else -> {
-                        addDelta(new.node(), DeltaState.New, "")
+                        addDelta(new.node(), DeltaState.New, path)
                         new.advance()
                     }
                 }
             }
         }
-        diff(oldDirectoryNode, newDirectoryNode)
+        diff(oldDirectoryNode, newDirectoryNode, "")
 
         fun DirectoryDelta.pruneEqualDirectories(): Boolean {
             deltas.removeIf { delta ->
