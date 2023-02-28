@@ -88,7 +88,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
                                 is FileNode -> if (!oldNode.digest.contentEquals(newNode.digest)) {
                                     deltas.add(FileDelta(newNode.name, DeltaState.Changed, null))
                                 }
-                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.New, path, null)
+                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.New, "path is never used if nestedState is New", null)
                             }
                             is DirectoryNode -> when (val newNode = new.node()) {
                                 is FileNode -> addNodeTypeChanged(oldNode, DeltaState.DirToFile, DeltaState.Deleted, path, newNode.digest.toHex())
@@ -105,7 +105,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
                         old.advance()
                     }
                     else -> {
-                        addDelta(new.node(), DeltaState.New, path)
+                        addDelta(new.node(), DeltaState.New, "path is never used if state is New")
                         new.advance()
                     }
                 }
@@ -135,14 +135,13 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
     }
 }
 
-fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0, path: String? = null) {
+fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0, path: String = "") {
     print("    ".repeat(indent))
     print("\"$name\"")
     val newPath = if (name == "/") "" else "$path/$name"
     fun moved(): String {
         val from = fileMovedFrom!!
-        val slash = from.lastIndexOf("/")
-        return " <- \"${if (from.substring(0, slash) == newPath.substring(0, newPath.lastIndexOf("/"))) from.substring(slash + 1) else from}\""
+        return " <- \"${if (from.substringBeforeLast("/") == newPath.substringBeforeLast("/")) from.substringAfterLast("/") else from}\""
     }
     when (this) {
         is FileDelta -> print("${if (fileMovedFrom == null) " $state" else moved()}\n")
