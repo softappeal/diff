@@ -29,16 +29,21 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
     val oldDigestToPaths = oldDirectoryNode.calculateDigestToPaths()
     val deletedDigestToPath = mutableMapOf<String, String>()
 
+    fun updateDeletedDigestToPath(name: String, digest: String, path: String): Boolean {
+        val paths = newDigestToPaths[digest]
+        if (paths != null && paths.size == 1 && oldDigestToPaths[digest]!!.size == 1) {
+            deletedDigestToPath[digest] = "$path/$name"
+            return true
+        }
+        return false
+    }
+
     fun DirectoryDelta.addDelta(node: Node, state: DeltaState, path: String) {
         when (node) {
             is FileNode -> {
                 val digest = node.digest.toHex()
                 if (state == DeltaState.Deleted) {
-                    val paths = newDigestToPaths[digest]
-                    if (paths != null && paths.size == 1 && oldDigestToPaths[digest]!!.size == 1) {
-                        deletedDigestToPath[digest] = "$path/${node.name}"
-                        return
-                    }
+                    if (updateDeletedDigestToPath(node.name, digest, path)) return
                 }
                 deltas.add(FileDelta(node.name, state, digest))
             }
@@ -88,7 +93,10 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
                                 is FileNode -> if (!oldNode.digest.contentEquals(newNode.digest)) {
                                     deltas.add(FileDelta(newNode.name, DeltaState.Changed, null))
                                 }
-                                is DirectoryNode -> addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.New, "path is never used if nestedState is New", null)
+                                is DirectoryNode -> {
+                                    updateDeletedDigestToPath(oldNode.name, oldNode.digest.toHex(), path)
+                                    addNodeTypeChanged(newNode, DeltaState.FileToDir, DeltaState.New, "path is never used if nestedState is New", null)
+                                }
                             }
                             is DirectoryNode -> when (val newNode = new.node()) {
                                 is FileNode -> addNodeTypeChanged(oldNode, DeltaState.DirToFile, DeltaState.Deleted, path, newNode.digest.toHex())

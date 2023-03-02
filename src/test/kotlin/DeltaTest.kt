@@ -43,18 +43,23 @@ class DeltaTest {
                         "d" New
                         "c" New
                             "d2" New
+                            "y" <- "/x"
+                            "q" <- "/a"
             """
         ) {
             dump(
                 it,
                 DirectoryNode("/", listOf(
                     FileNode("a", byteArrayOf(1)),
+                    FileNode("x", byteArrayOf(99)),
                 )),
                 DirectoryNode("/", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("d", byteArrayOf(2)),
                         DirectoryNode("c", listOf(
                             FileNode("d2", byteArrayOf(3)),
+                            FileNode("y", byteArrayOf(99)),
+                            FileNode("q", byteArrayOf(1)),
                         )),
                     )),
                 )),
@@ -67,18 +72,23 @@ class DeltaTest {
         assertEquals(
             """
                 "/"
-                    "a" FileToDir
-                        "b" New
+                    "x"
+                        "a" FileToDir
+                            "b" <- "/x/a"
             """
         ) {
             dump(
                 it,
                 DirectoryNode("/", listOf(
-                    FileNode("a", byteArrayOf(1)),
+                    DirectoryNode("x", listOf(
+                        FileNode("a", byteArrayOf(1)),
+                    )),
                 )),
                 DirectoryNode("/", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
+                    DirectoryNode("x", listOf(
+                        DirectoryNode("a", listOf(
+                            FileNode("b", byteArrayOf(1)),
+                        )),
                     )),
                 )),
             )
@@ -558,6 +568,89 @@ class DeltaTest {
                         )),
                         FileNode("jjjj", byteArrayOf(10)),
                     )),
+                )),
+            )
+        }
+    }
+
+    @Test
+    fun moved3() {
+        assertEquals( // TODO
+            """
+                "/"
+                    "a0" New
+                        "b1" New
+                            "c1" New
+                                "d1" New
+                                    "e1" <- "/a1/b1/c1/d1/e1"
+                                    "e2" <- "/a1/b1/c1/d1/e2"
+                                    "e3" <- "/a1/b1/c1/d1/e3"
+                                "d2" <- "/a1/b1/c1/d2"
+                                "d3" <- "/a1/b1/c1/d3"
+                                "d4" <- "/a1/b1/c1/d4"
+                            "c2" <- "/a1/b1/c2"
+                            "c3" <- "/a1/b1/c3"
+                            "c4" <- "/a1/b1/c4"
+                        "b2" <- "/a1/b2"
+                        "b3" <- "/a1/b3"
+                        "b4" <- "/a1/b4"
+                    "a1" Deleted
+                        "b1" Deleted
+                            "c1" Deleted
+                                "d1" Deleted
+            """
+        ) {
+            dump(
+                it,
+                DirectoryNode("/", listOf(
+                    DirectoryNode("a1", listOf(
+                        DirectoryNode("b1", listOf(
+                            DirectoryNode("c1", listOf(
+                                DirectoryNode("d1", listOf(
+                                    FileNode("e1", byteArrayOf(100)),
+                                    FileNode("e2", byteArrayOf(101)),
+                                    FileNode("e3", byteArrayOf(102)),
+                                )),
+                                FileNode("d2", byteArrayOf(103)),
+                                FileNode("d3", byteArrayOf(104)),
+                                FileNode("d4", byteArrayOf(105)),
+                            )),
+                            FileNode("c2", byteArrayOf(106)),
+                            FileNode("c3", byteArrayOf(107)),
+                            FileNode("c4", byteArrayOf(108)),
+                        )),
+                        FileNode("b2", byteArrayOf(109)),
+                        FileNode("b3", byteArrayOf(110)),
+                        FileNode("b4", byteArrayOf(111)),
+                    )),
+                    FileNode("a2", byteArrayOf(112)),
+                    FileNode("a3", byteArrayOf(113)),
+                    FileNode("a4", byteArrayOf(114)),
+                )),
+                DirectoryNode("/", listOf(
+                    DirectoryNode("a0", listOf(
+                        DirectoryNode("b1", listOf(
+                            DirectoryNode("c1", listOf(
+                                DirectoryNode("d1", listOf(
+                                    FileNode("e1", byteArrayOf(100)),
+                                    FileNode("e2", byteArrayOf(101)),
+                                    FileNode("e3", byteArrayOf(102)),
+                                )),
+                                FileNode("d2", byteArrayOf(103)),
+                                FileNode("d3", byteArrayOf(104)),
+                                FileNode("d4", byteArrayOf(105)),
+                            )),
+                            FileNode("c2", byteArrayOf(106)),
+                            FileNode("c3", byteArrayOf(107)),
+                            FileNode("c4", byteArrayOf(108)),
+                        )),
+                        FileNode("b2", byteArrayOf(109)),
+                        FileNode("b3", byteArrayOf(110)),
+                        FileNode("b4", byteArrayOf(111)),
+                    )),
+                    FileNode("a2", byteArrayOf(112)),
+                    FileNode("a3", byteArrayOf(113)),
+                    FileNode("a4", byteArrayOf(114)),
                 )),
             )
         }
