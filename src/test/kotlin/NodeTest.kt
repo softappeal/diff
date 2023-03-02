@@ -8,6 +8,18 @@ fun assertEquals(expected: String, block: (print: (s: String) -> Unit) -> Unit) 
     assertEquals((expected + "\n").trimIndent(), s.toString())
 }
 
+private fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
+    print("    ".repeat(indent))
+    print("\"$name\"")
+    when (this) {
+        is FileNode -> print(" ${digest.toHex()}\n")
+        is DirectoryNode -> {
+            print("\n")
+            nodes.forEach { it.dump(print, indent + 1) }
+        }
+    }
+}
+
 class NodeTest {
     @Test
     fun test() {

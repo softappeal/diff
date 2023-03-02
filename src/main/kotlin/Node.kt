@@ -91,15 +91,3 @@ fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Uni
     printDuplicates(directoryNodeDigestToPaths.digestToPaths, print)
     return directoryNodeDigestToPaths
 }
-
-fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
-    print("    ".repeat(indent))
-    print("\"$name\"")
-    when (this) {
-        is FileNode -> print(" ${digest.toHex()}\n")
-        is DirectoryNode -> {
-            print("\n")
-            nodes.forEach { it.dump(print, indent + 1) }
-        }
-    }
-}
