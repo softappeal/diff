@@ -43,8 +43,8 @@ class DeltaTest {
                         "d" New
                         "c" New
                             "d2" New
-                            "y" <- "/x"
-                            "q" <- "/a"
+                            "y" Moved "/x"
+                            "q" Moved "/a"
             """
         ) {
             dump(
@@ -74,7 +74,7 @@ class DeltaTest {
                 "/"
                     "x"
                         "a" FileToDir
-                            "b" <- "/x/a"
+                            "b" Moved "/x/a"
             """
         ) {
             dump(
@@ -155,7 +155,7 @@ class DeltaTest {
         assertEquals(
             """
                 "/"
-                    "a" DirToFile <- "/a/b"
+                    "a" DirToFile Moved "/a/b"
                         "c" Deleted
             """
         ) {
@@ -262,7 +262,7 @@ class DeltaTest {
         assertEquals(
             """
                 "/"
-                    "a" DirToFile <- "b"
+                    "a" DirToFile Renamed "b"
             """
         ) {
             dump(
@@ -416,8 +416,8 @@ class DeltaTest {
         assertEquals(
             """
                 "/"
-                    "c" <- "a"
-                    "d" <- "b"
+                    "c" Renamed "a"
+                    "d" Renamed "b"
             """
         ) {
             dump(
@@ -487,8 +487,8 @@ class DeltaTest {
                 "/"
                     "c" Deleted
                     "d" New
-                        "q" <- "/c/f"
-                    "x" <- "a"
+                        "q" Moved "/c/f"
+                    "x" Renamed "a"
             """
         ) {
             dump(
@@ -515,16 +515,16 @@ class DeltaTest {
             """
                 "/"
                     "a"
-                        "s" <- "/r"
-                        "y" <- "x"
-                    "c" <- "/a/b"
+                        "s" Moved "/r"
+                        "y" Renamed "x"
+                    "c" Moved "/a/b"
                     "i"
                         "ii"
                             "iii"
                                 "iiii"
-                                    "j" <- "/i/j"
-                                    "n" <- "m"
-                        "jjjj" <- "/i/ii/iii/iiii/jjjj"
+                                    "j" Moved "/i/j"
+                                    "n" Renamed "m"
+                        "jjjj" Moved "/i/ii/iii/iiii/jjjj"
             """
         ) {
             dump(
@@ -582,18 +582,18 @@ class DeltaTest {
                         "b1" New
                             "c1" New
                                 "d1" New
-                                    "e1" <- "/a1/b1/c1/d1/e1"
-                                    "e2" <- "/a1/b1/c1/d1/e2"
-                                    "e3" <- "/a1/b1/c1/d1/e3"
-                                "d2" <- "/a1/b1/c1/d2"
-                                "d3" <- "/a1/b1/c1/d3"
-                                "d4" <- "/a1/b1/c1/d4"
-                            "c2" <- "/a1/b1/c2"
-                            "c3" <- "/a1/b1/c3"
-                            "c4" <- "/a1/b1/c4"
-                        "b2" <- "/a1/b2"
-                        "b3" <- "/a1/b3"
-                        "b4" <- "/a1/b4"
+                                    "e1" Moved "/a1/b1/c1/d1/e1"
+                                    "e2" Moved "/a1/b1/c1/d1/e2"
+                                    "e3" Moved "/a1/b1/c1/d1/e3"
+                                "d2" Moved "/a1/b1/c1/d2"
+                                "d3" Moved "/a1/b1/c1/d3"
+                                "d4" Moved "/a1/b1/c1/d4"
+                            "c2" Moved "/a1/b1/c2"
+                            "c3" Moved "/a1/b1/c3"
+                            "c4" Moved "/a1/b1/c4"
+                        "b2" Moved "/a1/b2"
+                        "b3" Moved "/a1/b3"
+                        "b4" Moved "/a1/b4"
                     "a1" Deleted
                         "b1" Deleted
                             "c1" Deleted

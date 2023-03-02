@@ -1,13 +1,15 @@
 package ch.softappeal.but
 
 enum class DeltaState { Same, New, Deleted, Changed, FileToDir, DirToFile }
+enum class MovedState { Moved, Renamed }
 
 sealed class Delta(
     val name: String,
     val state: DeltaState,
     val digest: String?,
 ) {
-    var fileMovedFrom: String? = null
+    var movedFrom: String? = null
+    var movedState: MovedState? = null
 }
 
 class FileDelta(
@@ -132,30 +134,36 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
         }
         pruneEqualDirectories()
 
-        fun Delta.fixupMovedFrom() {
-            fileMovedFrom = deletedDigestToPath[digest]
-            return when (this) {
+        fun Delta.fixupMovedFrom(path: String) {
+            val newPath = if (name == "/") "" else "$path/$name"
+            val from = deletedDigestToPath[digest]
+            if (from != null) {
+                if (from.substringBeforeLast('/') == newPath.substringBeforeLast('/')) {
+                    movedState = MovedState.Renamed
+                    movedFrom = from.substringAfterLast('/')
+                } else {
+                    movedState = MovedState.Moved
+                    movedFrom = from
+                }
+            }
+            when (this) {
                 is FileDelta -> {}
-                is DirectoryDelta -> deltas.forEach { it.fixupMovedFrom() }
+                is DirectoryDelta -> deltas.forEach { it.fixupMovedFrom(newPath) }
             }
         }
-        fixupMovedFrom()
+        fixupMovedFrom("")
     }
 }
 
-fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0, path: String = "") {
+fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))
     print("\"$name\"")
-    val newPath = if (name == "/") "" else "$path/$name"
-    fun moved(): String {
-        val from = fileMovedFrom!!
-        return " <- \"${if (from.substringBeforeLast("/") == newPath.substringBeforeLast("/")) from.substringAfterLast("/") else from}\""
-    }
+    fun moved() = " $movedState \"$movedFrom\""
     when (this) {
-        is FileDelta -> print("${if (fileMovedFrom == null) " $state" else moved()}\n")
+        is FileDelta -> print("${if (movedState == null) " $state" else moved()}\n")
         is DirectoryDelta -> {
-            print("${if (state == DeltaState.Same) "" else " $state"}${if (fileMovedFrom == null) "" else moved()}\n")
-            deltas.forEach { it.dump(print, indent + 1, newPath) }
+            print("${if (state == DeltaState.Same) "" else " $state"}${if (movedState == null) "" else moved()}\n")
+            deltas.forEach { it.dump(print, indent + 1) }
         }
     }
 }
