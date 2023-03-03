@@ -63,7 +63,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
         })
     }
 
-    return DirectoryDelta("/", DeltaState.Same, null).apply {
+    return DirectoryDelta("", DeltaState.Same, null).apply {
         fun DirectoryDelta.diff(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode, path: String) {
             class DeltaIterator(node: DirectoryNode) {
                 private val iterator = node.nodes.iterator()
@@ -135,7 +135,7 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
         pruneEqualDirectories()
 
         fun Delta.fixupMovedFrom(path: String) {
-            val newPath = if (name == "/") "" else "$path/$name"
+            val newPath = if (name == "") "" else "$path/$name"
             val from = deletedDigestToPath[digest]
             if (from != null) {
                 if (from.substringBeforeLast('/') == newPath.substringBeforeLast('/')) {

@@ -34,7 +34,7 @@ private typealias DigestToPaths = Map<String, List<String>>
 fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
     val pathDigests = mutableListOf<Pair<String, String>>()
     fun Node.visit(path: String) {
-        val nextPath = if (name == "/") "" else "$path/$name"
+        val nextPath = if (name == "") "" else "$path/$name"
         when (this) {
             is FileNode -> pathDigests.add(Pair(nextPath, digest.toHex()))
             is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
@@ -66,7 +66,7 @@ private fun createDirectoryNode(digestAlgorithm: String, directory: String): Dir
 
     lateinit var node: DirectoryNode
     runBlocking {
-        CoroutineScope(Dispatchers.Default).launch { node = directoryNode(File(directory), "/") }.join()
+        CoroutineScope(Dispatchers.Default).launch { node = directoryNode(File(directory), "") }.join()
     }
     return node
 }

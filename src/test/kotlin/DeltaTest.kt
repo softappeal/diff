@@ -11,7 +11,7 @@ class DeltaTest {
     fun diff() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" Deleted
                     "b" Deleted
                     "d" New
@@ -20,12 +20,12 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(2)),
                     FileNode("c", byteArrayOf(3)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("c", byteArrayOf(3)),
                     FileNode("d", byteArrayOf(4)),
                     FileNode("e", byteArrayOf(5)),
@@ -38,7 +38,7 @@ class DeltaTest {
     fun addNodeFileToDir1() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" FileToDir
                         "d" New
                         "c" New
@@ -49,11 +49,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("x", byteArrayOf(99)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("d", byteArrayOf(2)),
                         DirectoryNode("c", listOf(
@@ -71,7 +71,7 @@ class DeltaTest {
     fun addNodeFileToDir2() {
         assertEquals(
             """
-                "/"
+                ""
                     "x"
                         "a" FileToDir
                             "b" Moved "/x/a"
@@ -79,12 +79,12 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("x", listOf(
                         FileNode("a", byteArrayOf(1)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("x", listOf(
                         DirectoryNode("a", listOf(
                             FileNode("b", byteArrayOf(1)),
@@ -99,7 +99,7 @@ class DeltaTest {
     fun addNodeFileToDir3() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" FileToDir
                         "b" New
                         "d" New
@@ -108,11 +108,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("c", byteArrayOf(1)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("d", byteArrayOf(1)),
@@ -126,7 +126,7 @@ class DeltaTest {
     fun addNodeDirToFile1() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" DirToFile
                         "d" Deleted
                         "e" Deleted
@@ -135,7 +135,7 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("d", byteArrayOf(1)),
                         DirectoryNode("e", listOf(
@@ -143,7 +143,7 @@ class DeltaTest {
                         )),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(3)),
                 )),
             )
@@ -154,20 +154,20 @@ class DeltaTest {
     fun addNodeDirToFile2() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" DirToFile Moved "/a/b"
                         "c" Deleted
             """
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
             )
@@ -178,7 +178,7 @@ class DeltaTest {
     fun addNodeDirToFile3() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" DirToFile
                         "b" Deleted
                         "c" Deleted
@@ -187,14 +187,14 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                         FileNode("x", byteArrayOf(1)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
             )
@@ -205,7 +205,7 @@ class DeltaTest {
     fun addNodeDirToFile4() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" DirToFile
                         "b" Deleted
                         "c" Deleted
@@ -214,13 +214,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("x", byteArrayOf(1)),
                 )),
@@ -232,7 +232,7 @@ class DeltaTest {
     fun addNodeDirToFile5() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" DirToFile
                         "b" Deleted
                         "c" Deleted
@@ -242,14 +242,14 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("c", byteArrayOf(2)),
                         FileNode("y", byteArrayOf(1)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("x", byteArrayOf(1)),
                 )),
@@ -261,17 +261,17 @@ class DeltaTest {
     fun addNodeDirToFile6() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" DirToFile Renamed "b"
             """
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf()),
                     FileNode("b", byteArrayOf(1)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
             )
@@ -282,7 +282,7 @@ class DeltaTest {
     fun addDeltaCreated() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" New
                     "d" New
                         "d" New
@@ -291,7 +291,7 @@ class DeltaTest {
             dump(
                 it,
                 DirectoryNode("", listOf()),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
@@ -305,7 +305,7 @@ class DeltaTest {
     fun addDeltaDeleted() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" Deleted
                     "d" Deleted
                         "d" Deleted
@@ -313,13 +313,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("/", listOf()),
+                DirectoryNode("", listOf()),
             )
         }
     }
@@ -328,18 +328,18 @@ class DeltaTest {
     fun pruneEqualDirectories1() {
         assertEquals(
             """
-                "/"
+                ""
             """
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("d", listOf(
                         FileNode("d", byteArrayOf(2)),
@@ -353,7 +353,7 @@ class DeltaTest {
     fun pruneEqualDirectories2() {
         assertEquals(
             """
-                "/"
+                ""
                     "c" Deleted
                     "x"
                         "z" Deleted
@@ -361,7 +361,7 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("c", listOf()),
                     DirectoryNode("g", listOf(
@@ -374,7 +374,7 @@ class DeltaTest {
                         FileNode("z", byteArrayOf(4)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("g", listOf(
                         FileNode("d", byteArrayOf(2)),
@@ -392,18 +392,18 @@ class DeltaTest {
     fun differ() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" Changed
                     "b" Changed
             """
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(10)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(2)),
                     FileNode("b", byteArrayOf(20)),
                 )),
@@ -415,18 +415,18 @@ class DeltaTest {
     fun renamed1() {
         assertEquals(
             """
-                "/"
+                ""
                     "c" Renamed "a"
                     "d" Renamed "b"
             """
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(2)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("c", byteArrayOf(1)),
                     FileNode("d", byteArrayOf(2)),
                 )),
@@ -438,7 +438,7 @@ class DeltaTest {
     fun renamed2() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" Deleted
                     "c" New
                     "d" New
@@ -446,10 +446,10 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("c", byteArrayOf(1)),
                     FileNode("d", byteArrayOf(1)),
                 )),
@@ -461,7 +461,7 @@ class DeltaTest {
     fun renamed3() {
         assertEquals(
             """
-                "/"
+                ""
                     "a" Deleted
                     "b" Deleted
                     "c" New
@@ -469,11 +469,11 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     FileNode("b", byteArrayOf(1)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("c", byteArrayOf(1)),
                 )),
             )
@@ -484,7 +484,7 @@ class DeltaTest {
     fun moved1() {
         assertEquals(
             """
-                "/"
+                ""
                     "c" Deleted
                     "d" New
                         "q" Moved "/c/f"
@@ -493,13 +493,13 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     FileNode("a", byteArrayOf(1)),
                     DirectoryNode("c", listOf(
                         FileNode("f", byteArrayOf(2)),
                     )),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("d", listOf(
                         FileNode("q", byteArrayOf(2)),
                     )),
@@ -513,7 +513,7 @@ class DeltaTest {
     fun moved2() {
         assertEquals(
             """
-                "/"
+                ""
                     "a"
                         "s" Moved "/r"
                         "y" Renamed "x"
@@ -529,7 +529,7 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("b", byteArrayOf(1)),
                         FileNode("x", byteArrayOf(2)),
@@ -549,7 +549,7 @@ class DeltaTest {
                     )),
                     FileNode("r", byteArrayOf(3)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a", listOf(
                         FileNode("s", byteArrayOf(3)),
                         FileNode("y", byteArrayOf(2)),
@@ -577,7 +577,7 @@ class DeltaTest {
     fun moved3() {
         assertEquals( // TODO
             """
-                "/"
+                ""
                     "a0" New
                         "b1" New
                             "c1" New
@@ -602,7 +602,7 @@ class DeltaTest {
         ) {
             dump(
                 it,
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a1", listOf(
                         DirectoryNode("b1", listOf(
                             DirectoryNode("c1", listOf(
@@ -627,7 +627,7 @@ class DeltaTest {
                     FileNode("a3", byteArrayOf(113)),
                     FileNode("a4", byteArrayOf(114)),
                 )),
-                DirectoryNode("/", listOf(
+                DirectoryNode("", listOf(
                     DirectoryNode("a0", listOf(
                         DirectoryNode("b1", listOf(
                             DirectoryNode("c1", listOf(
