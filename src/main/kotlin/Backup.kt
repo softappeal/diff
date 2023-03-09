@@ -21,7 +21,7 @@ fun backup(directory: String, archivePrefix: String) {
             }
 
             override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                out.putNextEntry(ZipEntry(folder.relativize(dir).toString() + "/"))
+                out.putNextEntry(ZipEntry(folder.relativize(dir).toString() + DIR_SEP))
                 out.closeEntry()
                 return FileVisitResult.CONTINUE
             }

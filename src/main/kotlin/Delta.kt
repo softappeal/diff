@@ -1,5 +1,16 @@
 package ch.softappeal.but
 
+data class DirectoryNodeDigestToPaths(
+    val directoryNode: DirectoryNode,
+    val digestToPaths: DigestToPaths = directoryNode.calculateDigestToPaths(),
+)
+
+fun create(digestAlgorithm: String, directory: String, print: (s: String) -> Unit): DirectoryNodeDigestToPaths {
+    val directoryNodeDigestToPaths = DirectoryNodeDigestToPaths(createDirectoryNode(digestAlgorithm, directory))
+    printDuplicates(directoryNodeDigestToPaths.digestToPaths, print)
+    return directoryNodeDigestToPaths
+}
+
 enum class DeltaState { Same, New, Deleted, Changed, FileToDir, DirToFile }
 enum class MovedState { MovedFrom, RenamedFrom }
 
@@ -28,14 +39,6 @@ class DirectoryDelta(
     digest: String?,
 ) : Delta(parent, name, state, digest) {
     val deltas: MutableList<Delta> = mutableListOf()
-}
-
-fun DirectoryDelta.find(path: String): DirectoryDelta {
-    if (path.isEmpty()) return this
-    val secondSlash = path.indexOf('/', 1)
-    val name = path.substring(1, if (secondSlash < 0) path.length else secondSlash)
-    val child = deltas.find { it.name == name }!! as DirectoryDelta
-    return child.find(path.substring(name.length + 1))
 }
 
 fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: DirectoryNodeDigestToPaths): DirectoryDelta {
@@ -144,47 +147,23 @@ fun create(oldDirectoryNode: DirectoryNode, newDirectoryNodeDigestToPaths: Direc
         }
         pruneEqualDirectories()
 
-        fun Delta.setMoved(from: String) = if (from.substringBeforeLast('/') == path.substringBeforeLast('/')) {
-            movedState = MovedState.RenamedFrom
-            movedFrom = from.substringAfterLast('/')
-        } else {
-            movedState = MovedState.MovedFrom
-            movedFrom = from
-        }
-
         fun Delta.fixupMovedFrom() {
             val from = deletedDigestToPath[digest]
-            if (from != null) setMoved(from)
+            if (from != null) {
+                if (from.substringBeforeLast('/') == path.substringBeforeLast('/')) {
+                    movedState = MovedState.RenamedFrom
+                    movedFrom = from.substringAfterLast('/')
+                } else {
+                    movedState = MovedState.MovedFrom
+                    movedFrom = from
+                }
+            }
             when (this) {
                 is FileDelta -> {}
                 is DirectoryDelta -> deltas.forEach { it.fixupMovedFrom() }
             }
         }
         fixupMovedFrom()
-
-        val root = this
-        fun Delta.removeMoved() {
-            when (this) {
-                is FileDelta -> {}
-                is DirectoryDelta -> {
-                    deltas.toList().forEach { it.removeMoved() }
-                    if (deltas.all { it.movedState == MovedState.MovedFrom }) {
-                        val paths = deltas.map { it.movedFrom!!.substringBeforeLast('/') }
-                        if (paths.distinct().size == 1) {
-                            if (deltas.any { it.movedFrom!!.substringAfterLast('/') != it.name }) return // are there renamed nodes?
-                            val from = paths.first()
-                            val parent = root.find(from.substringBeforeLast('/'))
-                            val child = parent.find("/${from.substringAfterLast('/')}")
-                            if (child.state == DeltaState.DirToFile) return
-                            parent.deltas.remove(child)
-                            setMoved(from)
-                            deltas.clear()
-                        }
-                    }
-                }
-            }
-        }
-        removeMoved()
     }
 }
 

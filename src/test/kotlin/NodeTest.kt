@@ -1,6 +1,27 @@
 package ch.softappeal.but
 
+import java.io.*
 import kotlin.test.*
+
+class NodeBuilder {
+    val nodes = mutableListOf<Node>()
+
+    fun file(name: String, digest: Byte) {
+        nodes.add(FileNode(name, byteArrayOf(digest)))
+    }
+
+    fun dir(name: String, block: NodeBuilder.() -> Unit) {
+        val builder = NodeBuilder()
+        builder.block()
+        nodes.add(DirectoryNode(name, builder.nodes))
+    }
+}
+
+fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
+    val builder = NodeBuilder()
+    builder.block()
+    return DirectoryNode("", builder.nodes)
+}
 
 fun assertEquals(expected: String, block: (print: (s: String) -> Unit) -> Unit) {
     val s = StringBuilder()
@@ -10,7 +31,7 @@ fun assertEquals(expected: String, block: (print: (s: String) -> Unit) -> Unit) 
 
 private fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
     print("    ".repeat(indent))
-    print("\"$name\"")
+    print("'$name'")
     when (this) {
         is FileNode -> print(" ${digest.toHex()}\n")
         is DirectoryNode -> {
@@ -22,33 +43,117 @@ private fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
 
 class NodeTest {
     @Test
-    fun test() {
+    fun toHex() {
+        assertEquals("00", byteArrayOf(0).toHex())
+        assertEquals("09", byteArrayOf(9).toHex())
+        assertEquals("0A", byteArrayOf(10).toHex())
+        assertEquals("0F", byteArrayOf(15).toHex())
+        assertEquals("7F", byteArrayOf(127).toHex())
+        assertEquals("FF", byteArrayOf(-1).toHex())
+        assertEquals("00FF", byteArrayOf(0, -1).toHex())
+    }
+
+    @Test
+    fun illegalNodeName() {
         assertEquals(
-            """
-                <no duplicates>
-                ""
-                    "a.txt" 0CC175B9C0F1B6A831C399E269772661
-                    "dir"
-                        "d.txt" 8277E0910D750195B448797616E091AD
-            """
-        ) {
-            create("MD5", "src/test/resources/test", it).directoryNode.dump(it)
+            "node name 'a/b' must not contain '/'",
+            assertFailsWith<IllegalArgumentException> { DirectoryNode("a/b", listOf()) }.message
+        )
+    }
+
+    @Test
+    fun dump() {
+        assertEquals("""
+            ''
+                'c' 03
+                'f'
+                    'empty'
+                    'ff'
+                        'x' 01
+                'q' 00
+        """) {
+            root {
+                file("q", 0)
+                dir("f") {
+                    dir("ff") {
+                        file("x", 1)
+                    }
+                    dir("empty") {}
+                }
+                file("c", 3)
+            }.dump(it)
         }
     }
 
     @Test
-    fun test2() {
+    fun thisIsNotADirectory() {
         assertEquals(
-            """
-                duplicates:
-                    ["/a.txt", "/dir/d.txt"]
-                ""
-                    "a.txt" 8277E0910D750195B448797616E091AD
-                    "dir"
-                        "d.txt" 8277E0910D750195B448797616E091AD
-            """
-        ) {
-            create("MD5", "src/test/resources/test2", it).directoryNode.dump(it)
+            "'this-is-not-a-directory' is not a directory",
+            assertFailsWith<IOException> { createDirectoryNode("MD5", "this-is-not-a-directory") }.message
+        )
+    }
+
+    @Suppress("SpellCheckingInspection")
+    @Test
+    fun createDirectoryNode() {
+        assertEquals("""
+            ''
+                'a.txt' CFCD208495D565EF66E7DFF9F98764DA
+                'b'
+                    'd.txt' CFCD208495D565EF66E7DFF9F98764DA
+                    'e'
+                        'g.txt' C4CA4238A0B923820DCC509A6F75849B
+                    'f.txt' CFCD208495D565EF66E7DFF9F98764DA
+                'c.txt' CFCD208495D565EF66E7DFF9F98764DA
+        """) {
+            createDirectoryNode("MD5", "src/test/resources/test").dump(it)
         }
+    }
+
+    @Test
+    fun noDuplicates() {
+        assertEquals("""
+            <no duplicates>
+        """) {
+            printDuplicates(root {
+                file("a", 0)
+                file("b", 1)
+            }.calculateDigestToPaths(), it)
+        }
+    }
+
+    @Test
+    fun duplicates() {
+        val digestToPaths = root {
+            file("a1", 1)
+            dir("f") {
+                dir("ff") {
+                    file("a2", 1)
+                    file("b2", 2)
+                    file("a3", 1)
+                    file("c", 4)
+                }
+            }
+            file("b1", 2)
+            file("c", 3)
+        }.calculateDigestToPaths()
+        assertEquals("""
+            {01=[/a1, /f/ff/a2, /f/ff/a3], 02=[/b1, /f/ff/b2], 03=[/c], 04=[/f/ff/c]}
+         """) {
+            it(digestToPaths.toString() + '\n')
+        }
+        assertEquals("""
+            duplicates:
+                ["/a1", "/f/ff/a2", "/f/ff/a3"]
+                ["/b1", "/f/ff/b2"]
+        """) {
+            printDuplicates(digestToPaths, it)
+        }
+    }
+
+    @Ignore
+    @Test
+    fun big() {
+        createDirectoryNode("MD5", "/Users/guru/Library/CloudStorage/OneDrive-Personal/data")
     }
 }
