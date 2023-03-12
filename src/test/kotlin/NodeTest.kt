@@ -62,25 +62,41 @@ class NodeTest {
     }
 
     @Test
+    fun duplicatedNodeNames() {
+        assertEquals(
+            "DirectoryNode 'd' has duplicated nodes ['a', 'a', 'b']",
+            assertFailsWith<IllegalArgumentException> {
+                root {
+                    dir("d") {
+                        file("a", 0)
+                        file("a", 0)
+                        file("b", 0)
+                    }
+                }
+            }.message
+        )
+    }
+
+    @Test
     fun dump() {
         assertEquals("""
             ''
-                'c' 03
+                'c' FD
                 'f'
                     'empty'
                     'ff'
-                        'x' 01
-                'q' 00
+                        'x' FE
+                'q' FF
         """) {
             root {
-                file("q", 0)
+                file("q", -1)
                 dir("f") {
                     dir("ff") {
-                        file("x", 1)
+                        file("x", -2)
                     }
                     dir("empty") {}
                 }
-                file("c", 3)
+                file("c", -3)
             }.dump(it)
         }
     }
@@ -155,5 +171,23 @@ class NodeTest {
     @Test
     fun big() {
         createDirectoryNode("MD5", "/Users/guru/Library/CloudStorage/OneDrive-Personal/data")
+    }
+
+    @Test
+    fun nodeIterator() {
+        assertTrue(NodeIterator(DirectoryNode("", listOf())).done())
+        val fileNode1 = FileNode("a", byteArrayOf())
+        val fileNode2 = FileNode("b", byteArrayOf())
+        val iterator = NodeIterator(DirectoryNode("", listOf(fileNode1, fileNode2)))
+        assertFalse(iterator.done())
+        assertSame(fileNode1, iterator.current())
+        iterator.advance()
+        assertFalse(iterator.done())
+        assertSame(fileNode2, iterator.current())
+        iterator.advance()
+        assertTrue(iterator.done())
+        assertFailsWith<NullPointerException> { iterator.current() }
+        assertFailsWith<IllegalStateException> { iterator.advance() }
+        assertTrue(iterator.done())
     }
 }

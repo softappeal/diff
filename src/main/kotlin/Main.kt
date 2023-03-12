@@ -2,7 +2,6 @@ package ch.softappeal.but
 
 import ch.softappeal.yass2.transport.*
 import java.io.*
-import java.nio.charset.*
 
 @Suppress("PrivatePropertyName")
 private val NodeSerializer = generatedBinarySerializer(NodeBaseEncoders)
@@ -20,30 +19,35 @@ private fun writeNode(file: String, node: Node) {
     File(file).writeBytes(writer.buffer.copyOf(writer.current))
 }
 
-fun main(args: Array<String>) {
+fun main(
+    algorithm: String, directory: String, nodeFile: String, archivePrefix: String?,
+    print: (s: String) -> Unit, doOverwrite: () -> Boolean,
+) {
+    val newNodeDigestToPaths = NodeDigestToPaths(createDirectoryNode(algorithm, directory))
+    printDuplicates(newNodeDigestToPaths.digestToPaths, print)
+    if (File(nodeFile).exists()) {
+        print("\n")
+        val oldNode = readNode(nodeFile)
+        createDirectoryDelta(NodeDigestToPaths(oldNode), newNodeDigestToPaths).dump(print)
+        print("\n")
+        print("type <y> to overwrite nodeFile (else abort): ")
+        if (!doOverwrite()) return
+    }
+    print("\n")
+    writeNode(nodeFile, newNodeDigestToPaths.node)
+    print("nodeFile '$nodeFile' written\n")
+    if (archivePrefix != null) {
+        backup(directory, archivePrefix)
+        print("archive '$archivePrefix' written\n")
+    }
+}
+
+fun main(vararg args: String) {
     check(args.size == 3 || args.size == 4) { "usage: algorithm directory nodeFile [ archivePrefix ]" }
     println()
-    val algorithm = args[0]
-    val directory = args[1]
-    val nodeFile = args[2]
-    val directoryNodeDigestToPaths = create(algorithm, directory, ::print)
-    if (File(nodeFile).exists()) {
-        val oldNode = readNode(nodeFile)
-        val directoryDelta = create(oldNode, directoryNodeDigestToPaths)
-        println()
-        directoryDelta.dump(::print)
-        println()
-        print("type <y> to overwrite nodeFile (else abort): ")
+    main(args[0], args[1], args[2], if (args.size == 4) args[3] else null, ::print) {
         val answer = readln()
-        if ("y" != answer) return
-    }
-    println()
-    writeNode(nodeFile, directoryNodeDigestToPaths.directoryNode)
-    println("nodeFile '$nodeFile' written")
-    if (args.size == 4) {
-        val archivePrefix = args[3]
-        backup(directory, archivePrefix)
-        println("archive '$archivePrefix' written")
+        "y" == answer
     }
     println()
     print("press <return> ")

@@ -2,807 +2,473 @@ package ch.softappeal.but
 
 import kotlin.test.*
 
-private fun dump(print: (s: String) -> Unit, oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
-    create(oldDirectoryNode, DirectoryNodeDigestToPaths(newDirectoryNode)).dump(print)
+private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String) {
+    assertEquals(expected) {
+        createDirectoryDelta(NodeDigestToPaths(old), NodeDigestToPaths(new)).dump(it)
+    }
 }
 
 class DeltaTest {
     @Test
-    fun diff() {
+    fun compareFlatEmpty() {
         assertEquals(
+            root {
+            },
+            root {
+            },
             """
-                "/"
-                    "a" Deleted
-                    "b" Deleted
-                    "d" New
-                    "e" New
+                '/'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("b", byteArrayOf(2)),
-                    FileNode("c", byteArrayOf(3)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("c", byteArrayOf(3)),
-                    FileNode("d", byteArrayOf(4)),
-                    FileNode("e", byteArrayOf(5)),
-                )),
-            )
-        }
-    }
-
-    /*
-        @Test
-        fun addNodeFileToDir1() {
-            assertEquals(
-                """
-                    "/"
-                        "a/" FileToDir
-                            "d" New
-                            "c/" New
-                                "d2" New
-                                "y" MovedFrom "/x"
-                                "q" MovedFrom "/a"
-                """
-            ) {
-                dump(
-                    it,
-                    DirectoryNode("", listOf(
-                        FileNode("a", byteArrayOf(1)),
-                        FileNode("x", byteArrayOf(99)),
-                    )),
-                    DirectoryNode("", listOf(
-                        DirectoryNode("a", listOf(
-                            FileNode("d", byteArrayOf(2)),
-                            DirectoryNode("c", listOf(
-                                FileNode("d2", byteArrayOf(3)),
-                                FileNode("y", byteArrayOf(99)),
-                                FileNode("q", byteArrayOf(1)),
-                            )),
-                        )),
-                    )),
-                )
-            }
-        }
-    */
-    @Test
-    fun addNodeFileToDir2() {
-        assertEquals(
-            """
-                "/"
-                    "x/"
-                        "a/" FileToDir
-                            "b" MovedFrom "/x/a"
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("x", listOf(
-                        FileNode("a", byteArrayOf(1)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("x", listOf(
-                        DirectoryNode("a", listOf(
-                            FileNode("b", byteArrayOf(1)),
-                        )),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeFileToDir3() {
+    fun compareFlatDeleted() {
         assertEquals(
+            root {
+                file("a", 0)
+            },
+            root {
+            },
             """
-                "/"
-                    "a/" FileToDir
-                        "b" New
-                        "d" New
-                    "c" Deleted
+                '/'
+                    'a' Deleted
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("c", byteArrayOf(1)),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                        FileNode("d", byteArrayOf(1)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeFileToDir4() {
+    fun compareFlatNew() {
         assertEquals(
+            root {
+            },
+            root {
+                file("a", 0)
+            },
             """
-                "/"
-                    "a/" FileToDir
-                        "c" MovedFrom "/b/c"
-                    "b/" Deleted
+                '/'
+                    'a' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("b", listOf(
-                        FileNode("c", byteArrayOf(2)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("c", byteArrayOf(2)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeFileToDir5() {
+    fun compareFlatSame() {
         assertEquals(
+            root {
+                file("a", 0)
+            },
+            root {
+                file("a", 0)
+            },
             """
-                "/"
-                    "a/" FileToDir
-                        "c" MovedFrom "/x/b/c"
-                    "x/" Deleted
-                        "b/" Deleted
+                '/'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("x", listOf(
-                        DirectoryNode("b", listOf(
-                            FileNode("c", byteArrayOf(2)),
-                        )),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("c", byteArrayOf(2)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile1() {
+    fun compareFlatChanged() {
         assertEquals(
+            root {
+                file("a", 0)
+            },
+            root {
+                file("a", 1)
+            },
             """
-                "/"
-                    "a" DirToFile
-                        "d" Deleted
-                        "e/" Deleted
-                            "f" Deleted
+                '/'
+                    'a' Changed
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("d", byteArrayOf(1)),
-                        DirectoryNode("e", listOf(
-                            FileNode("f", byteArrayOf(2)),
-                        )),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(3)),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile2() {
+    fun compareFlatMany() {
         assertEquals(
+            root {
+                file("a", 1)
+                file("d", 2)
+                file("e", 3)
+                file("g", 4)
+            },
+            root {
+                file("b", 5)
+                file("c", 6)
+                file("f", 7)
+            },
             """
-                "/"
-                    "a" DirToFile MovedFrom "/a/b"
-                        "c" Deleted
+                '/'
+                    'a' Deleted
+                    'b' New
+                    'c' New
+                    'd' Deleted
+                    'e' Deleted
+                    'f' New
+                    'g' Deleted
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                        FileNode("c", byteArrayOf(2)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile3() {
+    fun compareDirs() {
         assertEquals(
+            root {
+                file("a", 0)
+                dir("d1") {
+                    file("a", 1)
+                    file("q", 2)
+                    dir("d3") {
+                        file("a", 3)
+                        file("b", 4)
+                    }
+                    dir("d2") {
+                        dir("d3") {
+                            file("a", 5)
+                            file("b", 6)
+                        }
+                        dir("e") {}
+                        file("a", 7)
+                    }
+                }
+            },
+            root {
+                file("a", 100)
+                dir("d1") {
+                    file("a", 1)
+                    file("q", 2)
+                    dir("d3") {
+                        file("a", 3)
+                        dir("d3") {
+                            file("a", 101)
+                            file("b", 102)
+                        }
+                    }
+                    dir("d2") {
+                        dir("d3") {
+                            file("a", 5)
+                            file("b", 6)
+                            file("c", 103)
+                        }
+                        dir("e") {}
+                        file("a", 7)
+                    }
+                }
+            },
             """
-                "/"
-                    "a" DirToFile
-                        "b" Deleted
-                        "c" Deleted
-                        "x" Deleted
+                '/'
+                    'a' Changed
+                    'd1/'
+                        'd2/'
+                            'd3/'
+                                'c' New
+                        'd3/'
+                            'b' Deleted
+                            'd3/' New
+                                'a' New
+                                'b' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                        FileNode("c", byteArrayOf(2)),
-                        FileNode("x", byteArrayOf(1)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile4() {
+    fun addNodeDeleted() {
         assertEquals(
+            root {
+                file("a", 1)
+                dir("b") {
+                    file("c", 2)
+                    dir("d") {
+                        file("e", 3)
+                    }
+                }
+            },
+            root {
+            },
             """
-                "/"
-                    "a" DirToFile
-                        "b" Deleted
-                        "c" Deleted
-                    "x" New
+                '/'
+                    'a' Deleted
+                    'b/' Deleted
+                        'c' Deleted
+                        'd/' Deleted
+                            'e' Deleted
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                        FileNode("c", byteArrayOf(2)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("x", byteArrayOf(1)),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile5() {
+    fun addNodeNew() {
         assertEquals(
+            root {
+            },
+            root {
+                file("a", 1)
+                dir("b") {
+                    file("c", 2)
+                    dir("d") {
+                        file("e", 3)
+                    }
+                }
+            },
             """
-                "/"
-                    "a" DirToFile
-                        "b" Deleted
-                        "c" Deleted
-                        "y" Deleted
-                    "x" New
+                '/'
+                    'a' New
+                    'b/' New
+                        'c' New
+                        'd/' New
+                            'e' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                        FileNode("c", byteArrayOf(2)),
-                        FileNode("y", byteArrayOf(1)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("x", byteArrayOf(1)),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile6() {
+    fun addNodeTypeChangedFileToDir() {
         assertEquals(
+            root {
+                file("a", 1)
+            },
+            root {
+                dir("a") {
+                    file("b", 2)
+                    dir("c") {
+                        file("d", 3)
+                    }
+                }
+            },
             """
-                "/"
-                    "a" DirToFile RenamedFrom "b"
+                '/'
+                    'a/' FileToDir
+                        'b' New
+                        'c/' New
+                            'd' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf()),
-                    FileNode("b", byteArrayOf(1)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile7() {
+    fun addNodeTypeChangedFileToDirRenamed() {
         assertEquals(
+            root {
+                file("a", 1)
+            },
+            root {
+                dir("a") {
+                    file("b", 2)
+                }
+                file("b", 1)
+            },
             """
-                "/"
-                    "a" DirToFile RenamedFrom "c"
-                    "d/" New
-                        "b" MovedFrom "/a/b"
+                '/'
+                    'a/' FileToDir
+                        'b' New
+                    'b' RenamedFrom 'a'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                    )),
-                    FileNode("c", byteArrayOf(2)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(2)),
-                    DirectoryNode("d", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile8() {
+    fun addNodeTypeChangedFileToDirMoved() {
         assertEquals(
+            root {
+                file("a", 1)
+            },
+            root {
+                dir("a") {
+                    file("b", 1)
+                }
+            },
             """
-                "/"
-                    "a" DirToFile
-                    "c" Deleted
-                    "d/" New
-                        "b" MovedFrom "/a/b"
+                '/'
+                    'a/' FileToDir
+                        'b' MovedFrom '/a'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                    )),
-                    FileNode("c", byteArrayOf(2)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(3)),
-                    DirectoryNode("d", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile9() {
+    fun addNodeTypeChangedDirToFile() {
         assertEquals(
+            root {
+                dir("a") {
+                    file("b", 1)
+                    dir("c") {
+                        file("d", 2)
+                    }
+                }
+            },
+            root {
+                file("a", 3)
+            },
             """
-                "/"
-                    "a" DirToFile RenamedFrom "c"
-                        "b" Deleted
-                    "d/" New
-                        "b" New
+                '/'
+                    'a' DirToFile
+                        'b' Deleted
+                        'c/' Deleted
+                            'd' Deleted
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                    )),
-                    FileNode("c", byteArrayOf(2)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(2)),
-                    DirectoryNode("d", listOf(
-                        FileNode("b", byteArrayOf(3)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addNodeDirToFile10() {
+    fun pruneEqualDirectories() {
         assertEquals(
+            root {
+                file("a", 1)
+                dir("d") {
+                    file("e", 2)
+                }
+                dir("d2") {
+                    file("e", 3)
+                }
+            },
+            root {
+                file("a", 1)
+                dir("d") {
+                    file("e", 2)
+                }
+                dir("d2") {}
+                dir("d3") {}
+            },
             """
-                "/"
-                    "a" DirToFile
-                        "b" Deleted
-                    "c" Deleted
-                    "d/" New
-                        "b" New
+                '/'
+                    'd2/'
+                        'e' Deleted
+                    'd3/' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                    )),
-                    FileNode("c", byteArrayOf(2)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(4)),
-                    DirectoryNode("d", listOf(
-                        FileNode("b", byteArrayOf(3)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addDeltaCreated() {
+    fun renamed() {
         assertEquals(
+            root {
+                file("a", 1)
+            },
+            root {
+                file("e", 1)
+            },
             """
-                "/"
-                    "a" New
-                    "d/" New
-                        "d" New
+                '/'
+                    'e' RenamedFrom 'a'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf()),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("d", listOf(
-                        FileNode("d", byteArrayOf(2)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun addDeltaDeleted() {
+    fun moved() {
         assertEquals(
+            root {
+                file("a", 1)
+            },
+            root {
+                dir("d") {
+                    file("e", 1)
+                }
+            },
             """
-                "/"
-                    "a" Deleted
-                    "d/" Deleted
-                        "d" Deleted
+                '/'
+                    'd/' New
+                        'e' MovedFrom '/a'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("d", listOf(
-                        FileNode("d", byteArrayOf(2)),
-                    )),
-                )),
-                DirectoryNode("", listOf()),
-            )
-        }
+        )
     }
 
     @Test
-    fun pruneEqualDirectories1() {
+    fun renamedOldDuplicated() {
         assertEquals(
+            root {
+                file("a", 1)
+                file("b", 1)
+            },
+            root {
+                file("e", 1)
+            },
             """
-                "/"
+                '/'
+                    'a' Deleted
+                    'b' Deleted
+                    'e' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("d", listOf(
-                        FileNode("d", byteArrayOf(2)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("d", listOf(
-                        FileNode("d", byteArrayOf(2)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 
     @Test
-    fun pruneEqualDirectories2() {
+    fun renamedNewDuplicated() {
         assertEquals(
+            root {
+                file("a", 1)
+            },
+            root {
+                file("e", 1)
+                file("f", 1)
+            },
             """
-                "/"
-                    "c/" Deleted
-                    "x/"
-                        "z" Deleted
+                '/'
+                    'a' Deleted
+                    'e' New
+                    'f' New
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("c", listOf()),
-                    DirectoryNode("g", listOf(
-                        FileNode("d", byteArrayOf(2)),
-                        DirectoryNode("w", listOf(
-                            FileNode("x", byteArrayOf(3)),
-                        )),
-                    )),
-                    DirectoryNode("x", listOf(
-                        FileNode("z", byteArrayOf(4)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("g", listOf(
-                        FileNode("d", byteArrayOf(2)),
-                        DirectoryNode("w", listOf(
-                            FileNode("x", byteArrayOf(3)),
-                        )),
-                    )),
-                    DirectoryNode("x", listOf()),
-                )),
-            )
-        }
+        )
     }
 
+    @Suppress("SpellCheckingInspection")
     @Test
-    fun differ() {
+    fun manyRenamedAndMoved() {
         assertEquals(
+            root {
+                dir("a") {
+                    file("b", 1)
+                    file("x", 2)
+                }
+                dir("i") {
+                    dir("ii") {
+                        dir("iii") {
+                            dir("iiii") {
+                                file("jjjj", 10)
+                                file("m", 99)
+                            }
+                            file("jjj", 11)
+                        }
+                        file("jj", 12)
+                    }
+                    file("j", 13)
+                }
+                file("r", 3)
+            },
+            root {
+                dir("a") {
+                    file("s", 3)
+                    file("y", 2)
+                }
+                file("c", 1)
+                dir("i") {
+                    dir("ii") {
+                        dir("iii") {
+                            dir("iiii") {
+                                file("j", 13)
+                                file("n", 99)
+                            }
+                            file("jjj", 11)
+                        }
+                        file("jj", 12)
+                    }
+                    file("jjjj", 10)
+                }
+            },
             """
-                "/"
-                    "a" Changed
-                    "b" Changed
+                '/'
+                    'a/'
+                        's' MovedFrom '/r'
+                        'y' RenamedFrom 'x'
+                    'c' MovedFrom '/a/b'
+                    'i/'
+                        'ii/'
+                            'iii/'
+                                'iiii/'
+                                    'j' MovedFrom '/i/j'
+                                    'n' RenamedFrom 'm'
+                        'jjjj' MovedFrom '/i/ii/iii/iiii/jjjj'
             """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("b", byteArrayOf(10)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(2)),
-                    FileNode("b", byteArrayOf(20)),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun renamed1() {
-        assertEquals(
-            """
-                "/"
-                    "c" RenamedFrom "a"
-                    "d" RenamedFrom "b"
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("b", byteArrayOf(2)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("c", byteArrayOf(1)),
-                    FileNode("d", byteArrayOf(2)),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun renamed2() {
-        assertEquals(
-            """
-                "/"
-                    "a" Deleted
-                    "c" New
-                    "d" New
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("c", byteArrayOf(1)),
-                    FileNode("d", byteArrayOf(1)),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun renamed3() {
-        assertEquals(
-            """
-                "/"
-                    "a" Deleted
-                    "b" Deleted
-                    "c" New
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    FileNode("b", byteArrayOf(1)),
-                )),
-                DirectoryNode("", listOf(
-                    FileNode("c", byteArrayOf(1)),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun moved1() {
-        assertEquals(
-            """
-                "/"
-                    "c/" Deleted
-                    "d/" New
-                        "q" MovedFrom "/c/f"
-                    "x" RenamedFrom "a"
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    FileNode("a", byteArrayOf(1)),
-                    DirectoryNode("c", listOf(
-                        FileNode("f", byteArrayOf(2)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("d", listOf(
-                        FileNode("q", byteArrayOf(2)),
-                    )),
-                    FileNode("x", byteArrayOf(1)),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun moved2() {
-        assertEquals(
-            """
-                "/"
-                    "a/"
-                        "s" MovedFrom "/r"
-                        "y" RenamedFrom "x"
-                    "c" MovedFrom "/a/b"
-                    "i/"
-                        "ii/"
-                            "iii/"
-                                "iiii/"
-                                    "j" MovedFrom "/i/j"
-                                    "n" RenamedFrom "m"
-                        "jjjj" MovedFrom "/i/ii/iii/iiii/jjjj"
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("b", byteArrayOf(1)),
-                        FileNode("x", byteArrayOf(2)),
-                    )),
-                    DirectoryNode("i", listOf(
-                        DirectoryNode("ii", listOf(
-                            DirectoryNode("iii", listOf(
-                                DirectoryNode("iiii", listOf(
-                                    FileNode("jjjj", byteArrayOf(10)),
-                                    FileNode("m", byteArrayOf(99)),
-                                )),
-                                FileNode("jjj", byteArrayOf(11)),
-                            )),
-                            FileNode("jj", byteArrayOf(12)),
-                        )),
-                        FileNode("j", byteArrayOf(13)),
-                    )),
-                    FileNode("r", byteArrayOf(3)),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        FileNode("s", byteArrayOf(3)),
-                        FileNode("y", byteArrayOf(2)),
-                    )),
-                    FileNode("c", byteArrayOf(1)),
-                    DirectoryNode("i", listOf(
-                        DirectoryNode("ii", listOf(
-                            DirectoryNode("iii", listOf(
-                                DirectoryNode("iiii", listOf(
-                                    FileNode("j", byteArrayOf(13)),
-                                    FileNode("n", byteArrayOf(99)),
-                                )),
-                                FileNode("jjj", byteArrayOf(11)),
-                            )),
-                            FileNode("jj", byteArrayOf(12)),
-                        )),
-                        FileNode("jjjj", byteArrayOf(10)),
-                    )),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun moved5() {
-        assertEquals(
-            """
-                "/"
-                    "a0/" New
-                        "b2" MovedFrom "/a1/b2"
-                    "a1/" Deleted
-                    "a4" Changed
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a1", listOf(
-                        FileNode("b2", byteArrayOf(109)),
-                    )),
-                    FileNode("a4", byteArrayOf(114)),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("a0", listOf(
-                        FileNode("b2", byteArrayOf(109)),
-                    )),
-                    FileNode("a4", byteArrayOf(14)),
-                )),
-            )
-        }
-    }
-
-    @Test
-    fun emptyDir() {
-        assertEquals(
-            """
-                "/"
-                    "a/" Deleted
-                        "b/" Deleted
-                    "x/" New
-                        "b/" New
-                        "c" MovedFrom "/a/c"
-            """
-        ) {
-            dump(
-                it,
-                DirectoryNode("", listOf(
-                    DirectoryNode("a", listOf(
-                        DirectoryNode("b", listOf()),
-                        FileNode("c", byteArrayOf(114)),
-                    )),
-                )),
-                DirectoryNode("", listOf(
-                    DirectoryNode("x", listOf(
-                        DirectoryNode("b", listOf()),
-                        FileNode("c", byteArrayOf(114)),
-                    )),
-                )),
-            )
-        }
+        )
     }
 }
