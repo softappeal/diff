@@ -471,4 +471,77 @@ class DeltaTest {
             """
         )
     }
+
+    @Test
+    fun renamedDir() {
+        assertEquals(
+            root {
+                dir("x") {
+                    file("a", 1)
+                    dir("b") {
+                        file("c", 2)
+                        dir("d") {}
+                    }
+                }
+            },
+            root {
+                dir("y") {
+                    file("a", 1)
+                    dir("b") {
+                        file("c", 2)
+                        dir("d") {}
+                    }
+                }
+            },
+            """
+                '/'
+                    'x/' Deleted
+                        'b/' Deleted
+                            'd/' Deleted
+                    'y/' New
+                        'a' MovedFrom '/x/a'
+                        'b/' New
+                            'c' MovedFrom '/x/b/c'
+                            'd/' New
+            """
+        )
+    }
+
+    @Test
+    fun movedDir() {
+        assertEquals(
+            root {
+                dir("x") {
+                    file("a", 1)
+                    dir("b") {
+                        file("c", 2)
+                        dir("d") {}
+                    }
+                }
+            },
+            root {
+                dir("z") {
+                    dir("x") {
+                        file("a", 1)
+                        dir("b") {
+                            file("c", 2)
+                            dir("d") {}
+                        }
+                    }
+                }
+            },
+            """
+                '/'
+                    'x/' Deleted
+                        'b/' Deleted
+                            'd/' Deleted
+                    'z/' New
+                        'x/' New
+                            'a' MovedFrom '/x/a'
+                            'b/' New
+                                'c' MovedFrom '/x/b/c'
+                                'd/' New
+            """
+        )
+    }
 }
