@@ -10,6 +10,34 @@ private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: Strin
 
 class DeltaTest {
     @Test
+    fun getPath() {
+        val root = DirectoryDelta(null, "not-used", DeltaState.Same, null)
+        val a = DirectoryDelta(null, "a", DeltaState.Same, null)
+        val aa = DirectoryDelta(null, "aa", DeltaState.Same, null)
+        root.deltas.add(a)
+        a.deltas.add(aa)
+        assertSame(root, root.getPath(""))
+        assertFailsWith<NullPointerException> { root.getPath("/") }
+        assertFailsWith<NullPointerException> { root.getPath("//") }
+        assertFailsWith<NullPointerException> { root.getPath("a") }
+        assertSame(a, root.getPath("/a"))
+        assertFailsWith<NullPointerException> { root.getPath("/aa") }
+        assertSame(aa, root.getPath("/a/aa"))
+        assertFailsWith<NullPointerException> { root.getPath("/a/a") }
+        assertFailsWith<NullPointerException> { root.getPath("/a//") }
+    }
+
+    @Test
+    fun isEmptyDirectory() {
+        val directory = DirectoryDelta(null, "", DeltaState.New, null)
+        val file = FileDelta(directory, "", DeltaState.New, null)
+        assertFalse(file.isEmptyDirectory())
+        assertTrue(directory.isEmptyDirectory())
+        directory.deltas.add(file)
+        assertFalse(directory.isEmptyDirectory())
+    }
+
+    @Test
     fun compareFlatEmpty() {
         assertEquals(
             root {
@@ -400,10 +428,10 @@ class DeltaTest {
     }
 
     @Test
-    fun moved() {
+    fun movedDown() {
         assertEquals(
             root {
-                file("a", 1)
+                file("e", 1)
             },
             root {
                 dir("d") {
@@ -413,7 +441,49 @@ class DeltaTest {
             """
                 '/'
                     'd/' New
-                        'e' MovedFrom '/a'
+                        'e' MovedFrom '/e'
+            """
+        )
+    }
+
+    @Test
+    fun movedUp1() {
+        assertEquals(
+            root {
+                dir("d") {
+                    file("e", 1)
+                }
+            },
+            root {
+                file("e", 1)
+            },
+            """
+                '/'
+                    'd/' Deleted
+                    'e' MovedFrom '/d/e'
+            """
+        )
+    }
+
+    @Test
+    fun movedUp2() {
+        assertEquals(
+            root {
+                dir("z") {
+                    dir("d") {
+                        file("e", 1)
+                    }
+                }
+            },
+            root {
+                dir("d") {
+                    file("e", 1)
+                }
+            },
+            """
+                '/'
+                    'd/' MovedFrom '/z/d'
+                    'z/' Deleted
             """
         )
     }
@@ -517,6 +587,66 @@ class DeltaTest {
         )
     }
 
+    @Suppress("SpellCheckingInspection")
+    @Test
+    fun manyRenamedAndMovedDir() {
+        assertEquals(
+            root {
+                dir("a") {
+                    file("b", 1)
+                    file("x", 2)
+                    dir("a") {
+                        file("q", 17)
+                    }
+                }
+                dir("i") {
+                    dir("ii") {
+                        dir("iii") {
+                            dir("iiii") {
+                                file("jjjj", 10)
+                                file("m", 99)
+                            }
+                            file("jjj", 11)
+                        }
+                        file("jj", 12)
+                    }
+                    file("j", 13)
+                }
+                file("r", 3)
+            },
+            root {
+                dir("i") {
+                    dir("ii") {
+                        dir("iii2") {
+                            dir("iiii") {
+                                file("jjjj", 10)
+                                file("m", 99)
+                            }
+                            file("jjj", 11)
+                        }
+                        dir("a") {
+                            file("b", 1)
+                            file("x", 2)
+                            dir("a") {
+                                file("q", 17)
+                            }
+                        }
+                        file("jj", 12)
+                    }
+                    file("j", 13)
+                }
+                file("r", 3)
+            },
+            """
+                '/'
+                    'i/'
+                        'ii/'
+                            'a/' MovedFrom '/a'
+                            'iii2/' RenamedFrom 'iii'
+            """
+        )
+    }
+
     @Test
     fun renamedDir() {
         assertEquals(
@@ -540,14 +670,7 @@ class DeltaTest {
             },
             """
                 '/'
-                    'x/' Deleted
-                        'b/' Deleted
-                            'd/' Deleted
-                    'y/' New
-                        'a' MovedFrom '/x/a'
-                        'b/' New
-                            'c' MovedFrom '/x/b/c'
-                            'd/' New
+                    'y/' RenamedFrom 'x'
             """
         )
     }
@@ -561,6 +684,7 @@ class DeltaTest {
                     dir("b") {
                         file("c", 2)
                         dir("d") {}
+                        dir("d1") {}
                     }
                 }
             },
@@ -571,21 +695,137 @@ class DeltaTest {
                         dir("b") {
                             file("c", 2)
                             dir("d") {}
+                            dir("d1") {}
                         }
                     }
                 }
             },
             """
                 '/'
-                    'x/' Deleted
-                        'b/' Deleted
-                            'd/' Deleted
                     'z/' New
-                        'x/' New
-                            'a' MovedFrom '/x/a'
+                        'x/' MovedFrom '/x'
+            """
+        )
+    }
+
+    @Test
+    fun moved1() {
+        assertEquals(
+            root {
+                dir("b") {
+                    file("c", 2)
+                    dir("b") {
+                        file("r", 3)
+                    }
+                }
+            },
+            root {
+                dir("z") {
+                    dir("b") {
+                        file("c", 2)
+                        dir("b") {}
+                    }
+                }
+            },
+            """
+                '/'
+                    'b/' Deleted
+                        'b/' Deleted
+                            'r' Deleted
+                    'z/' New
+                        'b/' New
                             'b/' New
-                                'c' MovedFrom '/x/b/c'
-                                'd/' New
+                            'c' MovedFrom '/b/c'
+            """
+        )
+    }
+
+    @Test
+    fun moved2() {
+        assertEquals(
+            root {
+                dir("b") {
+                    file("c", 2)
+                    dir("b") {}
+                }
+            },
+            root {
+                dir("z") {
+                    dir("b") {
+                        file("c", 2)
+                        dir("b") {
+                            file("r", 3)
+                        }
+                    }
+                }
+            },
+            """
+                '/'
+                    'b/' Deleted
+                        'b/' Deleted
+                    'z/' New
+                        'b/' New
+                            'b/' New
+                                'r' New
+                            'c' MovedFrom '/b/c'
+            """
+        )
+    }
+
+    @Test
+    fun moved3() {
+        assertEquals(
+            root {
+                dir("b") {
+                    file("c", 2)
+                    dir("b") {}
+                }
+            },
+            root {
+                dir("z") {
+                    dir("b") {
+                        file("c", 2)
+                        dir("u") {}
+                    }
+                }
+            },
+            """
+                '/'
+                    'b/' Deleted
+                        'b/' Deleted
+                    'z/' New
+                        'b/' New
+                            'c' MovedFrom '/b/c'
+                            'u/' New
+            """
+        )
+    }
+
+    @Test
+    fun moved4() {
+        assertEquals(
+            root {
+                dir("b") {
+                    file("c", 2)
+                    file("u", 7)
+                }
+            },
+            root {
+                dir("z") {
+                    dir("b") {
+                        file("c", 2)
+                        dir("u") {}
+                    }
+                }
+            },
+            """
+                '/'
+                    'b/' Deleted
+                        'u' Deleted
+                    'z/' New
+                        'b/' New
+                            'c' MovedFrom '/b/c'
+                            'u/' New
             """
         )
     }

@@ -22,7 +22,7 @@ class FileDelta(
 ) : Delta(parent, name, state, digest)
 
 class DirectoryDelta(
-    parent: DirectoryDelta?,
+    val parent: DirectoryDelta?,
     name: String,
     state: DeltaState,
     digest: String?,
@@ -30,10 +30,20 @@ class DirectoryDelta(
     val deltas = mutableListOf<Delta>()
 }
 
+fun DirectoryDelta.getPath(path: String): DirectoryDelta {
+    if (path.isEmpty()) return this
+    val secondDirSep = path.indexOf(DIR_SEP, 1)
+    val name = path.substring(1, if (secondDirSep < 0) path.length else secondDirSep)
+    val child = deltas.find { it.name == name } as DirectoryDelta
+    return child.getPath(path.substring(name.length + 1))
+}
+
 data class NodeDigestToPaths(
     val node: DirectoryNode,
     val digestToPaths: DigestToPaths = node.calculateDigestToPaths(),
 )
+
+fun Delta.isEmptyDirectory() = this is DirectoryDelta && deltas.isEmpty()
 
 fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestToPaths: NodeDigestToPaths): DirectoryDelta =
     DirectoryDelta(null, "", DeltaState.Same, null).apply {
@@ -121,23 +131,58 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         }
         pruneEqualDirectories()
 
-        fun Delta.fixupFrom() {
-            val from = deletedDigestToPath[digest]
-            if (from != null) {
-                if (from.substringBeforeLast(DIR_SEP) == path.substringBeforeLast(DIR_SEP)) {
-                    fromState = FromState.RenamedFrom
-                    fromPath = from.substringAfterLast(DIR_SEP)
-                } else {
-                    fromState = FromState.MovedFrom
-                    fromPath = from
-                }
+        fun Delta.setFrom(from: String) {
+            check(state == DeltaState.New || state == DeltaState.DirToFile)
+            if (from.substringBeforeLast(DIR_SEP) == path.substringBeforeLast(DIR_SEP)) {
+                fromState = FromState.RenamedFrom
+                fromPath = from.substringAfterLast(DIR_SEP)
+                check(fromPath != name)
+            } else {
+                fromState = FromState.MovedFrom
+                fromPath = from
             }
+        }
+
+        fun Delta.fixupFrom() {
+            val path = deletedDigestToPath[digest]
+            if (path != null) setFrom(path)
             when (this) {
                 is FileDelta -> {}
                 is DirectoryDelta -> deltas.forEach { it.fixupFrom() }
             }
         }
         fixupFrom()
+
+        val root = this
+        fun Delta.mergeFrom() {
+            when (this) {
+                is FileDelta -> {}
+                is DirectoryDelta -> {
+                    deltas.toList().forEach { it.mergeFrom() }
+                    if (state != DeltaState.New) return
+                    val movedDeltas = deltas.filter { it.fromState == FromState.MovedFrom }
+                    val movedPaths = movedDeltas.map { it.fromPath!!.substringBeforeLast(DIR_SEP) }
+                    if (movedPaths.distinct().size != 1) return
+                    val movedPath = movedPaths.first()
+                    val movedDir = root.getPath(movedPath)
+                    check((movedDir == root && movedDir.state == DeltaState.Same) || (movedDir != root && movedDir.state == DeltaState.Deleted))
+                    val unmovedDeltas = deltas - movedDeltas.toSet()
+                    val movedDirDeltas = movedDir.deltas
+                    if (unmovedDeltas.size != movedDirDeltas.size) return
+                    for (unmovedDelta in unmovedDeltas) {
+                        check(unmovedDelta.state == DeltaState.New)
+                        if (!unmovedDelta.isEmptyDirectory()) return
+                        val movedDelta = movedDirDeltas.find { it.name == unmovedDelta.name } ?: return
+                        check(movedDelta.state == DeltaState.Deleted)
+                        if (!movedDelta.isEmptyDirectory()) return
+                    }
+                    check(movedDir.parent!!.deltas.remove(movedDir))
+                    setFrom(movedPath)
+                    deltas.clear()
+                }
+            }
+        }
+        mergeFrom()
     }
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {

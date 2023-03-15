@@ -43,7 +43,7 @@ fun main(
 }
 
 fun main(vararg args: String) {
-    check(args.size == 3 || args.size == 4) { "usage: algorithm directory nodeFile [ archivePrefix ]" }
+    require(args.size == 3 || args.size == 4) { "usage: algorithm directory nodeFile [ archivePrefix ]" }
     println()
     main(args[0], args[1], args[2], if (args.size == 4) args[3] else null, ::print) {
         val answer = readln()
