@@ -1,29 +1,32 @@
 package ch.softappeal.but
 
-enum class DeltaState { Same, New, Deleted, Changed, FileToDir, DirToFile, MovedFrom, RenamedFrom }
+enum class DeltaState { Same, New, Deleted, Changed, FileToDir, DirToFile }
+enum class FromState { MovedFrom, RenamedFrom }
 
 sealed class Delta(
     parent: DirectoryDelta?,
     val name: String,
-    var state: DeltaState,
+    val state: DeltaState,
+    val digest: String?,
 ) {
     val path: String = if (parent == null) "" else nextPath(parent.path, name)
+    var fromState: FromState? = null
+    var fromPath: String? = null
 }
 
 class FileDelta(
     parent: DirectoryDelta,
     name: String,
     state: DeltaState,
-    val digest: String?,
-) : Delta(parent, name, state) {
-    var fromPath: String? = null
-}
+    digest: String?,
+) : Delta(parent, name, state, digest)
 
 class DirectoryDelta(
     parent: DirectoryDelta?,
     name: String,
     state: DeltaState,
-) : Delta(parent, name, state) {
+    digest: String?,
+) : Delta(parent, name, state, digest) {
     val deltas = mutableListOf<Delta>()
 }
 
@@ -33,7 +36,7 @@ data class NodeDigestToPaths(
 )
 
 fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestToPaths: NodeDigestToPaths): DirectoryDelta =
-    DirectoryDelta(null, "", DeltaState.Same).apply {
+    DirectoryDelta(null, "", DeltaState.Same, null).apply {
         val (oldNode, oldDigestToPaths) = oldNodeDigestToPaths
         val (newNode, newDigestToPaths) = newNodeDigestToPaths
         val deletedDigestToPath = mutableMapOf<String, String>()
@@ -56,7 +59,7 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
                             if (state == DeltaState.Deleted && updateDeletedDigestToPath(node)) return
                             deltas.add(FileDelta(this, node.name, state, node.digest.toHex()))
                         }
-                        is DirectoryNode -> deltas.add(DirectoryDelta(this, node.name, state).apply {
+                        is DirectoryNode -> deltas.add(DirectoryDelta(this, node.name, state, null).apply {
                             node.nodes.forEach { addNode(it, state) }
                         })
                     }
@@ -69,22 +72,26 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
                 }
                 when {
                     compareTo == 0 -> {
-                        fun addNodeTypeChanged(node: DirectoryNode, state: DeltaState, nestedState: DeltaState) {
-                            deltas.add(DirectoryDelta(this, node.name, state).apply {
+                        fun addNodeTypeChanged(node: DirectoryNode, state: DeltaState, nestedState: DeltaState, digest: String?) {
+                            deltas.add(DirectoryDelta(this, node.name, state, digest).apply {
                                 node.nodes.forEach { addNode(it, nestedState) }
                             })
                         }
                         when (val old = oldIter.current()) {
                             is FileNode -> when (val new = newIter.current()) {
-                                is FileNode -> if (!old.digest.contentEquals(new.digest)) deltas.add(FileDelta(this, new.name, DeltaState.Changed, null))
+                                is FileNode -> if (!old.digest.contentEquals(new.digest)) {
+                                    deltas.add(FileDelta(this, new.name, DeltaState.Changed, null))
+                                }
                                 is DirectoryNode -> {
                                     updateDeletedDigestToPath(old)
-                                    addNodeTypeChanged(new, DeltaState.FileToDir, DeltaState.New)
+                                    addNodeTypeChanged(new, DeltaState.FileToDir, DeltaState.New, null)
                                 }
                             }
                             is DirectoryNode -> when (val new = newIter.current()) {
-                                is FileNode -> addNodeTypeChanged(old, DeltaState.DirToFile, DeltaState.Deleted)
-                                is DirectoryNode -> deltas.add(DirectoryDelta(this, new.name, DeltaState.Same).apply { compare(old, new) })
+                                is FileNode -> addNodeTypeChanged(old, DeltaState.DirToFile, DeltaState.Deleted, new.digest.toHex())
+                                is DirectoryNode -> deltas.add(DirectoryDelta(this, new.name, DeltaState.Same, null).apply {
+                                    compare(old, new)
+                                })
                             }
                         }
                         oldIter.advance()
@@ -114,33 +121,36 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         }
         pruneEqualDirectories()
 
-        fun Delta.fixupMovedFrom() {
-            when (this) {
-                is FileDelta -> {
-                    val from = deletedDigestToPath[digest]
-                    if (from != null) {
-                        if (from.substringBeforeLast(DIR_SEP) == path.substringBeforeLast(DIR_SEP)) {
-                            state = DeltaState.RenamedFrom
-                            fromPath = from.substringAfterLast(DIR_SEP)
-                        } else {
-                            state = DeltaState.MovedFrom
-                            fromPath = from
-                        }
-                    }
+        fun Delta.fixupFrom() {
+            val from = deletedDigestToPath[digest]
+            if (from != null) {
+                if (from.substringBeforeLast(DIR_SEP) == path.substringBeforeLast(DIR_SEP)) {
+                    fromState = FromState.RenamedFrom
+                    fromPath = from.substringAfterLast(DIR_SEP)
+                } else {
+                    fromState = FromState.MovedFrom
+                    fromPath = from
                 }
-                is DirectoryDelta -> deltas.forEach { it.fixupMovedFrom() }
+            }
+            when (this) {
+                is FileDelta -> {}
+                is DirectoryDelta -> deltas.forEach { it.fixupFrom() }
             }
         }
-        fixupMovedFrom()
+        fixupFrom()
     }
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
-    print("${"    ".repeat(indent)}'$name")
+    val dirSep = if (this is DirectoryDelta && state != DeltaState.DirToFile) "$DIR_SEP" else ""
+    val from = " $fromState '$fromPath'"
+    val info = if (state == DeltaState.New && fromState != null) {
+        from
+    } else {
+        "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
+    }
+    print("${"    ".repeat(indent)}'$name$dirSep'$info\n")
     when (this) {
-        is FileDelta -> print("' $state${if (fromPath == null) "" else " '$fromPath'"}\n")
-        is DirectoryDelta -> {
-            print("${if (state != DeltaState.DirToFile) "$DIR_SEP" else ""}'${if (state == DeltaState.Same) "" else " $state"}\n")
-            deltas.forEach { it.dump(print, indent + 1) }
-        }
+        is FileDelta -> {}
+        is DirectoryDelta -> deltas.forEach { it.dump(print, indent + 1) }
     }
 }

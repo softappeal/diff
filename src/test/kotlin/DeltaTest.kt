@@ -310,6 +310,51 @@ class DeltaTest {
     }
 
     @Test
+    fun addNodeTypeChangedDirToFileRenamed() {
+        assertEquals(
+            root {
+                dir("a") {
+                    file("b", 1)
+                    dir("c") {
+                        file("d", 2)
+                    }
+                }
+                file("x", 9)
+            },
+            root {
+                file("a", 9)
+            },
+            """
+                '/'
+                    'a' DirToFile RenamedFrom 'x'
+                        'b' Deleted
+                        'c/' Deleted
+                            'd' Deleted
+            """
+        )
+    }
+
+    @Test
+    fun addNodeTypeChangedDirToFileMoved() {
+        assertEquals(
+            root {
+                dir("a") {
+                    file("b", 1)
+                    file("x", 9)
+                }
+            },
+            root {
+                file("a", 1)
+            },
+            """
+                '/'
+                    'a' DirToFile MovedFrom '/a/b'
+                        'x' Deleted
+            """
+        )
+    }
+
+    @Test
     fun pruneEqualDirectories() {
         assertEquals(
             root {
