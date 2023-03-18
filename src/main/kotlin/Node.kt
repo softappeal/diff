@@ -91,7 +91,7 @@ fun printDuplicates(digestToPaths: DigestToPaths, print: (s: String) -> Unit) {
         print("<no duplicates>\n")
     } else {
         print("duplicates:\n")
-        duplicates.forEach { print("    ${it.map { name -> "\"$name\"" }}\n") }
+        duplicates.forEach { print("    ${it.map { name -> "'$name'" }}\n") }
     }
 }
 

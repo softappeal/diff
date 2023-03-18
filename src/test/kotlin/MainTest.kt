@@ -10,7 +10,7 @@ class MainTest {
         File(node).delete()
         assertEquals("""
             duplicates:
-                ["/a.txt", "/b/d.txt", "/b/f.txt", "/c.txt"]
+                ['/a.txt', '/b/d.txt', '/b/f.txt', '/c.txt']
 
             nodeFile 'build/node.yass' written
         """) {
