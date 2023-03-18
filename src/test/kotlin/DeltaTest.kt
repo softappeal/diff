@@ -709,123 +709,174 @@ class DeltaTest {
     }
 
     @Test
-    fun moved1() {
+    fun mergeFromOk() {
         assertEquals(
             root {
-                dir("b") {
-                    file("c", 2)
-                    dir("b") {
-                        file("r", 3)
+                dir("u") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {}
                     }
                 }
             },
             root {
-                dir("z") {
-                    dir("b") {
-                        file("c", 2)
-                        dir("b") {}
+                dir("t") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {}
                     }
                 }
             },
             """
                 '/'
-                    'b/' Deleted
-                        'b/' Deleted
-                            'r' Deleted
-                    'z/' New
-                        'b/' New
-                            'b/' New
-                            'c' MovedFrom '/b/c'
+                    't/' RenamedFrom 'u'
             """
         )
     }
 
     @Test
-    fun moved2() {
+    fun mergeFromWrongSize() {
         assertEquals(
             root {
-                dir("b") {
-                    file("c", 2)
-                    dir("b") {}
+                dir("u") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                    }
                 }
             },
             root {
-                dir("z") {
-                    dir("b") {
-                        file("c", 2)
-                        dir("b") {
-                            file("r", 3)
+                dir("t") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {}
+                    }
+                }
+            },
+            """
+                '/'
+                    't/' New
+                        'v/' New
+                            'd1/' New
+                            'd2/' New
+                            'same' MovedFrom '/u/v/same'
+                    'u/' Deleted
+                        'v/' Deleted
+                            'd1/' Deleted
+            """
+        )
+    }
+
+    @Test
+    fun mergeFromWrongName() {
+        assertEquals(
+            root {
+                dir("u") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {}
+                    }
+                }
+            },
+            root {
+                dir("t") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d3") {}
+                    }
+                }
+            },
+            """
+                '/'
+                    't/' New
+                        'v/' New
+                            'd1/' New
+                            'd3/' New
+                            'same' MovedFrom '/u/v/same'
+                    'u/' Deleted
+                        'v/' Deleted
+                            'd1/' Deleted
+                            'd2/' Deleted
+            """
+        )
+    }
+
+    @Test
+    fun mergeFromFile() {
+        assertEquals(
+            root {
+                dir("u") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {}
+                    }
+                }
+            },
+            root {
+                dir("t") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        file("d2", 1)
+                    }
+                }
+            },
+            """
+                '/'
+                    't/' New
+                        'v/' New
+                            'd1/' New
+                            'd2' New
+                            'same' MovedFrom '/u/v/same'
+                    'u/' Deleted
+                        'v/' Deleted
+                            'd1/' Deleted
+                            'd2/' Deleted
+            """
+        )
+    }
+
+    @Test
+    fun mergeFromNotEmptyDirectory() {
+        assertEquals(
+            root {
+                dir("u") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {
+                            file("x", 1)
                         }
                     }
                 }
             },
-            """
-                '/'
-                    'b/' Deleted
-                        'b/' Deleted
-                    'z/' New
-                        'b/' New
-                            'b/' New
-                                'r' New
-                            'c' MovedFrom '/b/c'
-            """
-        )
-    }
-
-    @Test
-    fun moved3() {
-        assertEquals(
             root {
-                dir("b") {
-                    file("c", 2)
-                    dir("b") {}
-                }
-            },
-            root {
-                dir("z") {
-                    dir("b") {
-                        file("c", 2)
-                        dir("u") {}
+                dir("t") {
+                    dir("v") {
+                        file("same", 123)
+                        dir("d1") {}
+                        dir("d2") {}
                     }
                 }
             },
             """
                 '/'
-                    'b/' Deleted
-                        'b/' Deleted
-                    'z/' New
-                        'b/' New
-                            'c' MovedFrom '/b/c'
-                            'u/' New
-            """
-        )
-    }
-
-    @Test
-    fun moved4() {
-        assertEquals(
-            root {
-                dir("b") {
-                    file("c", 2)
-                    file("u", 7)
-                }
-            },
-            root {
-                dir("z") {
-                    dir("b") {
-                        file("c", 2)
-                        dir("u") {}
-                    }
-                }
-            },
-            """
-                '/'
-                    'b/' Deleted
-                        'u' Deleted
-                    'z/' New
-                        'b/' New
-                            'c' MovedFrom '/b/c'
-                            'u/' New
+                    't/' New
+                        'v/' New
+                            'd1/' New
+                            'd2/' New
+                            'same' MovedFrom '/u/v/same'
+                    'u/' Deleted
+                        'v/' Deleted
+                            'd1/' Deleted
+                            'd2/' Deleted
+                                'x' Deleted
             """
         )
     }

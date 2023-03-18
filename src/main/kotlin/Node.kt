@@ -103,7 +103,7 @@ class NodeIterator(node: DirectoryNode) {
         advance0()
     }
 
-    @Suppress("BooleanMethodIsAlwaysInverted") fun done() = node == null
+    fun done() = node == null
 
     fun current() = node!!
 
