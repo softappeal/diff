@@ -69,12 +69,12 @@ fun ByteArray.toHex() = joinToString("") { "%02X".format(it) }
 
 typealias DigestToPaths = Map<String, List<String>>
 
-fun nextPath(path: String, name: String) = if (name == "") "" else "$path$DIR_SEP$name"
+fun String.concatPath(name: String) = "$this$DIR_SEP$name"
 
 fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
     val pathDigests = buildList {
         fun Node.visit(path: String) {
-            val nextPath = nextPath(path, name)
+            val nextPath = if (name == "") "" else path.concatPath(name)
             when (this) {
                 is FileNode -> add(Pair(nextPath, digest.toHex()))
                 is DirectoryNode -> nodes.forEach { it.visit(nextPath) }

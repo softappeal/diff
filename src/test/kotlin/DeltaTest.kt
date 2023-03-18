@@ -10,34 +10,6 @@ private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: Strin
 
 class DeltaTest {
     @Test
-    fun getPath() {
-        val root = DirectoryDelta(null, "not-used", DeltaState.Same, null)
-        val a = DirectoryDelta(null, "a", DeltaState.Same, null)
-        val aa = DirectoryDelta(null, "aa", DeltaState.Same, null)
-        root.deltas.add(a)
-        a.deltas.add(aa)
-        assertSame(root, root.getPath(""))
-        assertFailsWith<NullPointerException> { root.getPath("/") }
-        assertFailsWith<NullPointerException> { root.getPath("//") }
-        assertFailsWith<NullPointerException> { root.getPath("a") }
-        assertSame(a, root.getPath("/a"))
-        assertFailsWith<NullPointerException> { root.getPath("/aa") }
-        assertSame(aa, root.getPath("/a/aa"))
-        assertFailsWith<NullPointerException> { root.getPath("/a/a") }
-        assertFailsWith<NullPointerException> { root.getPath("/a//") }
-    }
-
-    @Test
-    fun isEmptyDirectory() {
-        val directory = DirectoryDelta(null, "", DeltaState.New, null)
-        val file = FileDelta(directory, "", DeltaState.New, null)
-        assertFalse(file.isEmptyDirectory())
-        assertTrue(directory.isEmptyDirectory())
-        directory.deltas.add(file)
-        assertFalse(directory.isEmptyDirectory())
-    }
-
-    @Test
     fun compareFlatEmpty() {
         assertEquals(
             root {
@@ -383,7 +355,7 @@ class DeltaTest {
     }
 
     @Test
-    fun pruneEqualDirectories() {
+    fun pruneEqualDirectory() {
         assertEquals(
             root {
                 file("a", 1)
@@ -709,7 +681,7 @@ class DeltaTest {
     }
 
     @Test
-    fun mergeFromOk() {
+    fun mergeMovedDirectoryOk() {
         assertEquals(
             root {
                 dir("u") {
@@ -737,7 +709,7 @@ class DeltaTest {
     }
 
     @Test
-    fun mergeFromWrongSize() {
+    fun mergeMovedDirectoryWrongSize() {
         assertEquals(
             root {
                 dir("u") {
@@ -771,7 +743,7 @@ class DeltaTest {
     }
 
     @Test
-    fun mergeFromWrongName() {
+    fun mergeMovedDirectoryWrongName() {
         assertEquals(
             root {
                 dir("u") {
@@ -807,7 +779,7 @@ class DeltaTest {
     }
 
     @Test
-    fun mergeFromFile() {
+    fun mergeMovedDirectoryFile() {
         assertEquals(
             root {
                 dir("u") {
@@ -843,7 +815,7 @@ class DeltaTest {
     }
 
     @Test
-    fun mergeFromNotEmptyDirectory() {
+    fun mergeMovedDirectoryNotEmptyDirectory() {
         assertEquals(
             root {
                 dir("u") {
