@@ -1,1 +1,1 @@
-rootProject.name = "but"
+rootProject.name = "diff"

@@ -1,1 +1,1 @@
-build/install/but/bin/but MD5 src/test/resources/test build/test.yass
+build/install/diff/bin/diff MD5 src/test/resources/test build/test.yass

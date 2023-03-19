@@ -1,4 +1,4 @@
-package ch.softappeal.but
+package ch.softappeal.diff
 
 enum class DeltaState { Same, New, Deleted, Changed, FileToDir, DirToFile }
 enum class FromState { MovedFrom, RenamedFrom }

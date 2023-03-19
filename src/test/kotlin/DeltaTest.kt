@@ -1,4 +1,4 @@
-package ch.softappeal.but
+package ch.softappeal.diff
 
 import kotlin.test.*
 

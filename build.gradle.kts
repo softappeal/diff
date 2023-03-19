@@ -29,5 +29,5 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClass.set("ch.softappeal.but.MainKt")
+    mainClass.set("ch.softappeal.diff.MainKt")
 }
