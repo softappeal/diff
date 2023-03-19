@@ -9,14 +9,17 @@ class MainTest {
         val node = "build/node.yass"
         File(node).delete()
         assertEquals("""
+
             duplicates:
                 ['/a.txt', '/b/d.txt', '/b/f.txt', '/c.txt']
 
             nodeFile 'build/node.yass' written
+
         """) {
             main("MD5", "src/test/resources/test", node, it) { false }
         }
         assertEquals("""
+
             <no duplicates>
             
             '/'
@@ -29,10 +32,12 @@ class MainTest {
 
             type <y> to overwrite nodeFile (else abort): 
             nodeFile 'build/node.yass' written
+
          """) {
             main("MD5", "src/test/resources/test2", node, it) { true }
         }
         assertEquals("""
+
             <no duplicates>
             
             '/'
