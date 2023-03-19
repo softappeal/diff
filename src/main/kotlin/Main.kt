@@ -2,6 +2,7 @@ package ch.softappeal.diff
 
 import ch.softappeal.yass2.transport.*
 import java.io.*
+import kotlin.system.*
 
 @Suppress("PrivatePropertyName")
 private val NodeSerializer = generatedBinarySerializer(NodeBaseEncoders)
@@ -42,6 +43,7 @@ fun main(vararg args: String) {
     require(args.size == 3) { "usage: algorithm directory nodeFile" }
     main(args[0], args[1], args[2], ::print) {
         val answer = readln()
-        "y" == answer
+        if ("y" != answer) exitProcess(1)
+        true
     }
 }
