@@ -14,7 +14,7 @@ class MainTest {
 
             nodeFile 'build/node.yass' written
         """) {
-            main("MD5", "src/test/resources/test", node, null, it) { false }
+            main("MD5", "src/test/resources/test", node, it) { false }
         }
         assertEquals("""
             <no duplicates>
@@ -29,9 +29,8 @@ class MainTest {
 
             type <y> to overwrite nodeFile (else abort): 
             nodeFile 'build/node.yass' written
-            archive 'build/backup_' written
          """) {
-            main("MD5", "src/test/resources/test2", node, "build/backup_", it) { true }
+            main("MD5", "src/test/resources/test2", node, it) { true }
         }
         assertEquals("""
             <no duplicates>
@@ -40,7 +39,7 @@ class MainTest {
 
             type <y> to overwrite nodeFile (else abort): 
          """) {
-            main("MD5", "src/test/resources/test2", node, "build/backup_", it) { false }
+            main("MD5", "src/test/resources/test2", node, it) { false }
             it("\n")
         }
     }

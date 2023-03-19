@@ -41,7 +41,7 @@ class DirectoryNode(
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
-const val DsStore = ".DS_Store"
+private const val MAC_DS_STORE = ".DS_Store"
 
 fun createDirectoryNode(digestAlgorithm: String, directory: String): DirectoryNode = runBlocking {
     CoroutineScope(Dispatchers.Default).async {
@@ -54,7 +54,7 @@ fun createDirectoryNode(digestAlgorithm: String, directory: String): DirectoryNo
             buildList {
                 (directory.listFiles() ?: throw IOException("'$directory' is not a directory")).forEach { file ->
                     if (file.isFile) {
-                        if (DsStore != file.name) add(fileNode(file))
+                        if (MAC_DS_STORE != file.name) add(fileNode(file))
                     } else {
                         add(directoryNode(file, file.name))
                     }

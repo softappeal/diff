@@ -20,7 +20,7 @@ private fun writeNode(file: String, node: Node) {
 }
 
 fun main(
-    algorithm: String, directory: String, nodeFile: String, archivePrefix: String?,
+    algorithm: String, directory: String, nodeFile: String,
     print: (s: String) -> Unit, doOverwrite: () -> Boolean,
 ) {
     val newNodeDigestToPaths = NodeDigestToPaths(createDirectoryNode(algorithm, directory))
@@ -36,20 +36,12 @@ fun main(
     print("\n")
     writeNode(nodeFile, newNodeDigestToPaths.node)
     print("nodeFile '$nodeFile' written\n")
-    if (archivePrefix != null) {
-        backup(directory, archivePrefix)
-        print("archive '$archivePrefix' written\n")
-    }
 }
 
 fun main(vararg args: String) {
-    require(args.size == 3 || args.size == 4) { "usage: algorithm directory nodeFile [ archivePrefix ]" }
-    println()
-    main(args[0], args[1], args[2], if (args.size == 4) args[3] else null, ::print) {
+    require(args.size == 3) { "usage: algorithm directory nodeFile" }
+    main(args[0], args[1], args[2], ::print) {
         val answer = readln()
         "y" == answer
     }
-    println()
-    print("press <return> ")
-    readln()
 }
