@@ -1,1 +1,0 @@
-./gradlew -Pversion=`git describe`
