@@ -144,6 +144,7 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
                     deltas.toList().forEach { it.mergeMovedDirectory() }
                     if (state != DeltaState.New) return
                     val moveds = deltas.filter { it.fromState == FromState.MovedFrom }
+                    if (moveds.any { it.from!!.name != it.name }) return // detects renamed moveds
                     val movedsParent = moveds.map { it.from!!.parent }
                     if (movedsParent.distinct().size != 1) return
                     val movedParent = movedsParent.first()!!

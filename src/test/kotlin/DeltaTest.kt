@@ -852,4 +852,32 @@ class DeltaTest {
             """
         )
     }
+
+    @Test
+    fun mergeMovedDirectoryRenamed() {
+        assertEquals(
+            root {
+                dir("u") {
+                    file("same", 123)
+                    file("x", 1)
+                }
+            },
+            root {
+                dir("t") {
+                    dir("u") {
+                        file("same", 123)
+                        file("y", 1)
+                    }
+                }
+            },
+            """
+                '/'
+                    't/' New
+                        'u/' New
+                            'same' MovedFrom '/u/same'
+                            'y' MovedFrom '/u/x'
+                    'u/' Deleted
+            """
+        )
+    }
 }
