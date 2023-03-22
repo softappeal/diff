@@ -880,4 +880,30 @@ class DeltaTest {
             """
         )
     }
+
+    @Test
+    fun pruneEqualDirectoryAfterMergeMovedDirectory() {
+        assertEquals(
+            root {
+                dir("u") {
+                    dir("v") {
+                        file("a", 1)
+                    }
+                    file("b", 2)
+                }
+            },
+            root {
+                dir("u") {
+                    file("b", 2)
+                }
+                dir("x") {
+                    file("a", 1)
+                }
+            },
+            """
+                '/'
+                    'x/' MovedFrom '/u/v'
+            """
+        )
+    }
 }

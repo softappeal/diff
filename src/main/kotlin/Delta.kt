@@ -104,17 +104,6 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         }
         compare(oldNode, newNode)
 
-        fun DirectoryDelta.pruneEqualDirectory(): Boolean {
-            deltas.removeIf { delta ->
-                when (delta) {
-                    is FileDelta -> false
-                    is DirectoryDelta -> delta.pruneEqualDirectory()
-                }
-            }
-            return deltas.isEmpty() && state == DeltaState.Same
-        }
-        pruneEqualDirectory()
-
         fun Delta.setFrom(fromDelta: Delta) {
             check(state == DeltaState.New || state == DeltaState.DirToFile)
             if (fromDelta.parent == parent) {
@@ -173,6 +162,17 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
             }
         }
         mergeMovedDirectory()
+
+        fun DirectoryDelta.pruneEqualDirectory(): Boolean {
+            deltas.removeIf { delta ->
+                when (delta) {
+                    is FileDelta -> false
+                    is DirectoryDelta -> delta.pruneEqualDirectory()
+                }
+            }
+            return deltas.isEmpty() && state == DeltaState.Same
+        }
+        pruneEqualDirectory()
     }
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
