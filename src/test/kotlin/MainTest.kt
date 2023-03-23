@@ -8,10 +8,15 @@ class MainTest {
     fun main() {
         val node = "build/node.yass"
         File(node).delete()
+        @Suppress("SpellCheckingInspection")
         assertEquals("""
 
             duplicates:
-                ['/a.txt', '/b/d.txt', '/b/f.txt', '/c.txt']
+                CFCD208495D565EF66E7DFF9F98764DA
+                    '/a.txt'
+                    '/b/d.txt'
+                    '/b/f.txt'
+                    '/c.txt'
 
             nodeFile 'build/node.yass' written
 

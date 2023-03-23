@@ -160,8 +160,13 @@ class NodeTest {
         }
         assertEquals("""
             duplicates:
-                ['/a1', '/f/ff/a2', '/f/ff/a3']
-                ['/b1', '/f/ff/b2']
+                01
+                    '/a1'
+                    '/f/ff/a2'
+                    '/f/ff/a3'
+                02
+                    '/b1'
+                    '/f/ff/b2'
         """) {
             printDuplicates(digestToPaths, it)
         }
