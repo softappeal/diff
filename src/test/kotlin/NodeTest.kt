@@ -128,9 +128,7 @@ class NodeTest {
 
     @Test
     fun noDuplicates() {
-        assertEquals("""
-            <no duplicates>
-        """) {
+        assertEquals("") {
             printDuplicates(root {
                 file("a", 0)
                 file("b", 1)
@@ -159,14 +157,15 @@ class NodeTest {
             it(digestToPaths.toString() + '\n')
         }
         assertEquals("""
-            duplicates:
-                01
-                    '/a1'
-                    '/f/ff/a2'
-                    '/f/ff/a3'
-                02
-                    '/b1'
-                    '/f/ff/b2'
+
+            - Duplicates
+                - 01
+                    - `/a1`
+                    - `/f/ff/a2`
+                    - `/f/ff/a3`
+                - 02
+                    - `/b1`
+                    - `/f/ff/b2`
         """) {
             printDuplicates(digestToPaths, it)
         }

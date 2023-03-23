@@ -177,9 +177,9 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
 
 fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     val dirSep = if (this is DirectoryDelta && state != DeltaState.DirToFile) "$DIR_SEP" else ""
-    val from = if (fromState == null) "" else " $fromState '${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}'"
+    val from = if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
     val info = if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
-    print("${"    ".repeat(indent)}'$name$dirSep'$info\n")
+    print("${"    ".repeat(indent)}- `$name$dirSep`$info\n")
     when (this) {
         is FileDelta -> {}
         is DirectoryDelta -> deltas.forEach { it.dump(print, indent + 1) }

@@ -11,12 +11,12 @@ class MainTest {
         @Suppress("SpellCheckingInspection")
         assertEquals("""
 
-            duplicates:
-                CFCD208495D565EF66E7DFF9F98764DA
-                    '/a.txt'
-                    '/b/d.txt'
-                    '/b/f.txt'
-                    '/c.txt'
+            - Duplicates
+                - CFCD208495D565EF66E7DFF9F98764DA
+                    - `/a.txt`
+                    - `/b/d.txt`
+                    - `/b/f.txt`
+                    - `/c.txt`
 
             nodeFile 'build/node.yass' written
 
@@ -25,16 +25,14 @@ class MainTest {
         }
         assertEquals("""
 
-            <no duplicates>
+            - `/`
+                - `b/` Deleted
+                    - `d.txt` Deleted
+                    - `e/` Deleted
+                        - `g.txt` Deleted
+                    - `f.txt` Deleted
+                - `c.txt` Deleted
             
-            '/'
-                'b/' Deleted
-                    'd.txt' Deleted
-                    'e/' Deleted
-                        'g.txt' Deleted
-                    'f.txt' Deleted
-                'c.txt' Deleted
-
             type <y> to overwrite nodeFile (else abort): 
             nodeFile 'build/node.yass' written
 
@@ -43,10 +41,8 @@ class MainTest {
         }
         assertEquals("""
 
-            <no duplicates>
+            - `/`
             
-            '/'
-
             type <y> to overwrite nodeFile (else abort): 
          """) {
             main("MD5", "src/test/resources/test2", node, it) { false }

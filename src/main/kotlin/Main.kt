@@ -24,7 +24,6 @@ fun main(
     algorithm: String, directory: String, nodeFile: String,
     print: (s: String) -> Unit, doOverwrite: () -> Boolean,
 ) {
-    print("\n")
     val newNodeDigestToPaths = NodeDigestToPaths(createDirectoryNode(algorithm, directory))
     printDuplicates(newNodeDigestToPaths.digestToPaths, print)
     if (File(nodeFile).exists()) {

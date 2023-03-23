@@ -87,13 +87,12 @@ fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
 
 fun printDuplicates(digestToPaths: DigestToPaths, print: (s: String) -> Unit) {
     val duplicates = digestToPaths.filter { it.value.size != 1 }
-    if (duplicates.isEmpty()) {
-        print("<no duplicates>\n")
-    } else {
-        print("duplicates:\n")
+    if (duplicates.isNotEmpty()) {
+        print("\n")
+        print("- Duplicates\n")
         duplicates.forEach { duplicate ->
-            print("    ${duplicate.key}\n")
-            duplicate.value.forEach { print("        '$it'\n") }
+            print("    - ${duplicate.key}\n")
+            duplicate.value.forEach { print("        - `$it`\n") }
         }
     }
 }
