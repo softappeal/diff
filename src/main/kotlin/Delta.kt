@@ -118,58 +118,39 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         fun Delta.fixupFrom() {
             val delta = deletedDigestToDelta[digest]
             if (delta != null) setFrom(delta)
-            when (this) {
-                is FileDelta -> {}
-                is DirectoryDelta -> deltas.forEach { it.fixupFrom() }
-            }
+            if (this is DirectoryDelta) deltas.forEach { it.fixupFrom() }
         }
         fixupFrom()
 
         val root = this
         @Suppress("SpellCheckingInspection") fun Delta.mergeMovedDirectory() {
-            when (this) {
-                is FileDelta -> {}
-                is DirectoryDelta -> {
-                    deltas.toList().forEach { it.mergeMovedDirectory() }
-                    if (state != DeltaState.New) return
-                    val moveds = deltas.filter { it.fromState == FromState.MovedFrom }
-                    if (moveds.any { it.from!!.name != it.name }) return // detects renamed moveds
-                    val movedsParent = moveds.map { it.from!!.parent }
-                    if (movedsParent.distinct().size != 1) return
-                    val movedParent = movedsParent.first()!!
-                    check((movedParent == root && movedParent.state == DeltaState.Same) || (movedParent != root && movedParent.state == DeltaState.Deleted))
-                    fun areUnmovedsMergeable(): Boolean {
-                        val unmoveds = deltas - moveds.toSet()
-                        if (unmoveds.size != movedParent.deltas.size) return false
-                        fun haveUnmovedsMatchingEmptyDirectories(): Boolean {
-                            for (unmoved in unmoveds) {
-                                fun Delta.isEmptyDirectory() = this is DirectoryDelta && deltas.isEmpty()
-                                check(unmoved.state == DeltaState.New)
-                                if (!unmoved.isEmptyDirectory()) return false
-                                val moved = movedParent.deltas.find { it.name == unmoved.name } ?: return false
-                                check(moved.state == DeltaState.Deleted)
-                                if (!moved.isEmptyDirectory()) return false
-                            }
-                            return true
-                        }
-                        return haveUnmovedsMatchingEmptyDirectories()
-                    }
-                    if (!areUnmovedsMergeable()) return
-                    check(movedParent.parent!!.deltas.remove(movedParent))
-                    setFrom(movedParent)
-                    deltas.clear()
-                }
+            if (this !is DirectoryDelta) return
+            deltas.toList().forEach { it.mergeMovedDirectory() }
+            if (state != DeltaState.New) return
+            val moveds = deltas.filter { it.fromState == FromState.MovedFrom }
+            if (moveds.any { it.from!!.name != it.name }) return // detects renamed moveds
+            val movedsParent = moveds.map { it.from!!.parent }
+            if (movedsParent.distinct().size != 1) return
+            val movedParent = movedsParent.first()!!
+            check((movedParent == root && movedParent.state == DeltaState.Same) || (movedParent != root && movedParent.state == DeltaState.Deleted))
+            val unmoveds = deltas - moveds.toSet()
+            if (unmoveds.size != movedParent.deltas.size) return
+            for (unmoved in unmoveds) { // have unmoveds matching empty directories?
+                fun Delta.isEmptyDirectory() = this is DirectoryDelta && deltas.isEmpty()
+                check(unmoved.state == DeltaState.New)
+                if (!unmoved.isEmptyDirectory()) return
+                val moved = movedParent.deltas.find { it.name == unmoved.name } ?: return
+                check(moved.state == DeltaState.Deleted)
+                if (!moved.isEmptyDirectory()) return
             }
+            check(movedParent.parent!!.deltas.remove(movedParent))
+            setFrom(movedParent)
+            deltas.clear()
         }
         mergeMovedDirectory()
 
         fun DirectoryDelta.pruneEqualDirectory(): Boolean {
-            deltas.removeIf { delta ->
-                when (delta) {
-                    is FileDelta -> false
-                    is DirectoryDelta -> delta.pruneEqualDirectory()
-                }
-            }
+            deltas.removeIf { if (it is DirectoryDelta) it.pruneEqualDirectory() else false }
             return deltas.isEmpty() && state == DeltaState.Same
         }
         pruneEqualDirectory()
@@ -180,8 +161,5 @@ fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
     val from = if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
     val info = if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
     print("${"    ".repeat(indent)}- `$name$dirSep`$info\n")
-    when (this) {
-        is FileDelta -> {}
-        is DirectoryDelta -> deltas.forEach { it.dump(print, indent + 1) }
-    }
+    if (this is DirectoryDelta) deltas.forEach { it.dump(print, indent + 1) }
 }
