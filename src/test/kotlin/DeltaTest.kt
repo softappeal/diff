@@ -3,9 +3,7 @@ package ch.softappeal.diff
 import kotlin.test.*
 
 private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String) {
-    assertEquals(expected) {
-        createDirectoryDelta(NodeDigestToPaths(old), NodeDigestToPaths(new)).dump(it)
-    }
+    assertEquals(expected) { createDirectoryDelta(old, new).print() }
 }
 
 class DeltaTest {

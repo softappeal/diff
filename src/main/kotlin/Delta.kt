@@ -30,15 +30,10 @@ class DirectoryDelta(
     val deltas = mutableListOf<Delta>()
 }
 
-data class NodeDigestToPaths(
-    val node: DirectoryNode,
-    val digestToPaths: DigestToPaths = node.calculateDigestToPaths(),
-)
-
-fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestToPaths: NodeDigestToPaths) =
+fun createDirectoryDelta(oldNode: DirectoryNode, newNode: DirectoryNode) =
     DirectoryDelta(null, "", DeltaState.Same, null).apply {
-        val (oldNode, oldDigestToPaths) = oldNodeDigestToPaths
-        val (newNode, newDigestToPaths) = newNodeDigestToPaths
+        val oldDigestToPaths = oldNode.calculateDigestToPaths()
+        val newDigestToPaths = newNode.calculateDigestToPaths()
         val deletedDigestToDelta = mutableMapOf<String, Delta>()
 
         fun DirectoryDelta.compare(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
@@ -156,10 +151,10 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         pruneEqualDirectory()
     }
 
-fun Delta.dump(print: (s: String) -> Unit, indent: Int = 0) {
+fun Delta.print(indent: Int = 0) {
     val dirSep = if (this is DirectoryDelta && state != DeltaState.DirToFile) "$DIR_SEP" else ""
     val from = if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
     val info = if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
-    print("${"    ".repeat(indent)}- `$name$dirSep`$info\n")
-    if (this is DirectoryDelta) deltas.forEach { it.dump(print, indent + 1) }
+    println("${"    ".repeat(indent)}- `$name$dirSep`$info")
+    if (this is DirectoryDelta) deltas.forEach { it.print(indent + 1) }
 }

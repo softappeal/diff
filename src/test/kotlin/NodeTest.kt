@@ -23,22 +23,17 @@ fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
     return DirectoryNode("", builder.nodes)
 }
 
-fun assertEquals(expected: String, block: (print: (s: String) -> Unit) -> Unit) {
-    val s = StringBuilder()
-    block { s.append(it) }
-    assertEquals((expected + "\n").trimIndent(), s.toString())
-}
-
-private fun Node.dump(print: (s: String) -> Unit, indent: Int = 0) {
-    print("    ".repeat(indent))
-    print("'$name'")
-    when (this) {
-        is FileNode -> print(" ${digest.toHex()}\n")
-        is DirectoryNode -> {
-            print("\n")
-            nodes.forEach { it.dump(print, indent + 1) }
-        }
+fun assertEquals(expected: String, block: () -> Unit) {
+    val charset = Charsets.UTF_8
+    val bytes = ByteArrayOutputStream()
+    val out = System.out
+    System.setOut(PrintStream(bytes, true, charset))
+    try {
+        block()
+    } finally {
+        System.setOut(out)
     }
+    assertEquals((expected + "\n").trimIndent(), bytes.toString(charset))
 }
 
 class NodeTest {
@@ -78,30 +73,6 @@ class NodeTest {
     }
 
     @Test
-    fun dump() {
-        assertEquals("""
-            ''
-                'c' FD
-                'f'
-                    'empty'
-                    'ff'
-                        'x' FE
-                'q' FF
-        """) {
-            root {
-                file("q", -1)
-                dir("f") {
-                    dir("ff") {
-                        file("x", -2)
-                    }
-                    dir("empty") {}
-                }
-                file("c", -3)
-            }.dump(it)
-        }
-    }
-
-    @Test
     fun thisIsNotADirectory() {
         assertEquals(
             "'this-is-not-a-directory' is not a directory",
@@ -113,26 +84,26 @@ class NodeTest {
     @Test
     fun createDirectoryNode() {
         assertEquals("""
-            ''
-                'a.txt' CFCD208495D565EF66E7DFF9F98764DA
-                'b'
-                    'd.txt' CFCD208495D565EF66E7DFF9F98764DA
-                    'e'
-                        'g.txt' C4CA4238A0B923820DCC509A6F75849B
-                    'f.txt' CFCD208495D565EF66E7DFF9F98764DA
-                'c.txt' CFCD208495D565EF66E7DFF9F98764DA
-        """) {
-            createDirectoryNode("MD5", "src/test/resources/test").dump(it)
-        }
+            - ``
+                - `a.txt` CFCD208495D565EF66E7DFF9F98764DA
+                - `b`
+                    - `d.txt` CFCD208495D565EF66E7DFF9F98764DA
+                    - `e`
+                        - `g.txt` C4CA4238A0B923820DCC509A6F75849B
+                    - `f.txt` CFCD208495D565EF66E7DFF9F98764DA
+                - `c.txt` CFCD208495D565EF66E7DFF9F98764DA
+        """) { createDirectoryNode("MD5", "src/test/resources/test").print() }
     }
 
     @Test
     fun noDuplicates() {
-        assertEquals("") {
+        assertEquals("""
+            <no-duplicates>
+        """) {
             printDuplicates(root {
                 file("a", 0)
                 file("b", 1)
-            }.calculateDigestToPaths(), it)
+            }.calculateDigestToPaths())
         }
     }
 
@@ -153,11 +124,8 @@ class NodeTest {
         }.calculateDigestToPaths()
         assertEquals("""
             {01=[/a1, /f/ff/a2, /f/ff/a3], 02=[/b1, /f/ff/b2], 03=[/c], 04=[/f/ff/c]}
-         """) {
-            it(digestToPaths.toString() + '\n')
-        }
+        """) { println(digestToPaths.toString()) }
         assertEquals("""
-
             - Duplicates
                 - 01
                     - `/a1`
@@ -166,9 +134,7 @@ class NodeTest {
                 - 02
                     - `/b1`
                     - `/f/ff/b2`
-        """) {
-            printDuplicates(digestToPaths, it)
-        }
+        """) { printDuplicates(digestToPaths) }
     }
 
     @Ignore

@@ -38,6 +38,17 @@ class DirectoryNode(
     }
 }
 
+fun Node.print(indent: Int = 0) {
+    print("${"    ".repeat(indent)}- `$name`")
+    when (this) {
+        is FileNode -> println(" ${digest.toHex()}")
+        is DirectoryNode -> {
+            println()
+            nodes.forEach { it.print(indent + 1) }
+        }
+    }
+}
+
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
@@ -85,14 +96,15 @@ fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
     return pathDigests.groupBy({ it.second }, { it.first })
 }
 
-fun printDuplicates(digestToPaths: DigestToPaths, print: (s: String) -> Unit) {
+fun printDuplicates(digestToPaths: DigestToPaths) {
     val duplicates = digestToPaths.filter { it.value.size != 1 }
-    if (duplicates.isNotEmpty()) {
-        print("\n")
-        print("- Duplicates\n")
+    if (duplicates.isEmpty()) {
+        println("<no-duplicates>")
+    } else {
+        println("- Duplicates")
         duplicates.forEach { duplicate ->
-            print("    - ${duplicate.key}\n")
-            duplicate.value.forEach { print("        - `$it`\n") }
+            println("    - ${duplicate.key}")
+            duplicate.value.forEach { println("        - `$it`") }
         }
     }
 }
