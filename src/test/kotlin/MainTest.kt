@@ -1,6 +1,7 @@
 package ch.softappeal.diff
 
 import java.io.*
+import kotlin.io.path.*
 import kotlin.test.*
 
 private fun redirectStdOut(block: () -> Unit): ByteArray {
@@ -31,20 +32,20 @@ class MainTest {
         fun test(vararg args: String) = assertEquals(USAGE, assertFailsWith<IllegalArgumentException> { testMain(*args) }.message)
         test()
         test("xxx")
-        test("create", "x", "x", "x")
-        test("print", "x", "x", "x")
-        test("duplicates", "x", "x", "x")
+        test("createNode", "x", "x", "x")
+        test("printNode", "x", "x", "x")
+        test("printDuplicates", "x", "x", "x")
         test("diff", "x", "x", "x")
+        test("script")
+        test("script", "x", "x", "x")
+        test("scriptNoDuplicates")
+        test("scriptNoDuplicates", "x", "x", "x")
     }
 
-    @Suppress("SpellCheckingInspection")
     @Test
     fun test() {
-        val algorithm = "MD5"
-        val oldDir = "src/test/resources/test"
-        val newDir = "src/test/resources/test2"
-        val oldNode = redirectStdOut { main("create", algorithm, oldDir) }
-        val newNode = redirectStdOut { main("create", algorithm, newDir) }
+        val oldNode = redirectStdOut { main("createNode", ALGORITHM, TEST_DIR.toString()) }
+        val newNode = redirectStdOut { main("createNode", ALGORITHM, TEST2_DIR.toString()) }
 
         redirectStdIn(oldNode) {
             assertEquals("""
@@ -56,7 +57,7 @@ class MainTest {
                             - `g.txt` C4CA4238A0B923820DCC509A6F75849B
                         - `f.txt` CFCD208495D565EF66E7DFF9F98764DA
                     - `c.txt` CFCD208495D565EF66E7DFF9F98764DA
-            """) { main("print") }
+            """) { main("printNode") }
         }
 
         redirectStdIn(oldNode) {
@@ -67,17 +68,17 @@ class MainTest {
                         - `/b/d.txt`
                         - `/b/f.txt`
                         - `/c.txt`
-            """) { main("duplicates") }
+            """) { main("printDuplicates") }
         }
 
         redirectStdIn(newNode) {
             assertEquals("""
                 <no-duplicates>
-            """) { main("duplicates") }
+            """) { main("printDuplicates") }
         }
 
-        val oldNodeFile = "build/oldNode.yass"
-        File(oldNodeFile).writeBytes(oldNode)
+        val oldNodeFile = Path("build/oldNode.yass")
+        oldNodeFile.writeBytes(oldNode)
         redirectStdIn(newNode) {
             assertEquals("""
                 - `/`
@@ -87,7 +88,70 @@ class MainTest {
                             - `g.txt` Deleted
                         - `f.txt` Deleted
                     - `c.txt` Deleted
-            """) { main("diff", oldNodeFile) }
+            """) { main("diff", oldNodeFile.toString()) }
         }
+    }
+
+    @Test
+    fun scriptTest() {
+        val toolDirectory = TEST_DIR.resolve("b")
+
+        assertEquals("""
+
+            DONE
+   
+        """) { script(toolDirectory, ALGORITHM, false, null) }
+
+        redirectStdIn("\n".toByteArray()) {
+            assertEquals("""
+                
+                - Duplicates
+                    - CFCD208495D565EF66E7DFF9F98764DA
+                        - `/a.txt`
+                        - `/b/d.txt`
+                        - `/b/f.txt`
+                        - `/c.txt`
+                
+                - `/`
+                    - `b/`
+                        - `node.yass` New
+                
+                type <y> to accept changes (else abort): 
+                ABORTED
+                
+            """) { script(toolDirectory, ALGORITHM, true, null) }
+        }
+
+        redirectStdIn("y\n".toByteArray()) {
+            assertEquals("""
+                
+                - `/`
+                    - `b/`
+                        - `node.yass` New
+                
+                type <y> to accept changes (else abort): 
+                DONE
+                
+            """) { script(toolDirectory, ALGORITHM, false, null) }
+        }
+
+        redirectStdIn("\n".toByteArray()) {
+            assertEquals("""
+                
+                - `/`
+                    - `b/`
+                        - `node.yass` Changed
+                
+                type <y> to accept changes (else abort): 
+                ABORTED
+                
+            """) { script(toolDirectory, ALGORITHM, false, null) }
+        }
+
+        redirectStdIn("y\n".toByteArray()) {
+            script(toolDirectory, ALGORITHM, false, "build/backup_")
+        }
+
+        toolDirectory.nodeFile().deleteExisting()
     }
 }

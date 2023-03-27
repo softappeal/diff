@@ -2,8 +2,9 @@ package ch.softappeal.diff
 
 import ch.softappeal.yass2.serialize.binary.*
 import kotlinx.coroutines.*
-import java.io.*
+import java.nio.file.*
 import java.security.*
+import kotlin.io.path.*
 
 const val DIR_SEP = '/'
 
@@ -52,27 +53,27 @@ fun Node.print(indent: Int = 0) {
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
-private const val MAC_DS_STORE = ".DS_Store"
+const val MAC_DS_STORE = ".DS_Store"
 
-fun createDirectoryNode(digestAlgorithm: String, directory: String): DirectoryNode = runBlocking {
+fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): DirectoryNode = runBlocking {
     CoroutineScope(Dispatchers.Default).async {
-        fun fileNode(file: File) = FileNode(file.name).apply {
-            launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(file.readBytes()) }
-        }
-
-        fun directoryNode(directory: File, name: String): DirectoryNode = DirectoryNode(
+        fun directoryNode(directory: Path, name: String): DirectoryNode = DirectoryNode(
             name,
             buildList {
-                (directory.listFiles() ?: throw IOException("'$directory' is not a directory")).forEach { file ->
-                    if (file.isFile) {
-                        if (MAC_DS_STORE != file.name) add(fileNode(file))
+                Files.newDirectoryStream(directory).forEach { path ->
+                    require(!path.isSymbolicLink()) { "'$path' is a symbolic link" }
+                    if (path.isRegularFile()) {
+                        if (MAC_DS_STORE == path.name) return@forEach
+                        add(FileNode(path.name).apply {
+                            launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(path.readBytes()) }
+                        })
                     } else {
-                        add(directoryNode(file, file.name))
+                        add(directoryNode(path, path.name))
                     }
                 }
             }
         )
-        directoryNode(File(directory), "")
+        directoryNode(sourceDirectory, "")
     }.await()
 }
 

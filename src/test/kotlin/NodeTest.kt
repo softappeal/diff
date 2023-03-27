@@ -1,6 +1,8 @@
 package ch.softappeal.diff
 
 import java.io.*
+import java.nio.file.*
+import kotlin.io.path.*
 import kotlin.test.*
 
 class NodeBuilder {
@@ -35,6 +37,10 @@ fun assertEquals(expected: String, block: () -> Unit) {
     }
     assertEquals((expected + "\n").trimIndent(), bytes.toString(charset))
 }
+
+const val ALGORITHM = "MD5"
+val TEST_DIR: Path = Path("src/test/resources/test")
+val TEST2_DIR: Path = TEST_DIR.resolveSibling("test2")
 
 class NodeTest {
     @Test
@@ -73,15 +79,6 @@ class NodeTest {
     }
 
     @Test
-    fun thisIsNotADirectory() {
-        assertEquals(
-            "'this-is-not-a-directory' is not a directory",
-            assertFailsWith<IOException> { createDirectoryNode("MD5", "this-is-not-a-directory") }.message
-        )
-    }
-
-    @Suppress("SpellCheckingInspection")
-    @Test
     fun createDirectoryNode() {
         assertEquals("""
             - ``
@@ -92,7 +89,7 @@ class NodeTest {
                         - `g.txt` C4CA4238A0B923820DCC509A6F75849B
                     - `f.txt` CFCD208495D565EF66E7DFF9F98764DA
                 - `c.txt` CFCD208495D565EF66E7DFF9F98764DA
-        """) { createDirectoryNode("MD5", "src/test/resources/test").print() }
+        """) { createDirectoryNode(ALGORITHM, TEST_DIR).print() }
     }
 
     @Test
@@ -135,12 +132,6 @@ class NodeTest {
                     - `/b1`
                     - `/f/ff/b2`
         """) { printDuplicates(digestToPaths) }
-    }
-
-    @Ignore
-    @Test
-    fun big() {
-        createDirectoryNode("MD5", "/Users/guru/Library/CloudStorage/OneDrive-Personal/data")
     }
 
     @Test

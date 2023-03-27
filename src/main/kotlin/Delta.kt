@@ -30,10 +30,15 @@ class DirectoryDelta(
     val deltas = mutableListOf<Delta>()
 }
 
-fun createDirectoryDelta(oldNode: DirectoryNode, newNode: DirectoryNode) =
+data class NodeDigestToPaths(
+    val node: DirectoryNode,
+    val digestToPaths: DigestToPaths = node.calculateDigestToPaths(),
+)
+
+fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestToPaths: NodeDigestToPaths) =
     DirectoryDelta(null, "", DeltaState.Same, null).apply {
-        val oldDigestToPaths = oldNode.calculateDigestToPaths()
-        val newDigestToPaths = newNode.calculateDigestToPaths()
+        val (oldNode, oldDigestToPaths) = oldNodeDigestToPaths
+        val (newNode, newDigestToPaths) = newNodeDigestToPaths
         val deletedDigestToDelta = mutableMapOf<String, Delta>()
 
         fun DirectoryDelta.compare(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
