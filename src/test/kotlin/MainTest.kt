@@ -154,4 +154,15 @@ class MainTest {
 
         toolDirectory.nodeFile().deleteExisting()
     }
+
+    @Ignore
+    @Test
+    fun testExternalDir() {
+        val dir = Path("/Users/guru/Library/CloudStorage/OneDrive-Personal/data/major")
+        val oldNode = dir.resolve("diff/node.yass").readNode()
+        val newNode = createDirectoryNode(ALGORITHM, dir)
+        val newNodeDigestToPaths = NodeDigestToPaths(newNode)
+        printDuplicates(newNodeDigestToPaths.digestToPaths)
+        createDirectoryDelta(NodeDigestToPaths(oldNode), newNodeDigestToPaths).print()
+    }
 }

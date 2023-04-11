@@ -122,7 +122,6 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         }
         fixupFrom()
 
-        val root = this
         @Suppress("SpellCheckingInspection") fun Delta.mergeMovedDirectory() {
             if (this !is DirectoryDelta) return
             deltas.toList().forEach { it.mergeMovedDirectory() }
@@ -132,7 +131,6 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
             val movedsParent = moveds.map { it.from!!.parent }
             if (movedsParent.distinct().size != 1) return
             val movedParent = movedsParent.first()!!
-            check((movedParent == root && movedParent.state == DeltaState.Same) || (movedParent != root && movedParent.state == DeltaState.Deleted))
             val unmoveds = deltas - moveds.toSet()
             if (unmoveds.size != movedParent.deltas.size) return
             for (unmoved in unmoveds) { // have unmoveds matching empty directories?

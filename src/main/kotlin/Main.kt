@@ -15,7 +15,7 @@ private fun ByteArray.readNode(): DirectoryNode {
     return node
 }
 
-private fun Path.readNode() = readBytes().readNode()
+fun Path.readNode() = readBytes().readNode()
 private fun readNodeFromStdIn() = System.`in`.readAllBytes().readNode()
 
 private fun DirectoryNode.write(): ByteArray {
