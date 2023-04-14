@@ -24,6 +24,8 @@ class FileNode(
     constructor(name: String, digest: ByteArray) : this(name) {
         this.digest = digest
     }
+
+    override fun toString() = "FileNode(name=`$name`,digest=${digest.toHex()})"
 }
 
 class DirectoryNode(
@@ -37,6 +39,8 @@ class DirectoryNode(
             "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}"
         }
     }
+
+    override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
 
 fun Node.print(indent: Int = 0) {
@@ -130,4 +134,6 @@ class NodeIterator(node: DirectoryNode) {
         check(!done())
         advance0()
     }
+
+    override fun toString() = "NodeIterator(${if (done()) "<done>" else current().toString()})"
 }

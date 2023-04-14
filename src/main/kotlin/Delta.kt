@@ -12,6 +12,7 @@ sealed class Delta(
     var fromState: FromState? = null
     var from: Delta? = null
     fun getPath(): String = parent?.getPath()?.concatPath(name) ?: ""
+    protected fun toString(className: String, deltas: String?) = "$className(path=`${getPath()}`,state=$state${if (from == null) "" else ",fromState=$fromState,from=`${from!!.getPath()}`"}$deltas${if (digest == null) "" else ",digest=$digest"})"
 }
 
 class FileDelta(
@@ -19,7 +20,9 @@ class FileDelta(
     name: String,
     state: DeltaState,
     digest: String?,
-) : Delta(parent, name, state, digest)
+) : Delta(parent, name, state, digest) {
+    override fun toString() = toString("FileDelta", "")
+}
 
 class DirectoryDelta(
     parent: DirectoryDelta?,
@@ -28,6 +31,7 @@ class DirectoryDelta(
     digest: String?,
 ) : Delta(parent, name, state, digest) {
     val deltas = mutableListOf<Delta>()
+    override fun toString() = toString("DirectoryDelta", ",deltas=${deltas.size}")
 }
 
 data class NodeDigestToPaths(
@@ -106,11 +110,11 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
 
         fun Delta.setFrom(fromDelta: Delta) {
             check(state == DeltaState.New || state == DeltaState.DirToFile)
-            if (fromDelta.parent == parent) {
-                fromState = FromState.RenamedFrom
+            fromState = if (fromDelta.parent == parent) {
                 check(fromDelta.name != name)
+                FromState.RenamedFrom
             } else {
-                fromState = FromState.MovedFrom
+                FromState.MovedFrom
             }
             from = fromDelta
         }
