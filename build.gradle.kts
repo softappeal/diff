@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm")
     application
 }
+
 val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${extra["kotlinx-coroutines.version"]}"
 fun yass2(module: String) = "ch.softappeal.yass2:yass2-$module:${extra["yass2.version"]}"
 
