@@ -1,10 +1,7 @@
 package ch.softappeal.diff
 
 import ch.softappeal.yass2.serialize.binary.*
-import kotlinx.coroutines.*
-import java.nio.file.*
-import java.security.*
-import kotlin.io.path.*
+import ch.softappeal.yass2.transport.*
 
 const val DIR_SEP = '/'
 
@@ -43,6 +40,23 @@ class DirectoryNode(
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
 
+val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
+val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
+private val NodeSerializer = generatedBinarySerializer(NodeBaseEncoders)
+
+fun ByteArray.readNode(): DirectoryNode {
+    val reader = BytesReader(this)
+    val node = NodeSerializer.read(reader) as DirectoryNode
+    check(reader.isDrained)
+    return node
+}
+
+fun DirectoryNode.write(): ByteArray {
+    val writer = BytesWriter(100_000)
+    NodeSerializer.write(writer, this)
+    return writer.buffer.copyOf(writer.current)
+}
+
 fun Node.print(indent: Int = 0) {
     print("${"    ".repeat(indent)}- `$name`")
     when (this) {
@@ -54,34 +68,17 @@ fun Node.print(indent: Int = 0) {
     }
 }
 
-val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
-val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
-
-const val MAC_DS_STORE = ".DS_Store"
-
-fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): DirectoryNode = runBlocking {
-    CoroutineScope(Dispatchers.Default).async {
-        fun directoryNode(directory: Path, name: String): DirectoryNode = DirectoryNode(
-            name,
-            buildList {
-                Files.newDirectoryStream(directory).forEach { path ->
-                    require(!path.isSymbolicLink()) { "'$path' is a symbolic link" }
-                    if (path.isRegularFile()) {
-                        if (MAC_DS_STORE == path.name) return@forEach
-                        add(FileNode(path.name).apply {
-                            launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(path.readBytes()) }
-                        })
-                    } else {
-                        add(directoryNode(path, path.name))
-                    }
-                }
-            }
-        )
-        directoryNode(sourceDirectory, "")
-    }.await()
+@Suppress("SpellCheckingInspection") private val HexChars = "0123456789ABCDEF".toCharArray()
+fun ByteArray.toHex(): String {
+    val hexDigits = CharArray(2 * size)
+    var i = 0
+    for (b in this) {
+        val byte = 0xFF and b.toInt()
+        hexDigits[i++] = HexChars[byte ushr 4]
+        hexDigits[i++] = HexChars[byte and 0x0F]
+    }
+    return hexDigits.concatToString()
 }
-
-fun ByteArray.toHex() = joinToString("") { "%02X".format(it) }
 
 typealias DigestToPaths = Map<String, List<String>>
 
@@ -137,3 +134,5 @@ class NodeIterator(node: DirectoryNode) {
 
     override fun toString() = "NodeIterator(${if (done()) "<done>" else current().toString()})"
 }
+
+const val MAC_DS_STORE = ".DS_Store"

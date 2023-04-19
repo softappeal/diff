@@ -2,11 +2,9 @@ package ch.softappeal.diff
 
 import kotlin.test.*
 
-private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String) {
-    assertEquals(expected) { createDirectoryDelta(NodeDigestToPaths(old), NodeDigestToPaths(new)).print() }
-}
+abstract class DeltaTest {
+    protected abstract fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String)
 
-class DeltaTest {
     @Test
     fun compareFlatEmpty() {
         assertEquals(

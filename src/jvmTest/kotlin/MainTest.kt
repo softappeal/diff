@@ -48,7 +48,7 @@ class MainTest {
         val newNode = redirectStdOut { main("createNode", ALGORITHM, TEST2_DIR.toString()) }
 
         redirectStdIn(oldNode) {
-            assertEquals("""
+            assertOutput("""
                 - ``
                     - `a.txt` CFCD208495D565EF66E7DFF9F98764DA
                     - `b`
@@ -61,7 +61,7 @@ class MainTest {
         }
 
         redirectStdIn(oldNode) {
-            assertEquals("""
+            assertOutput("""
                 - Duplicates
                     - CFCD208495D565EF66E7DFF9F98764DA
                         - `/a.txt`
@@ -72,7 +72,7 @@ class MainTest {
         }
 
         redirectStdIn(newNode) {
-            assertEquals("""
+            assertOutput("""
                 <no-duplicates>
             """) { main("printDuplicates") }
         }
@@ -80,7 +80,7 @@ class MainTest {
         val oldNodeFile = Path("build/oldNode.yass")
         oldNodeFile.writeBytes(oldNode)
         redirectStdIn(newNode) {
-            assertEquals("""
+            assertOutput("""
                 - `/`
                     - `b/` Deleted
                         - `d.txt` Deleted
@@ -96,14 +96,14 @@ class MainTest {
     fun scriptTest() {
         val toolDirectory = TEST_DIR.resolve("b")
 
-        assertEquals("""
+        assertOutput("""
 
             DONE
    
         """) { script(toolDirectory, ALGORITHM, false, null) }
 
         redirectStdIn("\n".toByteArray()) {
-            assertEquals("""
+            assertOutput("""
                 
                 - Duplicates
                     - CFCD208495D565EF66E7DFF9F98764DA
@@ -123,7 +123,7 @@ class MainTest {
         }
 
         redirectStdIn("y\n".toByteArray()) {
-            assertEquals("""
+            assertOutput("""
                 
                 - `/`
                     - `b/`
@@ -136,7 +136,7 @@ class MainTest {
         }
 
         redirectStdIn("\n".toByteArray()) {
-            assertEquals("""
+            assertOutput("""
                 
                 - `/`
                     - `b/`

@@ -152,7 +152,7 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         mergeMovedDirectory()
 
         fun DirectoryDelta.pruneEqualDirectory(): Boolean {
-            deltas.removeIf { if (it is DirectoryDelta) it.pruneEqualDirectory() else false }
+            deltas.removeAll { if (it is DirectoryDelta) it.pruneEqualDirectory() else false }
             return deltas.isEmpty() && state == DeltaState.Same
         }
         pruneEqualDirectory()

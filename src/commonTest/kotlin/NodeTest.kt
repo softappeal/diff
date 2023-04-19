@@ -1,8 +1,5 @@
 package ch.softappeal.diff
 
-import java.io.*
-import java.nio.file.*
-import kotlin.io.path.*
 import kotlin.test.*
 
 class NodeBuilder {
@@ -25,29 +22,28 @@ fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
     return DirectoryNode("", builder.nodes)
 }
 
-fun assertEquals(expected: String, block: () -> Unit) {
-    val charset = Charsets.UTF_8
-    val bytes = ByteArrayOutputStream()
-    val out = System.out
-    System.setOut(PrintStream(bytes, true, charset))
-    try {
-        block()
-    } finally {
-        System.setOut(out)
-    }
-    assertEquals((expected + "\n").trimIndent(), bytes.toString(charset))
-}
-
 const val ALGORITHM = "MD5"
-val TEST_DIR: Path = Path("src/test/resources/test")
-val TEST2_DIR: Path = TEST_DIR.resolveSibling("test2")
 
-class NodeTest {
+abstract class NodeTest {
+    protected abstract fun assertEquals(expected: String, printBlock: () -> Unit)
+
     @Test
     fun toHex() {
         assertEquals("00", byteArrayOf(0).toHex())
+        assertEquals("01", byteArrayOf(1).toHex())
+        assertEquals("02", byteArrayOf(2).toHex())
+        assertEquals("03", byteArrayOf(3).toHex())
+        assertEquals("04", byteArrayOf(4).toHex())
+        assertEquals("05", byteArrayOf(5).toHex())
+        assertEquals("06", byteArrayOf(6).toHex())
+        assertEquals("07", byteArrayOf(7).toHex())
+        assertEquals("08", byteArrayOf(8).toHex())
         assertEquals("09", byteArrayOf(9).toHex())
         assertEquals("0A", byteArrayOf(10).toHex())
+        assertEquals("0B", byteArrayOf(11).toHex())
+        assertEquals("0C", byteArrayOf(12).toHex())
+        assertEquals("0D", byteArrayOf(13).toHex())
+        assertEquals("0E", byteArrayOf(14).toHex())
         assertEquals("0F", byteArrayOf(15).toHex())
         assertEquals("7F", byteArrayOf(127).toHex())
         assertEquals("FF", byteArrayOf(-1).toHex())
@@ -76,20 +72,6 @@ class NodeTest {
                 }
             }.message
         )
-    }
-
-    @Test
-    fun createDirectoryNode() {
-        assertEquals("""
-            - ``
-                - `a.txt` CFCD208495D565EF66E7DFF9F98764DA
-                - `b`
-                    - `d.txt` CFCD208495D565EF66E7DFF9F98764DA
-                    - `e`
-                        - `g.txt` C4CA4238A0B923820DCC509A6F75849B
-                    - `f.txt` CFCD208495D565EF66E7DFF9F98764DA
-                - `c.txt` CFCD208495D565EF66E7DFF9F98764DA
-        """) { createDirectoryNode(ALGORITHM, TEST_DIR).print() }
     }
 
     @Test

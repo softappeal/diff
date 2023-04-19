@@ -25,7 +25,7 @@ class ArchiveTest {
         val archiveDir = Path("build/archive-test")
         createZipFile(TEST_DIR, archiveZip)
         extractZipFile(archiveZip, archiveDir)
-        assertEquals("""
+        assertOutput("""
             - ``
                 - `a.txt` CFCD208495D565EF66E7DFF9F98764DA
                 - `b`

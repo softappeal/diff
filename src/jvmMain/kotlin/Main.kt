@@ -1,28 +1,12 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.transport.*
 import java.nio.file.*
 import java.text.*
 import java.util.*
 import kotlin.io.path.*
 
-private val NodeSerializer = generatedBinarySerializer(NodeBaseEncoders)
-
-private fun ByteArray.readNode(): DirectoryNode {
-    val reader = BytesReader(this)
-    val node = NodeSerializer.read(reader) as DirectoryNode
-    check(reader.isDrained)
-    return node
-}
-
 fun Path.readNode() = readBytes().readNode()
 private fun readNodeFromStdIn() = System.`in`.readAllBytes().readNode()
-
-private fun DirectoryNode.write(): ByteArray {
-    val writer = BytesWriter(100_000)
-    NodeSerializer.write(writer, this)
-    return writer.buffer.copyOf(writer.current)
-}
 
 private fun DirectoryNode.writeToStdOut() = System.out.writeBytes(this.write())
 private fun DirectoryNode.writeToFile(file: Path) = file.writeBytes(this.write())
