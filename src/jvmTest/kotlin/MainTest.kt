@@ -98,9 +98,16 @@ class MainTest {
 
         assertOutput("""
 
+            - Duplicates
+                - CFCD208495D565EF66E7DFF9F98764DA
+                    - `/a.txt`
+                    - `/b/d.txt`
+                    - `/b/f.txt`
+                    - `/c.txt`
+            
             DONE
    
-        """) { script(toolDirectory, ALGORITHM, false, null) }
+        """) { script(toolDirectory, ALGORITHM, null) }
 
         redirectStdIn("\n".toByteArray()) {
             assertOutput("""
@@ -119,11 +126,18 @@ class MainTest {
                 type <y> to accept changes (else abort): 
                 ABORTED
                 
-            """) { script(toolDirectory, ALGORITHM, true, null) }
+            """) { script(toolDirectory, ALGORITHM, null) }
         }
 
         redirectStdIn("y\n".toByteArray()) {
             assertOutput("""
+                
+                - Duplicates
+                    - CFCD208495D565EF66E7DFF9F98764DA
+                        - `/a.txt`
+                        - `/b/d.txt`
+                        - `/b/f.txt`
+                        - `/c.txt`
                 
                 - `/`
                     - `b/`
@@ -132,11 +146,18 @@ class MainTest {
                 type <y> to accept changes (else abort): 
                 DONE
                 
-            """) { script(toolDirectory, ALGORITHM, false, null) }
+            """) { script(toolDirectory, ALGORITHM, null) }
         }
 
         redirectStdIn("\n".toByteArray()) {
             assertOutput("""
+                
+                - Duplicates
+                    - CFCD208495D565EF66E7DFF9F98764DA
+                        - `/a.txt`
+                        - `/b/d.txt`
+                        - `/b/f.txt`
+                        - `/c.txt`
                 
                 - `/`
                     - `b/`
@@ -145,11 +166,11 @@ class MainTest {
                 type <y> to accept changes (else abort): 
                 ABORTED
                 
-            """) { script(toolDirectory, ALGORITHM, false, null) }
+            """) { script(toolDirectory, ALGORITHM, null) }
         }
 
         redirectStdIn("y\n".toByteArray()) {
-            script(toolDirectory, ALGORITHM, false, "build/backup_")
+            script(toolDirectory, ALGORITHM, "build/backup_")
         }
 
         toolDirectory.nodeFile().deleteExisting()

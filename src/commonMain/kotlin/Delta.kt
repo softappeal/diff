@@ -158,10 +158,13 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
         pruneEqualDirectory()
     }
 
+fun Delta.info(): String {
+    val from = if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
+    return if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
+}
+
 fun Delta.print(indent: Int = 0) {
     val dirSep = if (this is DirectoryDelta && state != DeltaState.DirToFile) "$DIR_SEP" else ""
-    val from = if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
-    val info = if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
-    println("${"    ".repeat(indent)}- `$name$dirSep`$info")
+    println("${"    ".repeat(indent)}- `$name$dirSep`${info()}")
     if (this is DirectoryDelta) deltas.forEach { it.print(indent + 1) }
 }

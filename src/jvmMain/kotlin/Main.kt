@@ -4,6 +4,7 @@ import java.nio.file.*
 import java.text.*
 import java.util.*
 import kotlin.io.path.*
+import kotlin.system.*
 
 fun Path.readNode() = readBytes().readNode()
 private fun readNodeFromStdIn() = System.`in`.readAllBytes().readNode()
@@ -13,17 +14,17 @@ private fun DirectoryNode.writeToFile(file: Path) = file.writeBytes(this.write()
 
 fun Path.nodeFile(): Path = resolve("node.yass")
 
-fun script(toolDirectory: Path, algorithm: String, withDuplicates: Boolean, archivePrefix: String?) {
+fun script(toolDirectory: Path, algorithm: String, archivePrefix: String?, withGui: Boolean = false) {
     println()
     val root = toolDirectory.resolve("..")
     val newNodeDigestToPaths = NodeDigestToPaths(createDirectoryNode(algorithm, root))
-    if (withDuplicates) {
-        printDuplicates(newNodeDigestToPaths.digestToPaths)
-        println()
-    }
+    printDuplicates(newNodeDigestToPaths.digestToPaths)
+    println()
     val node = toolDirectory.nodeFile()
     if (node.exists()) {
-        createDirectoryDelta(NodeDigestToPaths(node.readNode()), newNodeDigestToPaths).print()
+        val delta = createDirectoryDelta(NodeDigestToPaths(node.readNode()), newNodeDigestToPaths)
+        if (withGui) gui(delta)
+        delta.print()
         println()
         print("type <y> to accept changes (else abort): ")
         val answer = readln()
@@ -31,6 +32,7 @@ fun script(toolDirectory: Path, algorithm: String, withDuplicates: Boolean, arch
         if (answer != "y") {
             println("ABORTED")
             println()
+            if (withGui) exitProcess(1)
             return
         }
     }
@@ -43,6 +45,7 @@ fun script(toolDirectory: Path, algorithm: String, withDuplicates: Boolean, arch
     }
     println("DONE")
     println()
+    if (withGui) exitProcess(0)
 }
 
 val USAGE = """
@@ -51,7 +54,7 @@ val USAGE = """
         'printNode' < nodeFile
         'printDuplicates' < nodeFile
         'diff' oldNodeFile < newNodeFile
-        ( 'script' | 'scriptNoDuplicates' ) algorithm [ archivePrefix ]
+        'script' algorithm [ archivePrefix ]
 """.trimIndent()
 
 fun main(vararg args: String) {
@@ -64,8 +67,8 @@ fun main(vararg args: String) {
         command == "printDuplicates" && args.size == 1 -> printDuplicates(readNodeFromStdIn().calculateDigestToPaths())
         command == "diff" && args.size == 2 ->
             createDirectoryDelta(NodeDigestToPaths(Path(args[1]).readNode()), NodeDigestToPaths(readNodeFromStdIn())).print()
-        (command == "script" || command == "scriptNoDuplicates") && (args.size == 2 || args.size == 3) ->
-            script(Path(""), args[1], command == "script", if (args.size == 2) null else args[2])
+        command == "script" && (args.size == 2 || args.size == 3) ->
+            script(Path(""), args[1], if (args.size == 2) null else args[2], true)
         else -> throwInvalidArgs()
     }
 }
