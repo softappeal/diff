@@ -2,8 +2,164 @@ package ch.softappeal.diff
 
 import kotlin.test.*
 
+val OLD_EVERYTHING = root {
+    dir("FileToDir") {
+        dir("simple") {
+            file("a", 0)
+        }
+        dir("renamed") {
+            file("a", 10)
+        }
+        dir("moved") {
+            file("a", 20)
+        }
+    }
+    dir("DirToFile") {
+        dir("simple") {
+            dir("a") {
+                file("b", 30)
+            }
+        }
+        dir("renamed") {
+            dir("a") {
+                file("b", 40)
+            }
+            file("c", 41)
+        }
+        dir("moved") {
+            dir("a") {
+                file("b", 50)
+            }
+        }
+    }
+    dir("Changed") {
+        file("a", 60)
+    }
+    dir("Deleted") {
+        dir("a") {
+            dir("b") {
+                file("c", 70)
+            }
+        }
+    }
+    dir("New") {
+    }
+    dir("RenamedFrom") {
+        dir("a") {
+            file("b", 90)
+        }
+    }
+    dir("MovedFrom") {
+        dir("a") {
+            file("b", 100)
+        }
+    }
+}
+
+val NEW_EVERYTHING = root {
+    dir("FileToDir") {
+        dir("simple") {
+            dir("a") {
+                file("b", 1)
+            }
+        }
+        dir("renamed") {
+            dir("a") {
+                file("b", 11)
+            }
+            file("c", 10)
+        }
+        dir("moved") {
+            dir("a") {
+                file("b", 20)
+            }
+        }
+    }
+    dir("DirToFile") {
+        dir("simple") {
+            file("a", 31)
+        }
+        dir("renamed") {
+            file("a", 41)
+        }
+        dir("moved") {
+            file("a", 50)
+        }
+    }
+    dir("Changed") {
+        file("a", 61)
+    }
+    dir("Deleted") {
+    }
+    dir("New") {
+        dir("a") {
+            dir("b") {
+                file("c", 80)
+            }
+        }
+    }
+    dir("RenamedFrom") {
+        dir("c") {
+            file("b", 90)
+        }
+    }
+    dir("MovedFrom") {
+        dir("c") {
+            dir("a") {
+                file("b", 100)
+            }
+        }
+    }
+}
+
 abstract class DeltaTest {
     protected abstract fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String)
+
+    @Test
+    fun everything() {
+        assertEquals(
+            OLD_EVERYTHING,
+            NEW_EVERYTHING,
+            """
+                - `/`
+                    - `Changed/`
+                        - `a` Changed
+                    - `Deleted/`
+                        - `a/` Deleted
+                            - `b/` Deleted
+                                - `c` Deleted
+                    - `DirToFile/`
+                        - `moved/`
+                            - `a` DirToFile MovedFrom `/DirToFile/moved/a/b`
+                        - `renamed/`
+                            - `a` DirToFile RenamedFrom `c`
+                                - `b` Deleted
+                        - `simple/`
+                            - `a` DirToFile
+                                - `b` Deleted
+                    - `FileToDir/`
+                        - `moved/`
+                            - `a/` FileToDir
+                                - `b` MovedFrom `/FileToDir/moved/a`
+                        - `renamed/`
+                            - `a/` FileToDir
+                                - `b` New
+                            - `c` RenamedFrom `a`
+                        - `simple/`
+                            - `a/` FileToDir
+                                - `b` New
+                    - `MovedFrom/`
+                        - `c/` New
+                            - `a/` MovedFrom `/MovedFrom/a`
+                    - `New/`
+                        - `a/` New
+                            - `b/` New
+                                - `c` New
+                    - `RenamedFrom/`
+                        - `c/` RenamedFrom `a`
+            """
+        )
+    }
 
     @Test
     fun compareFlatEmpty() {
