@@ -28,7 +28,7 @@ fun gui(root: DirectoryDelta) {
                         val delta = value as Delta
                         setTextNonSelectionColor(when (delta.state) {
                             DeltaState.Same -> Color.GRAY
-                            DeltaState.New -> Color.MAGENTA
+                            DeltaState.New -> if (delta.fromState == null) Color.BLUE else Color.MAGENTA
                             DeltaState.Deleted, DeltaState.Changed, DeltaState.FileToDir, DeltaState.DirToFile -> Color.RED
                         })
                         return super.getTreeCellRendererComponent(tree, "`${delta.name}`${delta.info()}", sel, expanded, leaf, row, hasFocus)
