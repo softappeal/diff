@@ -54,7 +54,7 @@ val USAGE = """
         'printNode' < nodeFile
         'printDuplicates' < nodeFile
         'diff' oldNodeFile < newNodeFile
-        'script' algorithm [ archivePrefix ]
+        ( 'script' | 'scriptWithGui' ) algorithm [ archivePrefix ]
 """.trimIndent()
 
 fun main(vararg args: String) {
@@ -67,8 +67,8 @@ fun main(vararg args: String) {
         command == "printDuplicates" && args.size == 1 -> printDuplicates(readNodeFromStdIn().calculateDigestToPaths())
         command == "diff" && args.size == 2 ->
             createDirectoryDelta(NodeDigestToPaths(Path(args[1]).readNode()), NodeDigestToPaths(readNodeFromStdIn())).print()
-        command == "script" && (args.size == 2 || args.size == 3) ->
-            script(Path(""), args[1], if (args.size == 2) null else args[2], true)
+        (command == "script" || command == "scriptWithGui") && (args.size == 2 || args.size == 3) ->
+            script(Path(""), args[1], if (args.size == 2) null else args[2], command == "scriptWithGui")
         else -> throwInvalidArgs()
     }
 }

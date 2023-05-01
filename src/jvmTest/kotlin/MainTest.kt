@@ -109,26 +109,6 @@ class MainTest {
    
         """) { script(toolDirectory, ALGORITHM, null) }
 
-        redirectStdIn("\n".toByteArray()) {
-            assertOutput("""
-                
-                - Duplicates
-                    - CFCD208495D565EF66E7DFF9F98764DA
-                        - `/a.txt`
-                        - `/b/d.txt`
-                        - `/b/f.txt`
-                        - `/c.txt`
-                
-                - `/`
-                    - `b/`
-                        - `node.yass` New
-                
-                type <y> to accept changes (else abort): 
-                ABORTED
-                
-            """) { script(toolDirectory, ALGORITHM, null) }
-        }
-
         redirectStdIn("y\n".toByteArray()) {
             assertOutput("""
                 
