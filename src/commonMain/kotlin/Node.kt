@@ -29,7 +29,7 @@ class DirectoryNode(
     name: String,
     nodes: List<Node>,
 ) : Node(name) {
-    val nodes = nodes.sortedBy { it.name }
+    val nodes = nodes.sortedBy(Node::name)
 
     init {
         require(nodes.map { it.name }.toSet().size == nodes.size) {
