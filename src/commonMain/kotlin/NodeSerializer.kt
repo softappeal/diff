@@ -1,10 +1,8 @@
 package ch.softappeal.diff
 
 @Suppress("RedundantSuppression", "UNCHECKED_CAST", "RemoveRedundantQualifierName", "SpellCheckingInspection", "RedundantVisibilityModifier")
-public fun generatedBinarySerializer(
-    baseEncoders: List<ch.softappeal.yass2.serialize.binary.BaseEncoder<*>>,
-): ch.softappeal.yass2.serialize.binary.BinarySerializer =
-    ch.softappeal.yass2.serialize.binary.BinarySerializer(baseEncoders + listOf(
+public val NodeSerializer: ch.softappeal.yass2.serialize.binary.BinarySerializer =
+    ch.softappeal.yass2.serialize.binary.BinarySerializer(ch.softappeal.diff.NodeBaseEncoders + listOf(
         ch.softappeal.yass2.serialize.binary.ClassEncoder(ch.softappeal.diff.FileNode::class, false,
             { w, i ->
                 w.writeNoIdRequired(3, i.name)

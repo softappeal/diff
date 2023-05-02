@@ -42,7 +42,6 @@ class DirectoryNode(
 
 val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
 val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
-private val NodeSerializer = generatedBinarySerializer(NodeBaseEncoders)
 
 fun ByteArray.readNode(): DirectoryNode {
     val reader = BytesReader(this)
