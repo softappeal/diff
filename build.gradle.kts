@@ -2,13 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 defaultTasks("clean", "build", "installDist")
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("multiplatform")
+    alias(libs.plugins.multiplatform)
     application
 }
-
-fun coroutines(module: String) = "org.jetbrains.kotlinx:kotlinx-coroutines-$module:${extra["kotlinx-coroutines.version"]}"
-fun yass2(module: String) = "ch.softappeal.yass2:yass2-$module:${extra["yass2.version"]}"
 
 kotlin {
     jvm {
@@ -35,12 +33,12 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(yass2("core"))
+                implementation(libs.yass2.core)
             }
         }
         val jvmMain by getting {
             dependencies {
-                implementation(coroutines("core"))
+                implementation(libs.coroutines.core)
             }
         }
         val commonTest by getting {
@@ -50,7 +48,7 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation(yass2("generate"))
+                implementation(libs.yass2.generate)
             }
         }
     }
