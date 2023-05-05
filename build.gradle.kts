@@ -2,9 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 defaultTasks("clean", "build", "installDist")
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.multiplatform)
+    @Suppress("DSL_SCOPE_VIOLATION") alias(libs.plugins.multiplatform) // https://github.com/gradle/gradle/issues/22797
     application
 }
 
