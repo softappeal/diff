@@ -5,6 +5,12 @@ import javax.swing.*
 import javax.swing.event.*
 import javax.swing.tree.*
 
+private val ColorSame = Color.GRAY
+private val ColorMoved = Color.BLUE
+private val ColorChanged = Color.MAGENTA
+private val ColorDeleted = Color.RED
+private val ColorNew = Color(0, 102, 0)
+
 fun gui(root: DirectoryDelta) {
     SwingUtilities.invokeLater {
         object : JFrame() {
@@ -27,9 +33,10 @@ fun gui(root: DirectoryDelta) {
                     override fun getTreeCellRendererComponent(tree: JTree, value: Any, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component {
                         val delta = value as Delta
                         setTextNonSelectionColor(when (delta.state) {
-                            DeltaState.Same -> Color.GRAY
-                            DeltaState.New -> if (delta.fromState == null) Color.BLUE else Color.MAGENTA
-                            DeltaState.Deleted, DeltaState.Changed, DeltaState.FileToDir, DeltaState.DirToFile -> Color.RED
+                            DeltaState.Same -> ColorSame
+                            DeltaState.Changed -> ColorChanged
+                            DeltaState.New -> if (delta.fromState == null) ColorNew else ColorMoved
+                            DeltaState.Deleted, DeltaState.FileToDir, DeltaState.DirToFile -> ColorDeleted
                         })
                         return super.getTreeCellRendererComponent(tree, "`${delta.name}`${delta.info()}", sel, expanded, leaf, row, hasFocus)
                     }
