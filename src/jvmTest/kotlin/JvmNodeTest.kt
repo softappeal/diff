@@ -22,6 +22,7 @@ val TEST_DIR: Path = Path("src/commonTest/resources/test")
 val TEST2_DIR: Path = TEST_DIR.resolveSibling("test2")
 
 class JvmNodeTest : NodeTest() {
+    @Suppress("SameParameterValue")
     override fun assertEquals(expected: String, printBlock: () -> Unit) = assertOutput(expected, printBlock)
 
     @Test

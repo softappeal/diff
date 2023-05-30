@@ -2,8 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 defaultTasks("clean", "build", "installDist")
 
+@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
-    @Suppress("DSL_SCOPE_VIOLATION") alias(libs.plugins.multiplatform) // https://github.com/gradle/gradle/issues/22797
+    alias(libs.plugins.multiplatform)
+    alias(libs.plugins.ksp)
     application
 }
 
@@ -45,11 +47,10 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val jvmTest by getting {
-            dependencies {
-                implementation(libs.yass2.generate)
-            }
-        }
+    }
+
+    dependencies {
+        ksp(libs.yass2.generate)
     }
 }
 

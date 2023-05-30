@@ -1,5 +1,8 @@
+@file:GenerateBinarySerializerAndDumper([StringEncoder::class, ByteArrayEncoder::class], [FileNode::class, DirectoryNode::class])
+
 package ch.softappeal.diff
 
+import ch.softappeal.yass2.*
 import ch.softappeal.yass2.serialize.binary.*
 import ch.softappeal.yass2.transport.*
 
@@ -29,7 +32,7 @@ class DirectoryNode(
     name: String,
     nodes: List<Node>,
 ) : Node(name) {
-    val nodes = nodes.sortedBy(Node::name)
+    val nodes: List<Node> = nodes.sortedBy(Node::name)
 
     init {
         require(nodes.map { it.name }.toSet().size == nodes.size) {
@@ -40,8 +43,7 @@ class DirectoryNode(
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
 
-val NodeBaseEncoders = listOf(StringEncoder, ByteArrayEncoder)
-val NodeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
+private val NodeSerializer = createSerializer()
 
 fun ByteArray.readNode(): DirectoryNode {
     val reader = BytesReader(this)
