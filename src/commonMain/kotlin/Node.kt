@@ -8,33 +8,31 @@ import ch.softappeal.yass2.transport.*
 
 const val DIR_SEP = '/'
 
-sealed class Node(
-    val name: String,
-) {
-    init {
-        require(!name.contains(DIR_SEP)) { "node name '$name' must not contain '$DIR_SEP'" }
-    }
+private fun Node.checkName() {
+    require(!name.contains(DIR_SEP)) { "node name '$name' must not contain '$DIR_SEP'" }
 }
 
-class FileNode(
-    name: String,
-) : Node(name) {
+sealed class Node(open val name: String)
+
+class FileNode(override val name: String) : Node(name) {
     lateinit var digest: ByteArray
 
     constructor(name: String, digest: ByteArray) : this(name) {
         this.digest = digest
     }
 
+    init {
+        checkName()
+    }
+
     override fun toString() = "FileNode(name=`$name`,digest=${digest.toHex()})"
 }
 
-class DirectoryNode(
-    name: String,
-    nodes: List<Node>,
-) : Node(name) {
-    val nodes: List<Node> = nodes.sortedBy(Node::name)
+class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(name) {
+    constructor(nodes: List<Node>, name: String) : this(name, nodes.sortedBy(Node::name))
 
     init {
+        checkName()
         require(nodes.map { it.name }.toSet().size == nodes.size) {
             "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}"
         }

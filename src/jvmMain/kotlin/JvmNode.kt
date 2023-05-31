@@ -8,7 +8,6 @@ import kotlin.io.path.*
 fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): DirectoryNode = runBlocking {
     CoroutineScope(Dispatchers.Default).async {
         fun directoryNode(directory: Path, name: String): DirectoryNode = DirectoryNode(
-            name,
             buildList {
                 Files.newDirectoryStream(directory).forEach { path ->
                     require(!path.isSymbolicLink()) { "'$path' is a symbolic link" }
@@ -21,7 +20,8 @@ fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): Directo
                         add(directoryNode(path, path.name))
                     }
                 }
-            }
+            },
+            name,
         )
         directoryNode(sourceDirectory, "")
     }.await()

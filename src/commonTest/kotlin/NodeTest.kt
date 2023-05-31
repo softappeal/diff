@@ -12,14 +12,14 @@ class NodeBuilder {
     fun dir(name: String, block: NodeBuilder.() -> Unit) {
         val builder = NodeBuilder()
         builder.block()
-        nodes.add(DirectoryNode(name, builder.nodes))
+        nodes.add(DirectoryNode(builder.nodes, name))
     }
 }
 
 fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
     val builder = NodeBuilder()
     builder.block()
-    return DirectoryNode("", builder.nodes)
+    return DirectoryNode(builder.nodes, "")
 }
 
 const val ALGORITHM = "MD5"
@@ -121,7 +121,7 @@ abstract class NodeTest {
         assertTrue(NodeIterator(DirectoryNode("", listOf())).done())
         val fileNode1 = FileNode("a", byteArrayOf())
         val fileNode2 = FileNode("b", byteArrayOf())
-        val iterator = NodeIterator(DirectoryNode("", listOf(fileNode1, fileNode2)))
+        val iterator = NodeIterator(DirectoryNode(listOf(fileNode1, fileNode2), ""))
         assertFalse(iterator.done())
         assertSame(fileNode1, iterator.current())
         iterator.advance()
