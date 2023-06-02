@@ -39,7 +39,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation(libs.coroutines.core)
+                implementation(libs.kotlinx.coroutines.core)
             }
         }
         val commonTest by getting {
