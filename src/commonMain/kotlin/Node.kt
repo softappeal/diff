@@ -29,17 +29,22 @@ class FileNode(override val name: String) : Node(name) {
 }
 
 class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(name) {
-    constructor(nodes: List<Node>, name: String) : this(name, nodes.sortedBy(Node::name))
-
     init {
         checkName()
-        require(nodes.map { it.name }.toSet().size == nodes.size) {
-            "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}"
+        fun isSorted(): Boolean {
+            for (n in 0 until nodes.size - 1) {
+                if (nodes[n].name > nodes[n + 1].name) return false
+            }
+            return true
         }
+        require(isSorted()) { "nodes $nodes must be sorted" }
+        require(nodes.map { it.name }.toSet().size == nodes.size) { "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}" }
     }
 
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
+
+fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 
 private val NodeSerializer = createSerializer()
 

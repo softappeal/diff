@@ -12,14 +12,14 @@ class NodeBuilder {
     fun dir(name: String, block: NodeBuilder.() -> Unit) {
         val builder = NodeBuilder()
         builder.block()
-        nodes.add(DirectoryNode(builder.nodes, name))
+        nodes.add(createDirectoryNode(name, builder.nodes))
     }
 }
 
 fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
     val builder = NodeBuilder()
     builder.block()
-    return DirectoryNode(builder.nodes, "")
+    return createDirectoryNode("", builder.nodes)
 }
 
 const val ALGORITHM = "MD5"
@@ -54,7 +54,7 @@ abstract class NodeTest {
     fun illegalNodeName() {
         assertEquals(
             "node name 'a/b' must not contain '/'",
-            assertFailsWith<IllegalArgumentException> { DirectoryNode("a/b", listOf()) }.message
+            assertFailsWith<IllegalArgumentException> { createDirectoryNode("a/b", listOf()) }.message
         )
     }
 
@@ -70,6 +70,19 @@ abstract class NodeTest {
                         file("b", 0)
                     }
                 }
+            }.message
+        )
+    }
+
+    @Test
+    fun notSortedNodes() {
+        assertEquals(
+            "nodes [FileNode(name=`b`,digest=00), FileNode(name=`a`,digest=00)] must be sorted",
+            assertFailsWith<IllegalArgumentException> {
+                DirectoryNode("", listOf(
+                    FileNode("b", byteArrayOf(0)),
+                    FileNode("a", byteArrayOf(0)),
+                ))
             }.message
         )
     }
@@ -118,10 +131,10 @@ abstract class NodeTest {
 
     @Test
     fun nodeIterator() {
-        assertTrue(NodeIterator(DirectoryNode("", listOf())).done())
+        assertTrue(NodeIterator(createDirectoryNode("", listOf())).done())
         val fileNode1 = FileNode("a", byteArrayOf())
         val fileNode2 = FileNode("b", byteArrayOf())
-        val iterator = NodeIterator(DirectoryNode(listOf(fileNode1, fileNode2), ""))
+        val iterator = NodeIterator(createDirectoryNode("", listOf(fileNode1, fileNode2)))
         assertFalse(iterator.done())
         assertSame(fileNode1, iterator.current())
         iterator.advance()
