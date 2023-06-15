@@ -50,7 +50,7 @@ kotlin {
     }
 
     dependencies {
-        ksp(libs.yass2.generate)
+        ksp(libs.yass2.ksp)
     }
 }
 

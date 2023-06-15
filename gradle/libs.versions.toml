@@ -1,16 +1,16 @@
 [versions]
 
-kotlin             = "1.8.21"
-ksp                = "1.8.21-1.0.11" # kotlin must be prefix of ksp
+kotlin             = "1.8.22"
+ksp                = "1.8.22-1.0.11" # kotlin must be prefix of ksp
 kotlinx-coroutines = "1.7.1"
-yass2              = "13.1.1"
+yass2              = "14.0.0"
 
 [libraries]
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
-yass2-core     = { module = "ch.softappeal.yass2:yass2-core"    , version.ref = "yass2" }
-yass2-generate = { module = "ch.softappeal.yass2:yass2-generate", version.ref = "yass2" }
+yass2-core = { module = "ch.softappeal.yass2:yass2-core", version.ref = "yass2" }
+yass2-ksp  = { module = "ch.softappeal.yass2:yass2-ksp" , version.ref = "yass2" }
 
 [plugins]
 

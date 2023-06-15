@@ -1,4 +1,4 @@
-@file:GenerateBinarySerializerAndDumper([StringEncoder::class, ByteArrayEncoder::class], [FileNode::class, DirectoryNode::class])
+@file:BinarySerializerAndDumper([StringEncoder::class, ByteArrayEncoder::class], [FileNode::class, DirectoryNode::class])
 
 package ch.softappeal.diff
 
