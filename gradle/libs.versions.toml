@@ -3,7 +3,7 @@
 kotlin             = "1.8.22"
 ksp                = "1.8.22-1.0.11" # kotlin must be prefix of ksp
 kotlinx-coroutines = "1.7.1"
-yass2              = "14.0.0"
+yass2              = "15.0.0"
 
 [libraries]
 
