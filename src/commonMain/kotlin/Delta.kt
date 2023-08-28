@@ -12,7 +12,9 @@ sealed class Delta(
     var fromState: FromState? = null
     var from: Delta? = null
     fun getPath(): String = parent?.getPath()?.concatPath(name) ?: ""
-    protected fun toString(className: String, deltas: String?) = "$className(path=`${getPath()}`,state=$state${if (from == null) "" else ",fromState=$fromState,from=`${from!!.getPath()}`"}$deltas${if (digest == null) "" else ",digest=$digest"})"
+    protected fun toString(className: String, deltas: String?) =
+        "$className(path=`${getPath()}`,state=$state${if (from == null) "" else ",fromState=$fromState,from=`${from!!.getPath()}`"}" +
+            "$deltas${if (digest == null) "" else ",digest=$digest"})"
 }
 
 class FileDelta(
@@ -84,12 +86,17 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
                             }
                         when (val old = oldIter.current()) {
                             is FileNode -> when (val new = newIter.current()) {
-                                is FileNode -> if (!old.digest.contentEquals(new.digest)) deltas.add(FileDelta(this, new.name, DeltaState.Changed, null))
-                                is DirectoryNode -> addNodeTypeChanged(new, DeltaState.FileToDir, DeltaState.New, null).updateDeletedDigestToDelta(old)
+                                is FileNode -> if (!old.digest.contentEquals(new.digest)) {
+                                    deltas.add(FileDelta(this, new.name, DeltaState.Changed, null))
+                                }
+                                is DirectoryNode -> addNodeTypeChanged(new, DeltaState.FileToDir, DeltaState.New, null)
+                                    .updateDeletedDigestToDelta(old)
                             }
                             is DirectoryNode -> when (val new = newIter.current()) {
                                 is FileNode -> addNodeTypeChanged(old, DeltaState.DirToFile, DeltaState.Deleted, new.digest.toHex())
-                                is DirectoryNode -> deltas.add(DirectoryDelta(this, new.name, DeltaState.Same, null).apply { compare(old, new) })
+                                is DirectoryNode -> deltas.add(
+                                    DirectoryDelta(this, new.name, DeltaState.Same, null).apply { compare(old, new) }
+                                )
                             }
                         }
                         oldIter.advance()
@@ -159,7 +166,11 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
     }
 
 fun Delta.info(): String {
-    val from = if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
+    val from = if (fromState == null) {
+        ""
+    } else {
+        " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
+    }
     return if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
 }
 

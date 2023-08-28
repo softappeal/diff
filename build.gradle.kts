@@ -1,8 +1,9 @@
-import org.jetbrains.kotlin.gradle.tasks.*
+require(libs.versions.ksp.get().startsWith("${libs.versions.kotlin.get()}-")) {
+    "kotlin version '${libs.versions.kotlin.get()}' must be a prefix of ksp version '${libs.versions.ksp.get()}'"
+}
 
 defaultTasks("clean", "build", "installDist")
 
-@Suppress("DSL_SCOPE_VIOLATION") // https://github.com/gradle/gradle/issues/22797
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.ksp)
@@ -12,11 +13,6 @@ plugins {
 kotlin {
     jvm {
         withJava()
-        tasks.withType<KotlinCompile> {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
     }
 
     js {

@@ -38,7 +38,9 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
             return true
         }
         require(isSorted()) { "nodes $nodes must be sorted" }
-        require(nodes.map { it.name }.toSet().size == nodes.size) { "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}" }
+        require(nodes.map { it.name }.toSet().size == nodes.size) {
+            "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}"
+        }
     }
 
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"

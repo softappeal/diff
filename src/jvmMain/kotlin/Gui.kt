@@ -30,7 +30,9 @@ fun gui(root: DirectoryDelta) {
                     override fun valueForPathChanged(path: TreePath, newValue: Any) = Unit
                 })
                 tree.cellRenderer = object : DefaultTreeCellRenderer() {
-                    override fun getTreeCellRendererComponent(tree: JTree, value: Any, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component {
+                    override fun getTreeCellRendererComponent(
+                        tree: JTree, value: Any, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean,
+                    ): Component {
                         val delta = value as Delta
                         setTextNonSelectionColor(when (delta.state) {
                             DeltaState.Same -> ColorSame
@@ -38,7 +40,9 @@ fun gui(root: DirectoryDelta) {
                             DeltaState.New -> if (delta.fromState == null) ColorNew else ColorMoved
                             DeltaState.Deleted, DeltaState.FileToDir, DeltaState.DirToFile -> ColorDeleted
                         })
-                        return super.getTreeCellRendererComponent(tree, "`${delta.name}`${delta.info()}", sel, expanded, leaf, row, hasFocus)
+                        return super.getTreeCellRendererComponent(
+                            tree, "`${delta.name}`${delta.info()}", sel, expanded, leaf, row, hasFocus
+                        )
                     }
                 }
                 tree.isRootVisible = true
