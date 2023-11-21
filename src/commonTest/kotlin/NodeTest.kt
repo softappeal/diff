@@ -4,11 +4,11 @@ import kotlin.test.*
 
 class NodeBuilder {
     val nodes = mutableListOf<Node>()
-
-    fun file(name: String, digest: Byte) {
-        nodes.add(FileNode(name, byteArrayOf(digest)))
+    fun file(name: String, size: Int, digest: Byte) {
+        nodes.add(FileNode(name, size, byteArrayOf(digest)))
     }
 
+    fun file(name: String, digest: Byte) = file(name, 0, digest)
     fun dir(name: String, block: NodeBuilder.() -> Unit) {
         val builder = NodeBuilder()
         builder.block()
@@ -77,11 +77,11 @@ abstract class NodeTest {
     @Test
     fun notSortedNodes() {
         assertEquals(
-            "nodes [FileNode(name=`b`,digest=00), FileNode(name=`a`,digest=00)] must be sorted",
+            "nodes [FileNode(name=`b`,size=0,digest=00), FileNode(name=`a`,size=0,digest=00)] must be sorted",
             assertFailsWith<IllegalArgumentException> {
                 DirectoryNode("", listOf(
-                    FileNode("b", byteArrayOf(0)),
-                    FileNode("a", byteArrayOf(0)),
+                    FileNode("b", 0, byteArrayOf(0)),
+                    FileNode("a", 0, byteArrayOf(0)),
                 ))
             }.message
         )
@@ -132,8 +132,8 @@ abstract class NodeTest {
     @Test
     fun nodeIterator() {
         assertTrue(NodeIterator(createDirectoryNode("", listOf())).done())
-        val fileNode1 = FileNode("a", byteArrayOf())
-        val fileNode2 = FileNode("b", byteArrayOf())
+        val fileNode1 = FileNode("a", 0, byteArrayOf())
+        val fileNode2 = FileNode("b", 0, byteArrayOf())
         val iterator = NodeIterator(createDirectoryNode("", listOf(fileNode1, fileNode2)))
         assertFalse(iterator.done())
         assertSame(fileNode1, iterator.current())

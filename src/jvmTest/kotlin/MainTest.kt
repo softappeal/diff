@@ -50,13 +50,13 @@ class MainTest {
         redirectStdIn(oldNode) {
             assertOutput("""
                 - ``
-                    - `a.txt` CFCD208495D565EF66E7DFF9F98764DA
+                    - `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
                     - `b`
-                        - `d.txt` CFCD208495D565EF66E7DFF9F98764DA
+                        - `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
                         - `e`
-                            - `g.txt` C4CA4238A0B923820DCC509A6F75849B
-                        - `f.txt` CFCD208495D565EF66E7DFF9F98764DA
-                    - `c.txt` CFCD208495D565EF66E7DFF9F98764DA
+                            - `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
+                        - `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                    - `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
             """) { main("printNode") }
         }
 
@@ -69,6 +69,25 @@ class MainTest {
                         - `/b/f.txt`
                         - `/c.txt`
             """) { main("printDuplicates") }
+        }
+
+        redirectStdIn(NEW_EVERYTHING.write()) {
+            assertOutput("""
+                - 3 `/Changed/b`
+                - 2 `/Changed/a`
+                - 2 `/Changed/e`
+                - 1 `/Changed/s`
+                - 0 `/DirToFile/moved/a`
+                - 0 `/DirToFile/renamed/a`
+                - 0 `/DirToFile/simple/a`
+                - 0 `/FileToDir/moved/a/b`
+                - 0 `/FileToDir/renamed/a/b`
+                - 0 `/FileToDir/renamed/c`
+                - 0 `/FileToDir/simple/a/b`
+                - 0 `/MovedFrom/c/a/b`
+                - 0 `/New/a/b/c`
+                - 0 `/RenamedFrom/c/b`
+            """) { main("printSizes") }
         }
 
         redirectStdIn(newNode) {
@@ -141,7 +160,7 @@ class MainTest {
                 
                 - `/`
                     - `b/`
-                        - `node.yass` Changed
+                        - `node.yass` Bigger
                 
                 type <y> to accept changes (else abort): 
                 ABORTED

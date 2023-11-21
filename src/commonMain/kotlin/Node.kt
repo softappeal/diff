@@ -1,4 +1,9 @@
-@file:GenerateBinarySerializer([StringEncoder::class, ByteArrayEncoder::class], [FileNode::class, DirectoryNode::class], [], false)
+@file:GenerateBinarySerializer(
+    [StringEncoder::class, IntEncoder::class, ByteArrayEncoder::class],
+    [FileNode::class, DirectoryNode::class],
+    [],
+    false
+)
 
 package ch.softappeal.diff
 
@@ -15,9 +20,11 @@ private fun Node.checkName() {
 sealed class Node(open val name: String)
 
 class FileNode(override val name: String) : Node(name) {
+    var size: Int = 0
     lateinit var digest: ByteArray
 
-    constructor(name: String, digest: ByteArray) : this(name) {
+    constructor(name: String, size: Int, digest: ByteArray) : this(name) {
+        this.size = size
         this.digest = digest
     }
 
@@ -25,7 +32,7 @@ class FileNode(override val name: String) : Node(name) {
         checkName()
     }
 
-    override fun toString() = "FileNode(name=`$name`,digest=${digest.toHex()})"
+    override fun toString() = "FileNode(name=`$name`,size=$size,digest=${digest.toHex()})"
 }
 
 class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(name) {
@@ -66,7 +73,7 @@ fun DirectoryNode.write(): ByteArray {
 fun Node.print(indent: Int = 0) {
     print("${"    ".repeat(indent)}- `$name`")
     when (this) {
-        is FileNode -> println(" ${digest.toHex()}")
+        is FileNode -> println(" $size ${digest.toHex()}")
         is DirectoryNode -> {
             println()
             nodes.forEach { it.print(indent + 1) }
@@ -86,23 +93,22 @@ fun ByteArray.toHex(): String {
     return hexDigits.concatToString()
 }
 
-typealias DigestToPaths = Map<String, List<String>>
-
 fun String.concatPath(name: String) = "$this$DIR_SEP$name"
 
-fun DirectoryNode.calculateDigestToPaths(): DigestToPaths {
-    val pathDigests = buildList {
-        fun Node.visit(path: String) {
-            val nextPath = if (name == "") "" else path.concatPath(name)
-            when (this) {
-                is FileNode -> add(Pair(nextPath, digest.toHex()))
-                is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
-            }
+private fun <E> DirectoryNode.paths(map: FileNode.() -> E): List<Pair<String, E>> = buildList {
+    fun Node.visit(path: String) {
+        val nextPath = if (name == "") "" else path.concatPath(name)
+        when (this) {
+            is FileNode -> add(Pair(nextPath, map()))
+            is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
         }
-        visit("")
     }
-    return pathDigests.groupBy({ it.second }, { it.first })
+    visit("")
 }
+
+typealias DigestToPaths = Map<String, List<String>>
+
+fun DirectoryNode.calculateDigestToPaths(): DigestToPaths = paths { digest.toHex() }.groupBy({ it.second }, { it.first })
 
 fun printDuplicates(digestToPaths: DigestToPaths) {
     val duplicates = digestToPaths.filter { it.value.size != 1 }
@@ -142,3 +148,9 @@ class NodeIterator(node: DirectoryNode) {
 }
 
 const val MAC_DS_STORE = ".DS_Store"
+
+fun DirectoryNode.printFilesBySize() {
+    paths { size }.sortedByDescending { it.second }.forEach {
+        println("- ${it.second} `${it.first}`")
+    }
+}

@@ -1,6 +1,6 @@
 package ch.softappeal.diff
 
-enum class DeltaState { Same, New, Deleted, Changed, FileToDir, DirToFile }
+enum class DeltaState { Same, New, Deleted, Smaller, Bigger, Changed, FileToDir, DirToFile }
 enum class FromState { MovedFrom, RenamedFrom }
 
 sealed class Delta(
@@ -86,8 +86,17 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
                             }
                         when (val old = oldIter.current()) {
                             is FileNode -> when (val new = newIter.current()) {
-                                is FileNode -> if (!old.digest.contentEquals(new.digest)) {
-                                    deltas.add(FileDelta(this, new.name, DeltaState.Changed, null))
+                                is FileNode -> if ((old.size != new.size) || !old.digest.contentEquals(new.digest)) {
+                                    deltas.add(FileDelta(
+                                        this,
+                                        new.name,
+                                        when {
+                                            old.size < new.size -> DeltaState.Bigger
+                                            old.size > new.size -> DeltaState.Smaller
+                                            else -> DeltaState.Changed
+                                        },
+                                        null,
+                                    ))
                                 }
                                 is DirectoryNode -> addNodeTypeChanged(new, DeltaState.FileToDir, DeltaState.New, null)
                                     .updateDeletedDigestToDelta(old)

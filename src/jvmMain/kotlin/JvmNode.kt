@@ -15,7 +15,11 @@ fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): Directo
                     if (path.isRegularFile()) {
                         if (MAC_DS_STORE == path.name) return@forEach
                         add(FileNode(path.name).apply {
-                            launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(path.readBytes()) }
+                            launch {
+                                val bytes = path.readBytes()
+                                size = bytes.size
+                                digest = MessageDigest.getInstance(digestAlgorithm).digest(bytes)
+                            }
                         })
                     } else {
                         add(directoryNode(path, path.name))

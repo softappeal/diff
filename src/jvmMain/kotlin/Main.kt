@@ -53,6 +53,7 @@ val USAGE = """
         'createNode' algorithm directory > nodeFile
         'printNode' < nodeFile
         'printDuplicates' < nodeFile
+        'printSizes' < nodeFile
         'diff' oldNodeFile < newNodeFile
         ( 'script' | 'scriptWithGui' ) algorithm [ archivePrefix ]
 """.trimIndent()
@@ -65,6 +66,7 @@ fun main(vararg args: String) {
         command == "createNode" && args.size == 3 -> createDirectoryNode(args[1], Path(args[2])).writeToStdOut()
         command == "printNode" && args.size == 1 -> readNodeFromStdIn().print()
         command == "printDuplicates" && args.size == 1 -> printDuplicates(readNodeFromStdIn().calculateDigestToPaths())
+        command == "printSizes" && args.size == 1 -> readNodeFromStdIn().printFilesBySize()
         command == "diff" && args.size == 2 ->
             createDirectoryDelta(NodeDigestToPaths(Path(args[1]).readNode()), NodeDigestToPaths(readNodeFromStdIn())).print()
         (command == "script" || command == "scriptWithGui") && (args.size == 2 || args.size == 3) ->

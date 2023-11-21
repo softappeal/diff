@@ -33,7 +33,10 @@ val OLD_EVERYTHING = root {
         }
     }
     dir("Changed") {
-        file("a", 60)
+        file("e", 2, 60)
+        file("a", 2, 60)
+        file("s", 2, 60)
+        file("b", 2, 60)
     }
     dir("Deleted") {
         dir("a") {
@@ -87,7 +90,10 @@ val NEW_EVERYTHING = root {
         }
     }
     dir("Changed") {
-        file("a", 61)
+        file("e", 2, 60)
+        file("a", 2, 61)
+        file("s", 1, 60)
+        file("b", 3, 60)
     }
     dir("Deleted") {
     }
@@ -124,6 +130,8 @@ abstract class DeltaTest {
                 - `/`
                     - `Changed/`
                         - `a` Changed
+                        - `b` Bigger
+                        - `s` Smaller
                     - `Deleted/`
                         - `a/` Deleted
                             - `b/` Deleted
@@ -1085,6 +1093,27 @@ abstract class DeltaTest {
             """
                 - `/`
                     - `x/` MovedFrom `/u/v`
+            """
+        )
+    }
+
+    @Test
+    fun smallerBigger() {
+        assertEquals(
+            root {
+                file("a", 2, 1)
+                file("b", 2, 1)
+                file("c", 2, 1)
+            },
+            root {
+                file("a", 1, 1)
+                file("b", 3, 1)
+                file("c", 2, 1)
+            },
+            """
+                - `/`
+                    - `a` Smaller
+                    - `b` Bigger
             """
         )
     }

@@ -29,13 +29,13 @@ class JvmNodeTest : NodeTest() {
     fun createDirectoryNode() {
         assertEquals("""
             - ``
-                - `a.txt` CFCD208495D565EF66E7DFF9F98764DA
+                - `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
                 - `b`
-                    - `d.txt` CFCD208495D565EF66E7DFF9F98764DA
+                    - `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
                     - `e`
-                        - `g.txt` C4CA4238A0B923820DCC509A6F75849B
-                    - `f.txt` CFCD208495D565EF66E7DFF9F98764DA
-                - `c.txt` CFCD208495D565EF66E7DFF9F98764DA
+                        - `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
+                    - `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                - `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
         """) { createDirectoryNode(ALGORITHM, TEST_DIR).print() }
     }
 }
