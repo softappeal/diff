@@ -71,22 +71,38 @@ class MainTest {
             """) { main("printDuplicates") }
         }
 
-        redirectStdIn(NEW_EVERYTHING.write()) {
+        redirectStdIn(root {
+            file(".", 0, 0)
+            file(".txt", 1000, 0)
+            file("a.txt", 2000, 0)
+            file("b.txt", 3000, 0)
+            file("c", 4000, 0)
+            file("d.", 5000, 0)
+            file("e.pdf", 6000, 0)
+            file("f.pdf", 7000, 0)
+            file("g.a", 8000, 0)
+            file("h.A", 9000, 0)
+            dir("dir") {
+                file("x.txt", 10000, 0)
+            }
+        }.write()) {
             assertOutput("""
-                - 3 `/Changed/b`
-                - 2 `/Changed/a`
-                - 2 `/Changed/e`
-                - 1 `/Changed/s`
-                - 0 `/DirToFile/moved/a`
-                - 0 `/DirToFile/renamed/a`
-                - 0 `/DirToFile/simple/a`
-                - 0 `/FileToDir/moved/a/b`
-                - 0 `/FileToDir/renamed/a/b`
-                - 0 `/FileToDir/renamed/c`
-                - 0 `/FileToDir/simple/a/b`
-                - 0 `/MovedFrom/c/a/b`
-                - 0 `/New/a/b/c`
-                - 0 `/RenamedFrom/c/b`
+                - <no-ext>
+                    - 5 KB `/d.`
+                    - 4 KB `/c`
+                    - 0 KB `/.`
+                - `.A`
+                    - 9 KB `/h.A`
+                - `.a`
+                    - 8 KB `/g.a`
+                - `.pdf`
+                    - 7 KB `/f.pdf`
+                    - 6 KB `/e.pdf`
+                - `.txt`
+                    - 10 KB `/dir/x.txt`
+                    - 3 KB `/b.txt`
+                    - 2 KB `/a.txt`
+                    - 1 KB `/.txt`
             """) { main("printSizes") }
         }
 

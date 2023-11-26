@@ -95,11 +95,13 @@ fun ByteArray.toHex(): String {
 
 fun String.concatPath(name: String) = "$this$DIR_SEP$name"
 
-private fun <E> DirectoryNode.paths(map: FileNode.() -> E): List<Pair<String, E>> = buildList {
+private data class PathInfo<I>(val path: String, val info: I)
+
+private fun <I> DirectoryNode.paths(info: FileNode.() -> I): Collection<PathInfo<I>> = buildList {
     fun Node.visit(path: String) {
         val nextPath = if (name == "") "" else path.concatPath(name)
         when (this) {
-            is FileNode -> add(Pair(nextPath, map()))
+            is FileNode -> add(PathInfo(nextPath, info()))
             is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
         }
     }
@@ -108,7 +110,7 @@ private fun <E> DirectoryNode.paths(map: FileNode.() -> E): List<Pair<String, E>
 
 typealias DigestToPaths = Map<String, List<String>>
 
-fun DirectoryNode.calculateDigestToPaths(): DigestToPaths = paths { digest.toHex() }.groupBy({ it.second }, { it.first })
+fun DirectoryNode.calculateDigestToPaths(): DigestToPaths = paths { digest.toHex() }.groupBy({ it.info }, { it.path })
 
 fun printDuplicates(digestToPaths: DigestToPaths) {
     val duplicates = digestToPaths.filter { it.value.size != 1 }
@@ -150,7 +152,17 @@ class NodeIterator(node: DirectoryNode) {
 const val MAC_DS_STORE = ".DS_Store"
 
 fun DirectoryNode.printFilesBySize() {
-    paths { size }.sortedByDescending { it.second }.forEach {
-        println("- ${it.second} `${it.first}`")
+    val extToPathSizes = buildMap<String?, MutableList<PathInfo<Int>>> {
+        paths { size }.forEach { pathSize ->
+            val path = pathSize.path
+            val lastDot = path.lastIndexOf('.')
+            val ext = if (lastDot < 0 || lastDot == path.lastIndex) null else path.substring(lastDot)
+            val pathSizes = getOrPut(ext) { mutableListOf() }
+            pathSizes.add(pathSize)
+        }
+    }
+    extToPathSizes.entries.sortedBy { it.key }.forEach { (ext, pathSizes) ->
+        println("- ${if (ext == null) "<no-ext>" else "`$ext`"}")
+        pathSizes.sortedByDescending { it.info }.forEach { (path, size) -> println("    - ${size / 1000} KB `$path`") }
     }
 }
