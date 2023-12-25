@@ -1,9 +1,9 @@
 [versions]
 
-kotlin             = "1.9.20"
-ksp                = "1.9.20-1.0.14"
-kotlinx-coroutines = "1.7.3"
-yass2              = "15.0.2"
+kotlin             = "1.9.22"
+ksp                = "1.9.22-1.0.17"
+kotlinx-coroutines = "1.8.0-RC2"
+yass2              = "15.0.4"
 
 [libraries]
 

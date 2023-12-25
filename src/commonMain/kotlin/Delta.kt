@@ -175,9 +175,16 @@ fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestT
     }
 
 fun Delta.info(): String {
-    val from =
-        if (fromState == null) "" else " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
-    return if (state == DeltaState.New && fromState != null) from else "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
+    val from = if (fromState == null) {
+        ""
+    } else {
+        " $fromState `${if (fromState == FromState.MovedFrom) from!!.getPath() else from!!.name}`"
+    }
+    return if (state == DeltaState.New && fromState != null) {
+        from
+    } else {
+        "${if (state == DeltaState.Same) "" else " $state"}${if (fromState == null) "" else from}"
+    }
 }
 
 fun Delta.print(indent: Int = 0) {

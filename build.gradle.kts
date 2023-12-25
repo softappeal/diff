@@ -1,7 +1,3 @@
-require(libs.versions.ksp.get().startsWith("${libs.versions.kotlin.get()}-")) {
-    "kotlin version '${libs.versions.kotlin.get()}' must be a prefix of ksp version '${libs.versions.ksp.get()}'"
-}
-
 defaultTasks("clean", "build", "installDist")
 
 plugins {
@@ -13,10 +9,6 @@ plugins {
 kotlin {
     jvm {
         withJava()
-    }
-
-    js {
-        nodejs()
     }
 
     targets.all {
@@ -46,7 +38,7 @@ kotlin {
     }
 
     dependencies {
-        ksp(libs.yass2.ksp)
+        add("kspJvm", libs.yass2.ksp)
     }
 }
 
