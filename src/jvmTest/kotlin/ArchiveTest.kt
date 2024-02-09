@@ -1,9 +1,12 @@
 package ch.softappeal.diff
 
-import java.nio.file.*
-import java.util.zip.*
-import kotlin.io.path.*
-import kotlin.test.*
+import java.nio.file.Path
+import java.util.zip.ZipInputStream
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.inputStream
+import kotlin.io.path.writeBytes
+import kotlin.test.Test
 
 private fun extractZipFile(zipFile: Path, targetDirectory: Path) {
     targetDirectory.toFile().deleteRecursively()

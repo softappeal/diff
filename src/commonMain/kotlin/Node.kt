@@ -7,9 +7,12 @@
 
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.*
-import ch.softappeal.yass2.serialize.binary.*
-import ch.softappeal.yass2.transport.*
+import ch.softappeal.yass2.serialize.binary.ByteArrayEncoder
+import ch.softappeal.yass2.serialize.binary.GenerateBinarySerializer
+import ch.softappeal.yass2.serialize.binary.IntEncoder
+import ch.softappeal.yass2.serialize.binary.StringEncoder
+import ch.softappeal.yass2.transport.BytesReader
+import ch.softappeal.yass2.transport.BytesWriter
 
 const val DIR_SEP = '/'
 

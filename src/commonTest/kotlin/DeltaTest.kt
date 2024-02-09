@@ -1,6 +1,6 @@
 package ch.softappeal.diff
 
-import kotlin.test.*
+import kotlin.test.Test
 
 val OLD_EVERYTHING = root {
     dir("FileToDir") {

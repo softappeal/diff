@@ -1,6 +1,11 @@
 package ch.softappeal.diff
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class NodeBuilder {
     val nodes = mutableListOf<Node>()

@@ -1,8 +1,15 @@
 package ch.softappeal.diff
 
-import java.io.*
-import kotlin.io.path.*
-import kotlin.test.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import kotlin.io.path.Path
+import kotlin.io.path.deleteExisting
+import kotlin.io.path.writeBytes
+import kotlin.test.Ignore
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 private fun redirectStdOut(block: () -> Unit): ByteArray {
     val bytes = ByteArrayOutputStream()

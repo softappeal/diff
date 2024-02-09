@@ -1,9 +1,15 @@
 package ch.softappeal.diff
 
-import java.awt.*
-import javax.swing.*
-import javax.swing.event.*
-import javax.swing.tree.*
+import java.awt.Color
+import java.awt.Component
+import javax.swing.JFrame
+import javax.swing.JScrollPane
+import javax.swing.JTree
+import javax.swing.SwingUtilities
+import javax.swing.event.TreeModelListener
+import javax.swing.tree.DefaultTreeCellRenderer
+import javax.swing.tree.TreeModel
+import javax.swing.tree.TreePath
 
 private val ColorSame = Color.GRAY
 private val ColorMoved = Color.BLUE

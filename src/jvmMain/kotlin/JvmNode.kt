@@ -1,9 +1,17 @@
 package ch.softappeal.diff
 
-import kotlinx.coroutines.*
-import java.nio.file.*
-import java.security.*
-import kotlin.io.path.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.nio.file.Files
+import java.nio.file.Path
+import java.security.MessageDigest
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.isSymbolicLink
+import kotlin.io.path.name
+import kotlin.io.path.readBytes
 
 fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): DirectoryNode = runBlocking {
     CoroutineScope(Dispatchers.Default).async {

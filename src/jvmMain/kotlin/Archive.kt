@@ -1,9 +1,14 @@
 package ch.softappeal.diff
 
-import java.nio.file.*
-import java.nio.file.attribute.*
-import java.util.zip.*
-import kotlin.io.path.*
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import kotlin.io.path.name
+import kotlin.io.path.outputStream
 
 private const val DIR_SEP_STRING = DIR_SEP.toString()
 

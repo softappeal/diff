@@ -1,10 +1,13 @@
 package ch.softappeal.diff
 
-import java.nio.file.*
-import java.text.*
-import java.util.*
-import kotlin.io.path.*
-import kotlin.system.*
+import java.nio.file.Path
+import java.text.SimpleDateFormat
+import java.util.Date
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.readBytes
+import kotlin.io.path.writeBytes
+import kotlin.system.exitProcess
 
 fun Path.readNode() = readBytes().readNode()
 private fun readNodeFromStdIn() = System.`in`.readAllBytes().readNode()
