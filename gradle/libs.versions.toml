@@ -2,8 +2,8 @@
 
 kotlin             = "1.9.22"
 ksp                = "1.9.22-1.0.17"
-kotlinx-coroutines = "1.8.0-RC2"
-yass2              = "15.0.4"
+kotlinx-coroutines = "1.8.0"
+yass2              = "15.0.5"
 
 [libraries]
 
