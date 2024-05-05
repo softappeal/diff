@@ -1,7 +1,7 @@
 [versions]
 
-kotlin             = "1.9.22"
-ksp                = "1.9.22-1.0.17"
+kotlin             = "1.9.23"
+ksp                = "1.9.23-1.0.20"
 kotlinx-coroutines = "1.8.0"
 yass2              = "15.0.5"
 

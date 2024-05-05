@@ -1,0 +1,20 @@
+#file: noinspection SpellCheckingInspection
+on:
+  workflow_dispatch:
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gradle/wrapper-validation-action@v2
+      - run: docker image     build                                        --tag project-image .
+      - run: docker container create              --name project-container       project-image ./gradlew -Pversion=`git describe`
+      - run: docker container start --interactive        project-container
+      - run: docker container cp                         project-container:/project/build/distributions .
+      - name: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create `git describe` diff-`git describe`.zip
