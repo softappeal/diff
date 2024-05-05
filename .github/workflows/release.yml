@@ -16,5 +16,4 @@ jobs:
       - name: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create `git describe` diff-`git describe`.zip
+        run: gh release create `git describe` distributions/diff-`git describe`.zip
