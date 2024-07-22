@@ -1,14 +1,6 @@
-@file:GenerateBinarySerializer(
-    [StringEncoder::class, IntEncoder::class, ByteArrayEncoder::class],
-    [FileNode::class, DirectoryNode::class],
-    [],
-    false
-)
-
 package ch.softappeal.diff
 
 import ch.softappeal.yass2.serialize.binary.ByteArrayEncoder
-import ch.softappeal.yass2.serialize.binary.GenerateBinarySerializer
 import ch.softappeal.yass2.serialize.binary.IntEncoder
 import ch.softappeal.yass2.serialize.binary.StringEncoder
 import ch.softappeal.yass2.transport.BytesReader
@@ -58,7 +50,10 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 
-private val NodeSerializer = createSerializer()
+internal val BaseEncoders = listOf(StringEncoder, IntEncoder, ByteArrayEncoder)
+internal val TreeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
+
+private val NodeSerializer = createSerializer(BaseEncoders)
 
 fun ByteArray.readNode(): DirectoryNode {
     val reader = BytesReader(this)
@@ -85,7 +80,7 @@ fun Node.print(indent: Int = 0) {
 }
 
 @Suppress("SpellCheckingInspection") private val HexChars = "0123456789ABCDEF".toCharArray()
-fun ByteArray.toHex(): String {
+internal fun ByteArray.toHex(): String {
     val hexDigits = CharArray(2 * size)
     var i = 0
     for (b in this) {
@@ -96,7 +91,7 @@ fun ByteArray.toHex(): String {
     return hexDigits.concatToString()
 }
 
-fun String.concatPath(name: String) = "$this$DIR_SEP$name"
+internal fun String.concatPath(name: String) = "$this$DIR_SEP$name"
 
 private data class PathInfo<I>(val path: String, val info: I)
 

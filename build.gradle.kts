@@ -4,7 +4,6 @@ defaultTasks("clean", "build", "installDist")
 
 plugins {
     alias(libs.plugins.multiplatform)
-    alias(libs.plugins.ksp)
     application
 }
 
@@ -32,9 +31,11 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-    }
-    dependencies {
-        add("kspJvm", libs.yass2.ksp)
+        jvmTest {
+            dependencies {
+                implementation(libs.yass2.generate)
+            }
+        }
     }
 }
 
