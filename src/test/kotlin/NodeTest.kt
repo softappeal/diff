@@ -1,5 +1,9 @@
 package ch.softappeal.diff
 
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -29,9 +33,23 @@ fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
 
 const val ALGORITHM = "MD5"
 
-abstract class NodeTest {
-    protected abstract fun assertEquals(expected: String, printBlock: () -> Unit)
+fun assertOutput(expected: String, printBlock: () -> Unit) {
+    val charset = Charsets.UTF_8
+    val bytes = ByteArrayOutputStream()
+    val out = System.out
+    System.setOut(PrintStream(bytes, true, charset))
+    try {
+        printBlock()
+    } finally {
+        System.setOut(out)
+    }
+    assertEquals((expected + "\n").trimIndent(), bytes.toString(charset))
+}
 
+val TEST_DIR: Path = Path("src/test/resources/test")
+val TEST2_DIR: Path = TEST_DIR.resolveSibling("test2")
+
+class NodeTest {
     @Test
     fun toHex() {
         assertEquals("00", byteArrayOf(0).toHex())
@@ -94,7 +112,7 @@ abstract class NodeTest {
 
     @Test
     fun noDuplicates() {
-        assertEquals("""
+        assertOutput("""
             <no-duplicates>
         """) {
             printDuplicates(root {
@@ -119,10 +137,10 @@ abstract class NodeTest {
             file("b1", 2)
             file("c", 3)
         }.calculateDigestToPaths()
-        assertEquals("""
+        assertOutput("""
             {01=[/a1, /f/ff/a2, /f/ff/a3], 02=[/b1, /f/ff/b2], 03=[/c], 04=[/f/ff/c]}
         """) { println(digestToPaths.toString()) }
-        assertEquals("""
+        assertOutput("""
             - Duplicates
                 - 01
                     - `/a1`
@@ -150,5 +168,19 @@ abstract class NodeTest {
         assertFailsWith<NullPointerException> { iterator.current() }
         assertFailsWith<IllegalStateException> { iterator.advance() }
         assertTrue(iterator.done())
+    }
+
+    @Test
+    fun createDirectoryNode() {
+        assertOutput("""
+            - ``
+                - `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                - `b`
+                    - `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                    - `e`
+                        - `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
+                    - `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                - `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+        """) { createDirectoryNode(ALGORITHM, TEST_DIR).print() }
     }
 }

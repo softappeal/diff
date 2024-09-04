@@ -1,6 +1,6 @@
 [versions]
 
-kotlin             = "2.0.0"
+kotlin             = "2.0.20"
 kotlinx-coroutines = "1.8.1"
 yass2              = "16.0.0"
 
@@ -13,4 +13,4 @@ yass2-generate = { module = "ch.softappeal.yass2:yass2-generate" , version.ref =
 
 [plugins]
 
-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

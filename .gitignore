@@ -1,5 +1,5 @@
 .DS_Store
 /.idea/
 /.gradle/
+/.kotlin/
 /build/
-/kotlin-js-store/

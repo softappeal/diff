@@ -118,9 +118,11 @@ val NEW_EVERYTHING = root {
     }
 }
 
-abstract class DeltaTest {
-    protected abstract fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String)
+private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String) {
+    assertOutput(expected) { createDirectoryDelta(NodeDigestToPaths(old), NodeDigestToPaths(new)).print() }
+}
 
+class DeltaTest {
     @Test
     fun everything() {
         assertEquals(

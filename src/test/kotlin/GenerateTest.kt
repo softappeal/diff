@@ -9,7 +9,7 @@ class GenerateTest {
     @Test
     fun test() {
         generate(
-            "src/commonMain/kotlin",
+            "src/main/kotlin",
             "ch.softappeal.diff",
             Mode.Verify,
         ) {
