@@ -289,7 +289,7 @@ class DeltaTest {
                             file("a", 5)
                             file("b", 6)
                         }
-                        dir("e") {}
+                        dir("e")
                         file("a", 7)
                     }
                 }
@@ -312,7 +312,7 @@ class DeltaTest {
                             file("b", 6)
                             file("c", 103)
                         }
-                        dir("e") {}
+                        dir("e")
                         file("a", 7)
                     }
                 }
@@ -533,8 +533,8 @@ class DeltaTest {
                 dir("d") {
                     file("e", 2)
                 }
-                dir("d2") {}
-                dir("d3") {}
+                dir("d2")
+                dir("d3")
             },
             """
                 - `/`
@@ -789,7 +789,7 @@ class DeltaTest {
                     file("a", 1)
                     dir("b") {
                         file("c", 2)
-                        dir("d") {}
+                        dir("d")
                     }
                 }
             },
@@ -798,7 +798,7 @@ class DeltaTest {
                     file("a", 1)
                     dir("b") {
                         file("c", 2)
-                        dir("d") {}
+                        dir("d")
                     }
                 }
             },
@@ -817,8 +817,8 @@ class DeltaTest {
                     file("a", 1)
                     dir("b") {
                         file("c", 2)
-                        dir("d") {}
-                        dir("d1") {}
+                        dir("d")
+                        dir("d1")
                     }
                 }
             },
@@ -828,8 +828,8 @@ class DeltaTest {
                         file("a", 1)
                         dir("b") {
                             file("c", 2)
-                            dir("d") {}
-                            dir("d1") {}
+                            dir("d")
+                            dir("d1")
                         }
                     }
                 }
@@ -849,8 +849,8 @@ class DeltaTest {
                 dir("u") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d2") {}
+                        dir("d1")
+                        dir("d2")
                     }
                 }
             },
@@ -858,8 +858,8 @@ class DeltaTest {
                 dir("t") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d2") {}
+                        dir("d1")
+                        dir("d2")
                     }
                 }
             },
@@ -877,7 +877,7 @@ class DeltaTest {
                 dir("u") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
+                        dir("d1")
                     }
                 }
             },
@@ -885,8 +885,8 @@ class DeltaTest {
                 dir("t") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d2") {}
+                        dir("d1")
+                        dir("d2")
                     }
                 }
             },
@@ -911,8 +911,8 @@ class DeltaTest {
                 dir("u") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d2") {}
+                        dir("d1")
+                        dir("d2")
                     }
                 }
             },
@@ -920,8 +920,8 @@ class DeltaTest {
                 dir("t") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d3") {}
+                        dir("d1")
+                        dir("d3")
                     }
                 }
             },
@@ -947,8 +947,8 @@ class DeltaTest {
                 dir("u") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d2") {}
+                        dir("d1")
+                        dir("d2")
                     }
                 }
             },
@@ -956,7 +956,7 @@ class DeltaTest {
                 dir("t") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
+                        dir("d1")
                         file("d2", 1)
                     }
                 }
@@ -983,7 +983,7 @@ class DeltaTest {
                 dir("u") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
+                        dir("d1")
                         dir("d2") {
                             file("x", 1)
                         }
@@ -994,8 +994,8 @@ class DeltaTest {
                 dir("t") {
                     dir("v") {
                         file("same", 123)
-                        dir("d1") {}
-                        dir("d2") {}
+                        dir("d1")
+                        dir("d2")
                     }
                 }
             },

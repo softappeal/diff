@@ -18,7 +18,7 @@ class NodeBuilder {
     }
 
     fun file(name: String, digest: Byte) = file(name, 0, digest)
-    fun dir(name: String, block: NodeBuilder.() -> Unit) {
+    fun dir(name: String, block: NodeBuilder.() -> Unit = {}) {
         val builder = NodeBuilder()
         builder.block()
         nodes.add(createDirectoryNode(name, builder.nodes))
