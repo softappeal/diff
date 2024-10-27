@@ -1,21 +1,31 @@
 package ch.softappeal.diff
 
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.io.path.Path
 import kotlin.io.path.exists
-import kotlin.io.path.readBytes
-import kotlin.io.path.writeBytes
 import kotlin.system.exitProcess
 
-fun Path.readNode() = readBytes().readNode()
-private fun readNodeFromStdIn() = System.`in`.readAllBytes().readNode()
+fun Path.readDirectoryNode(): DirectoryNode = FileInputStream(toFile()).use {
+    DataInputStream(it).readNode() as DirectoryNode
+}
 
-private fun DirectoryNode.writeToStdOut() = System.out.writeBytes(this.write())
-private fun DirectoryNode.writeToFile(file: Path) = file.writeBytes(this.write())
+private fun readDirectoryNodeFromStdIn() = DataInputStream(System.`in`).readNode() as DirectoryNode
 
-fun Path.nodeFile(): Path = resolve("node.yass")
+private fun DirectoryNode.writeToStdOut() = DataOutputStream(System.out).writeNode(this)
+
+private fun DirectoryNode.writeToFile(file: Path) {
+    DataOutputStream(FileOutputStream(file.toFile())).use {
+        it.writeNode(this)
+    }
+}
+
+fun Path.nodeFile(): Path = resolve("node.ser")
 
 fun script(toolDirectory: Path, algorithm: String, archivePrefix: String?, withGui: Boolean = false) {
     println()
@@ -25,7 +35,7 @@ fun script(toolDirectory: Path, algorithm: String, archivePrefix: String?, withG
     println()
     val node = toolDirectory.nodeFile()
     if (node.exists()) {
-        val delta = createDirectoryDelta(NodeDigestToPaths(node.readNode()), newNodeDigestToPaths)
+        val delta = createDirectoryDelta(NodeDigestToPaths(node.readDirectoryNode()), newNodeDigestToPaths)
         if (withGui) gui(delta)
         delta.print()
         println()
@@ -67,11 +77,12 @@ fun main(vararg args: String) {
     val command = args[0]
     when {
         command == "createNode" && args.size == 3 -> createDirectoryNode(args[1], Path(args[2])).writeToStdOut()
-        command == "printNode" && args.size == 1 -> readNodeFromStdIn().print()
-        command == "printDuplicates" && args.size == 1 -> printDuplicates(readNodeFromStdIn().calculateDigestToPaths())
-        command == "printSizes" && args.size == 1 -> readNodeFromStdIn().printFilesBySize()
-        command == "diff" && args.size == 2 ->
-            createDirectoryDelta(NodeDigestToPaths(Path(args[1]).readNode()), NodeDigestToPaths(readNodeFromStdIn())).print()
+        command == "printNode" && args.size == 1 -> readDirectoryNodeFromStdIn().print()
+        command == "printDuplicates" && args.size == 1 -> printDuplicates(readDirectoryNodeFromStdIn().calculateDigestToPaths())
+        command == "printSizes" && args.size == 1 -> readDirectoryNodeFromStdIn().printFilesBySize()
+        command == "diff" && args.size == 2 -> createDirectoryDelta(
+            NodeDigestToPaths(Path(args[1]).readDirectoryNode()), NodeDigestToPaths(readDirectoryNodeFromStdIn())
+        ).print()
         (command == "script" || command == "scriptWithGui") && (args.size == 2 || args.size == 3) ->
             script(Path(""), args[1], if (args.size == 2) null else args[2], command == "scriptWithGui")
         else -> throwInvalidArgs()

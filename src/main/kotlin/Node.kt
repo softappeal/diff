@@ -1,10 +1,5 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.binary.ByteArrayEncoder
-import ch.softappeal.yass2.serialize.binary.IntEncoder
-import ch.softappeal.yass2.serialize.binary.StringEncoder
-import ch.softappeal.yass2.transport.BytesReader
-import ch.softappeal.yass2.transport.BytesWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -61,24 +56,6 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
 }
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
-
-internal val BaseEncoders = listOf(StringEncoder, IntEncoder, ByteArrayEncoder)
-internal val TreeConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
-
-private val NodeSerializer = createSerializer(BaseEncoders)
-
-fun ByteArray.readNode(): DirectoryNode {
-    val reader = BytesReader(this)
-    val node = NodeSerializer.read(reader) as DirectoryNode
-    check(reader.isDrained)
-    return node
-}
-
-fun DirectoryNode.write(): ByteArray {
-    val writer = BytesWriter(100_000)
-    NodeSerializer.write(writer, this)
-    return writer.buffer.copyOf(writer.current)
-}
 
 fun Node.print(indent: Int = 0) {
     print("${"    ".repeat(indent)}- `$name`")

@@ -2,6 +2,7 @@ package ch.softappeal.diff
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.io.PrintStream
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
@@ -78,7 +79,8 @@ class MainTest {
             """) { main("printDuplicates") }
         }
 
-        redirectStdIn(root {
+        val bytes = ByteArrayOutputStream()
+        DataOutputStream(bytes).writeNode(root {
             file(".", 0, 0)
             file(".txt", 1000, 0)
             file("a.txt", 2000, 0)
@@ -92,7 +94,8 @@ class MainTest {
             dir("dir") {
                 file("x.txt", 10000, 0)
             }
-        }.write()) {
+        })
+        redirectStdIn(bytes.toByteArray()) {
             assertOutput("""
                 - <no-ext>
                     - 5 KB `/d.`
@@ -119,7 +122,7 @@ class MainTest {
             """) { main("printDuplicates") }
         }
 
-        val oldNodeFile = Path("build/oldNode.yass")
+        val oldNodeFile = Path("build/oldNode.ser")
         oldNodeFile.writeBytes(oldNode)
         redirectStdIn(newNode) {
             assertOutput("""
@@ -163,7 +166,7 @@ class MainTest {
                 
                 - `/`
                     - `b/`
-                        - `node.yass` New
+                        - `node.ser` New
                 
                 type <y> to accept changes (else abort): 
                 DONE
@@ -183,7 +186,7 @@ class MainTest {
                 
                 - `/`
                     - `b/`
-                        - `node.yass` Bigger
+                        - `node.ser` Bigger
                 
                 type <y> to accept changes (else abort): 
                 ABORTED
@@ -202,7 +205,7 @@ class MainTest {
     @Test
     fun testExternalDir() {
         val dir = Path("/Users/guru/Library/CloudStorage/OneDrive-Personal/data/major")
-        val oldNode = dir.resolve("diff/node.yass").readNode()
+        val oldNode = dir.resolve("diff/node.ser").readDirectoryNode()
         val newNode = createDirectoryNode(ALGORITHM, dir)
         val newNodeDigestToPaths = NodeDigestToPaths(newNode)
         printDuplicates(newNodeDigestToPaths.digestToPaths)

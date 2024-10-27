@@ -5,7 +5,7 @@ It also shows duplicated files and writes an archive.
 
 It must be copied at top level into the directory.
 It is started by double-clicking `start.command`.
-The current content is tracked in `node.yass`.
+The current content is tracked in `node.ser`.
 
 Precondition: a `JRE` must be installed
 
@@ -15,7 +15,7 @@ Precondition: a `JRE` must be installed
             bin/
             lib/
             start.command
-            node.yass
+            node.ser
         mySubDir1/
             ...
         mySubDir2/
