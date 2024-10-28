@@ -11,8 +11,8 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.system.exitProcess
 
-fun Path.readDirectoryNode(): DirectoryNode = FileInputStream(toFile()).use {
-    DataInputStream(it).readNode() as DirectoryNode
+fun Path.readDirectoryNode(): DirectoryNode = DataInputStream(FileInputStream(toFile())).use {
+    it.readNode() as DirectoryNode
 }
 
 private fun readDirectoryNodeFromStdIn() = DataInputStream(System.`in`).readNode() as DirectoryNode
