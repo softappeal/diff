@@ -10,7 +10,9 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.yass2.core)
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.yass2.generate)
     testImplementation(kotlin("test"))
 }
 

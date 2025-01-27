@@ -1,5 +1,8 @@
 package ch.softappeal.diff
 
+import ch.softappeal.yass2.serialize.binary.ByteArrayBinaryEncoder
+import ch.softappeal.yass2.serialize.binary.IntBinaryEncoder
+import ch.softappeal.yass2.serialize.binary.StringBinaryEncoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -54,6 +57,9 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
 
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
+
+internal val EncoderObjects = listOf(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
+internal val ConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 

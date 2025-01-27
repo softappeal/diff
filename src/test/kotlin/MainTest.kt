@@ -1,8 +1,8 @@
 package ch.softappeal.diff
 
+import ch.softappeal.yass2.serialize.writeBytes
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.DataOutputStream
 import java.io.PrintStream
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
@@ -79,8 +79,7 @@ class MainTest {
             """) { main("printDuplicates") }
         }
 
-        val bytes = ByteArrayOutputStream()
-        DataOutputStream(bytes).writeNode(root {
+        redirectStdIn(NodeSerializer.writeBytes(root {
             file(".", 0, 0)
             file(".txt", 1000, 0)
             file("a.txt", 2000, 0)
@@ -94,8 +93,7 @@ class MainTest {
             dir("dir") {
                 file("x.txt", 10000, 0)
             }
-        })
-        redirectStdIn(bytes.toByteArray()) {
+        })) {
             assertOutput("""
                 - <no-ext>
                     - 5 KB `/d.`
@@ -122,7 +120,7 @@ class MainTest {
             """) { main("printDuplicates") }
         }
 
-        val oldNodeFile = Path("build/oldNode.ser")
+        val oldNodeFile = Path("build/oldNode.yass")
         oldNodeFile.writeBytes(oldNode)
         redirectStdIn(newNode) {
             assertOutput("""
@@ -166,7 +164,7 @@ class MainTest {
                 
                 - `/`
                     - `b/`
-                        - `node.ser` New
+                        - `node.yass` New
                 
                 type <y> to accept changes (else abort): 
                 DONE
@@ -186,7 +184,7 @@ class MainTest {
                 
                 - `/`
                     - `b/`
-                        - `node.ser` Bigger
+                        - `node.yass` Bigger
                 
                 type <y> to accept changes (else abort): 
                 ABORTED
@@ -205,7 +203,7 @@ class MainTest {
     @Test
     fun testExternalDir() {
         val dir = Path("/Users/guru/Library/CloudStorage/OneDrive-Personal/data/major")
-        val oldNode = dir.resolve("diff/node.ser").readDirectoryNode()
+        val oldNode = dir.resolve("diff/node.yass").readNode()
         val newNode = createDirectoryNode(ALGORITHM, dir)
         val newNodeDigestToPaths = NodeDigestToPaths(newNode)
         printDuplicates(newNodeDigestToPaths.digestToPaths)

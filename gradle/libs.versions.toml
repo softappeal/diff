@@ -1,11 +1,15 @@
 [versions]
 
-kotlin = "2.0.21" # https://github.com/JetBrains/kotlin
-kotlinx-coroutines = "1.9.0" # https://github.com/Kotlin/kotlinx.coroutines
+kotlin             = "2.1.10" # https://github.com/JetBrains/kotlin
+kotlinx-coroutines = "1.10.1" # https://github.com/Kotlin/kotlinx.coroutines
+yass2              = "19.0.0" # https://github.com/softappeal/yass2
 
 [libraries]
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+
+yass2-core     = { module = "ch.softappeal.yass2:yass2-core"    , version.ref = "yass2" }
+yass2-generate = { module = "ch.softappeal.yass2:yass2-generate", version.ref = "yass2" }
 
 [plugins]
 
