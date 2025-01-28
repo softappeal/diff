@@ -12,7 +12,9 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.isSymbolicLink
 import kotlin.io.path.name
+import kotlin.io.path.pathString
 import kotlin.io.path.readBytes
+import kotlin.io.path.relativeTo
 
 const val DIR_SEP = '/'
 
@@ -137,8 +139,15 @@ class NodeIterator(node: DirectoryNode) {
     override fun toString() = "NodeIterator(${if (done()) "<done>" else current().toString()})"
 }
 
-const val MAC_DS_STORE = ".DS_Store"
-const val GIT_DIR = ".git"
+private fun Path.ignored(basePath: Path, isIgnored: (relativePath: String) -> Boolean): Boolean {
+    val relativePath = relativeTo(basePath).pathString
+    val ignored = isIgnored(relativePath)
+    // println("${if (ignored) 'i' else ' '} '$relativePath${if (isDirectory()) "/" else ""}'")
+    return ignored
+}
+
+fun Path.ignoredFile(basePath: Path) = ignored(basePath) { ".DS_Store" == name }
+fun Path.ignoredDir(basePath: Path) = ignored(basePath) { relativePath -> ".git" == relativePath }
 
 fun DirectoryNode.printFilesBySize() {
     val extToPathSizes = buildMap<String?, MutableList<PathInfo<Int>>> {
@@ -164,7 +173,7 @@ fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): Directo
                 Files.newDirectoryStream(directory).forEach { path ->
                     require(!path.isSymbolicLink()) { "'$path' is a symbolic link" }
                     if (path.isRegularFile()) {
-                        if (MAC_DS_STORE == path.name) return@forEach
+                        if (path.ignoredFile(sourceDirectory)) return@forEach
                         add(FileNode(path.name).apply {
                             launch {
                                 val bytes = path.readBytes()
@@ -173,7 +182,7 @@ fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): Directo
                             }
                         })
                     } else if (path.isDirectory()) {
-                        if (GIT_DIR == path.name) return@forEach
+                        if (path.ignoredDir(sourceDirectory)) return@forEach
                         add(directoryNode(path, path.name))
                     } else {
                         error("path '$path' has unexpected type")

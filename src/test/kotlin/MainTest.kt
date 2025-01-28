@@ -154,7 +154,7 @@ class MainTest {
 
         redirectStdIn("y\n".toByteArray()) {
             assertOutput("""
-                
+
                 - Duplicates
                     - CFCD208495D565EF66E7DFF9F98764DA
                         - `/a.txt`
@@ -174,7 +174,7 @@ class MainTest {
 
         redirectStdIn("\n".toByteArray()) {
             assertOutput("""
-                
+
                 - Duplicates
                     - CFCD208495D565EF66E7DFF9F98764DA
                         - `/a.txt`
@@ -190,6 +190,8 @@ class MainTest {
                 ABORTED
                 
             """) { script(toolDirectory, ALGORITHM, null) }
+
+            toolDirectory.nodeFile().deleteExisting()
         }
 
         redirectStdIn("y\n".toByteArray()) {

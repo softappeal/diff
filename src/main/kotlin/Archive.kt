@@ -7,7 +7,6 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import kotlin.io.path.name
 import kotlin.io.path.outputStream
 
 private const val DIR_SEP_STRING = DIR_SEP.toString()
@@ -20,14 +19,14 @@ fun createZipFile(sourceDirectory: Path, zipFile: Path) {
             ))
 
             override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                if (MAC_DS_STORE == file.name) return FileVisitResult.CONTINUE
+                if (file.ignoredFile(sourceDirectory)) return FileVisitResult.CONTINUE
                 file.putEntry()
                 Files.copy(file, output)
                 return FileVisitResult.CONTINUE
             }
 
             override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                if (GIT_DIR == dir.name) return FileVisitResult.SKIP_SUBTREE
+                if (dir.ignoredDir(sourceDirectory)) return FileVisitResult.SKIP_SUBTREE
                 dir.putEntry(DIR_SEP_STRING)
                 return FileVisitResult.CONTINUE
             }
