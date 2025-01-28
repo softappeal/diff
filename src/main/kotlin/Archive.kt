@@ -27,6 +27,7 @@ fun createZipFile(sourceDirectory: Path, zipFile: Path) {
             }
 
             override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+                if (GIT_DIR == dir.name) return FileVisitResult.SKIP_SUBTREE
                 dir.putEntry(DIR_SEP_STRING)
                 return FileVisitResult.CONTINUE
             }

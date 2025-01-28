@@ -1,8 +1,5 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.binary.ByteArrayBinaryEncoder
-import ch.softappeal.yass2.serialize.binary.IntBinaryEncoder
-import ch.softappeal.yass2.serialize.binary.StringBinaryEncoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -11,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
+import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.isSymbolicLink
 import kotlin.io.path.name
@@ -57,9 +55,6 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
 
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
-
-internal val EncoderObjects = listOf(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
-internal val ConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 
@@ -143,6 +138,7 @@ class NodeIterator(node: DirectoryNode) {
 }
 
 const val MAC_DS_STORE = ".DS_Store"
+const val GIT_DIR = ".git"
 
 fun DirectoryNode.printFilesBySize() {
     val extToPathSizes = buildMap<String?, MutableList<PathInfo<Int>>> {
@@ -176,8 +172,11 @@ fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): Directo
                                 digest = MessageDigest.getInstance(digestAlgorithm).digest(bytes)
                             }
                         })
-                    } else {
+                    } else if (path.isDirectory()) {
+                        if (GIT_DIR == path.name) return@forEach
                         add(directoryNode(path, path.name))
+                    } else {
+                        error("path '$path' has unexpected type")
                     }
                 }
             },
