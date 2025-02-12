@@ -16,15 +16,16 @@
 package ch.softappeal.diff
 
 /*
-    1: kotlin.collections.List
-    2: kotlin.String
-    3: kotlin.Int
-    4: kotlin.ByteArray
-    5: ch.softappeal.diff.FileNode
+    0: null - built-in
+    1: [] - built-in
+    2: kotlin.String - base
+    3: kotlin.Int - base
+    4: kotlin.ByteArray - base
+    5: ch.softappeal.diff.FileNode - class
         name: required 2
         digest: required 4
         size: required 3
-    6: ch.softappeal.diff.DirectoryNode
+    6: ch.softappeal.diff.DirectoryNode - class
         name: required 2
         nodes: required 1
 */
