@@ -11,8 +11,6 @@ import kotlin.io.path.readBytes
 import kotlin.io.path.writeBytes
 import kotlin.system.exitProcess
 
-val NodeSerializer = createBinarySerializer()
-
 fun Path.readNode() = NodeSerializer.readBytes(readBytes()) as DirectoryNode
 private fun readNodeFromStdIn() = NodeSerializer.readBytes(System.`in`.readAllBytes()) as DirectoryNode
 
@@ -24,7 +22,10 @@ fun Path.nodeFile(): Path = resolve("node.yass")
 fun script(toolDirectory: Path, algorithm: String, archivePrefix: String?, withGui: Boolean = false) {
     println()
     val root = toolDirectory.resolve("..")
-    val newNodeDigestToPaths = NodeDigestToPaths(createDirectoryNode(algorithm, root))
+    val rootNode = createDirectoryNode(algorithm, root)
+    rootNode.printBadPaths()
+    println()
+    val newNodeDigestToPaths = NodeDigestToPaths(rootNode)
     printDuplicates(newNodeDigestToPaths.digestToPaths)
     println()
     val node = toolDirectory.nodeFile()
@@ -60,6 +61,7 @@ val USAGE = """
         'createNode' algorithm directory > nodeFile
         'printNode' < nodeFile
         'printDuplicates' < nodeFile
+        'printBadPaths' < nodeFile
         'printSizes' < nodeFile
         'diff' oldNodeFile < newNodeFile
         ( 'script' | 'scriptWithGui' ) algorithm [ archivePrefix ]
@@ -73,6 +75,7 @@ fun main(vararg args: String) {
         command == "createNode" && args.size == 3 -> createDirectoryNode(args[1], Path(args[2])).writeToStdOut()
         command == "printNode" && args.size == 1 -> readNodeFromStdIn().print()
         command == "printDuplicates" && args.size == 1 -> printDuplicates(readNodeFromStdIn().calculateDigestToPaths())
+        command == "printBadPaths" && args.size == 1 -> readNodeFromStdIn().printBadPaths()
         command == "printSizes" && args.size == 1 -> readNodeFromStdIn().printFilesBySize()
         command == "diff" && args.size == 2 ->
             createDirectoryDelta(NodeDigestToPaths(Path(args[1]).readNode()), NodeDigestToPaths(readNodeFromStdIn())).print()

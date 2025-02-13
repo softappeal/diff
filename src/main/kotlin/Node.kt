@@ -1,5 +1,8 @@
 package ch.softappeal.diff
 
+import ch.softappeal.yass2.serialize.binary.ByteArrayBinaryEncoder
+import ch.softappeal.yass2.serialize.binary.IntBinaryEncoder
+import ch.softappeal.yass2.serialize.binary.StringBinaryEncoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -8,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
+import java.util.regex.Pattern
 import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.isSymbolicLink
@@ -57,6 +61,10 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
 
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
+
+internal val EncoderObjects = listOf(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
+internal val ConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
+val NodeSerializer = createBinarySerializer()
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 
@@ -112,6 +120,30 @@ fun printDuplicates(digestToPaths: DigestToPaths) {
             println("    - ${duplicate.key}")
             duplicate.value.forEach { println("        - `$it`") }
         }
+    }
+}
+
+private val GoodName = Pattern.compile("[a-zA-Z0-9-_. ]+")
+fun goodName(name: String) = GoodName.matcher(name).matches()
+private fun DirectoryNode.badPaths(): List<String> = buildList {
+    fun Node.visit(path: String) {
+        val nextPath = if (this == this@badPaths) "" else path.concatPath(name)
+        if (nextPath.isNotEmpty() && !goodName(name)) add("$nextPath${if (this is FileNode) "" else "/"}")
+        when (this) {
+            is FileNode -> {}
+            is DirectoryNode -> nodes.forEach { it.visit(nextPath) }
+        }
+    }
+    visit("")
+}
+
+fun DirectoryNode.printBadPaths() {
+    val badPaths = badPaths()
+    if (badPaths.isEmpty()) {
+        println("<no-bad-paths>")
+    } else {
+        println("- BadPaths")
+        badPaths.forEach { println("    - '$it'") }
     }
 }
 

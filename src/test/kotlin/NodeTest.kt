@@ -183,4 +183,48 @@ class NodeTest {
                 - `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
         """) { createDirectoryNode(ALGORITHM, TEST_DIR).print() }
     }
+
+    @Test
+    fun goodName() {
+        assertFalse(goodName(""))
+        assertFalse(goodName("+"))
+        assertTrue(goodName(" "))
+        assertTrue(goodName("."))
+        assertTrue(goodName("-"))
+        assertTrue(goodName("_"))
+        @Suppress("SpellCheckingInspection")
+        assertTrue(goodName("..  --__aazzAAZZ0099"))
+    }
+
+    @Test
+    fun printBadPaths() {
+        assertOutput("""
+            <no-bad-paths>
+        """) {
+            root {
+            }.printBadPaths()
+        }
+        assertOutput("""
+            - BadPaths
+                - '/bad*dir/'
+                - '/bad*dir/bad*file'
+                - '/bad*file'
+                - '/good-dir/bad*file'
+                - '/good-dir/bad*file 2'
+        """) {
+            root {
+                file("bad*file", 1)
+                file("good-file", 1)
+                dir("good-dir") {
+                    file("bad*file 2", 1)
+                    file("bad*file", 1)
+                    file("good-file", 1)
+                }
+                dir("bad*dir") {
+                    file("bad*file", 1)
+                    file("good-file", 1)
+                }
+            }.printBadPaths()
+        }
+    }
 }

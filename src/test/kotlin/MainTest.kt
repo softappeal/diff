@@ -79,6 +79,12 @@ class MainTest {
             """) { main("printDuplicates") }
         }
 
+        redirectStdIn(oldNode) {
+            assertOutput("""
+                <no-bad-paths>
+            """) { main("printBadPaths") }
+        }
+
         redirectStdIn(NodeSerializer.writeBytes(root {
             file(".", 0, 0)
             file(".txt", 1000, 0)
@@ -141,6 +147,8 @@ class MainTest {
 
         assertOutput("""
 
+            <no-bad-paths>
+
             - Duplicates
                 - CFCD208495D565EF66E7DFF9F98764DA
                     - `/a.txt`
@@ -154,6 +162,8 @@ class MainTest {
 
         redirectStdIn("y\n".toByteArray()) {
             assertOutput("""
+
+                <no-bad-paths>
 
                 - Duplicates
                     - CFCD208495D565EF66E7DFF9F98764DA
@@ -174,6 +184,8 @@ class MainTest {
 
         redirectStdIn("\n".toByteArray()) {
             assertOutput("""
+
+                <no-bad-paths>
 
                 - Duplicates
                     - CFCD208495D565EF66E7DFF9F98764DA
