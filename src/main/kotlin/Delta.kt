@@ -189,6 +189,6 @@ fun Delta.info(): String {
 
 fun Delta.print(indent: Int = 0) {
     val dirSep = if (this is DirectoryDelta && state != DeltaState.DirToFile) "$DIR_SEP" else ""
-    println("${"    ".repeat(indent)}- `$name$dirSep`${info()}")
+    println("${"    ".repeat(indent)}`$name$dirSep`${info()}")
     if (this is DirectoryDelta) deltas.forEach { it.print(indent + 1) }
 }

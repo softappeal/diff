@@ -69,7 +69,7 @@ val NodeSerializer = createBinarySerializer()
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 
 fun Node.print(indent: Int = 0) {
-    print("${"    ".repeat(indent)}- `$name`")
+    print("${"    ".repeat(indent)}`$name`")
     when (this) {
         is FileNode -> println(" $size ${digest.toHex()}")
         is DirectoryNode -> {
@@ -115,15 +115,15 @@ fun printDuplicates(digestToPaths: DigestToPaths) {
     if (duplicates.isEmpty()) {
         println("<no-duplicates>")
     } else {
-        println("- Duplicates")
+        println("Duplicates")
         duplicates.forEach { duplicate ->
-            println("    - ${duplicate.key}")
-            duplicate.value.forEach { println("        - `$it`") }
+            println("    ${duplicate.key}")
+            duplicate.value.forEach { println("        `$it`") }
         }
     }
 }
 
-private val GoodName = Pattern.compile("[a-zA-Z0-9-_. ]+")
+private val GoodName = Pattern.compile("[a-zA-Z0-9-_.]+")
 fun goodName(name: String) = GoodName.matcher(name).matches()
 private fun DirectoryNode.badPaths(): List<String> = buildList {
     fun Node.visit(path: String) {
@@ -142,8 +142,8 @@ fun DirectoryNode.printBadPaths() {
     if (badPaths.isEmpty()) {
         println("<no-bad-paths>")
     } else {
-        println("- BadPaths")
-        badPaths.forEach { println("    - '$it'") }
+        println("BadPaths")
+        badPaths.forEach { println("    `$it`") }
     }
 }
 
@@ -192,8 +192,8 @@ fun DirectoryNode.printFilesBySize() {
         }
     }
     extToPathSizes.entries.sortedBy { it.key }.forEach { (ext, pathSizes) ->
-        println("- ${if (ext == null) "<no-ext>" else "`$ext`"}")
-        pathSizes.sortedByDescending { it.info }.forEach { (path, size) -> println("    - ${size / 1000} KB `$path`") }
+        println(if (ext == null) "<no-ext>" else "`$ext`")
+        pathSizes.sortedByDescending { it.info }.forEach { (path, size) -> println("    ${size / 1000} KB `$path`") }
     }
 }
 

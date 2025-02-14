@@ -129,44 +129,44 @@ class DeltaTest {
             OLD_EVERYTHING,
             NEW_EVERYTHING,
             """
-                - `/`
-                    - `Changed/`
-                        - `a` Changed
-                        - `b` Bigger
-                        - `s` Smaller
-                    - `Deleted/`
-                        - `a/` Deleted
-                            - `b/` Deleted
-                                - `c` Deleted
-                    - `DirToFile/`
-                        - `moved/`
-                            - `a` DirToFile MovedFrom `/DirToFile/moved/a/b`
-                        - `renamed/`
-                            - `a` DirToFile RenamedFrom `c`
-                                - `b` Deleted
-                        - `simple/`
-                            - `a` DirToFile
-                                - `b` Deleted
-                    - `FileToDir/`
-                        - `moved/`
-                            - `a/` FileToDir
-                                - `b` MovedFrom `/FileToDir/moved/a`
-                        - `renamed/`
-                            - `a/` FileToDir
-                                - `b` New
-                            - `c` RenamedFrom `a`
-                        - `simple/`
-                            - `a/` FileToDir
-                                - `b` New
-                    - `MovedFrom/`
-                        - `c/` New
-                            - `a/` MovedFrom `/MovedFrom/a`
-                    - `New/`
-                        - `a/` New
-                            - `b/` New
-                                - `c` New
-                    - `RenamedFrom/`
-                        - `c/` RenamedFrom `a`
+                `/`
+                    `Changed/`
+                        `a` Changed
+                        `b` Bigger
+                        `s` Smaller
+                    `Deleted/`
+                        `a/` Deleted
+                            `b/` Deleted
+                                `c` Deleted
+                    `DirToFile/`
+                        `moved/`
+                            `a` DirToFile MovedFrom `/DirToFile/moved/a/b`
+                        `renamed/`
+                            `a` DirToFile RenamedFrom `c`
+                                `b` Deleted
+                        `simple/`
+                            `a` DirToFile
+                                `b` Deleted
+                    `FileToDir/`
+                        `moved/`
+                            `a/` FileToDir
+                                `b` MovedFrom `/FileToDir/moved/a`
+                        `renamed/`
+                            `a/` FileToDir
+                                `b` New
+                            `c` RenamedFrom `a`
+                        `simple/`
+                            `a/` FileToDir
+                                `b` New
+                    `MovedFrom/`
+                        `c/` New
+                            `a/` MovedFrom `/MovedFrom/a`
+                    `New/`
+                        `a/` New
+                            `b/` New
+                                `c` New
+                    `RenamedFrom/`
+                        `c/` RenamedFrom `a`
             """
         )
     }
@@ -179,7 +179,7 @@ class DeltaTest {
             root {
             },
             """
-                - `/`
+                `/`
             """
         )
     }
@@ -193,8 +193,8 @@ class DeltaTest {
             root {
             },
             """
-                - `/`
-                    - `a` Deleted
+                `/`
+                    `a` Deleted
             """
         )
     }
@@ -208,8 +208,8 @@ class DeltaTest {
                 file("a", 0)
             },
             """
-                - `/`
-                    - `a` New
+                `/`
+                    `a` New
             """
         )
     }
@@ -224,7 +224,7 @@ class DeltaTest {
                 file("a", 0)
             },
             """
-                - `/`
+                `/`
             """
         )
     }
@@ -239,8 +239,8 @@ class DeltaTest {
                 file("a", 1)
             },
             """
-                - `/`
-                    - `a` Changed
+                `/`
+                    `a` Changed
             """
         )
     }
@@ -260,14 +260,14 @@ class DeltaTest {
                 file("f", 7)
             },
             """
-                - `/`
-                    - `a` Deleted
-                    - `b` New
-                    - `c` New
-                    - `d` Deleted
-                    - `e` Deleted
-                    - `f` New
-                    - `g` Deleted
+                `/`
+                    `a` Deleted
+                    `b` New
+                    `c` New
+                    `d` Deleted
+                    `e` Deleted
+                    `f` New
+                    `g` Deleted
             """
         )
     }
@@ -318,17 +318,17 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `a` Changed
-                    - `d1/`
-                        - `d2/`
-                            - `d3/`
-                                - `c` New
-                        - `d3/`
-                            - `b` Deleted
-                            - `d3/` New
-                                - `a` New
-                                - `b` New
+                `/`
+                    `a` Changed
+                    `d1/`
+                        `d2/`
+                            `d3/`
+                                `c` New
+                        `d3/`
+                            `b` Deleted
+                            `d3/` New
+                                `a` New
+                                `b` New
             """
         )
     }
@@ -348,12 +348,12 @@ class DeltaTest {
             root {
             },
             """
-                - `/`
-                    - `a` Deleted
-                    - `b/` Deleted
-                        - `c` Deleted
-                        - `d/` Deleted
-                            - `e` Deleted
+                `/`
+                    `a` Deleted
+                    `b/` Deleted
+                        `c` Deleted
+                        `d/` Deleted
+                            `e` Deleted
             """
         )
     }
@@ -373,12 +373,12 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `a` New
-                    - `b/` New
-                        - `c` New
-                        - `d/` New
-                            - `e` New
+                `/`
+                    `a` New
+                    `b/` New
+                        `c` New
+                        `d/` New
+                            `e` New
             """
         )
     }
@@ -398,11 +398,11 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `a/` FileToDir
-                        - `b` New
-                        - `c/` New
-                            - `d` New
+                `/`
+                    `a/` FileToDir
+                        `b` New
+                        `c/` New
+                            `d` New
             """
         )
     }
@@ -420,10 +420,10 @@ class DeltaTest {
                 file("b", 1)
             },
             """
-                - `/`
-                    - `a/` FileToDir
-                        - `b` New
-                    - `b` RenamedFrom `a`
+                `/`
+                    `a/` FileToDir
+                        `b` New
+                    `b` RenamedFrom `a`
             """
         )
     }
@@ -440,9 +440,9 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `a/` FileToDir
-                        - `b` MovedFrom `/a`
+                `/`
+                    `a/` FileToDir
+                        `b` MovedFrom `/a`
             """
         )
     }
@@ -462,11 +462,11 @@ class DeltaTest {
                 file("a", 3)
             },
             """
-                - `/`
-                    - `a` DirToFile
-                        - `b` Deleted
-                        - `c/` Deleted
-                            - `d` Deleted
+                `/`
+                    `a` DirToFile
+                        `b` Deleted
+                        `c/` Deleted
+                            `d` Deleted
             """
         )
     }
@@ -487,11 +487,11 @@ class DeltaTest {
                 file("a", 9)
             },
             """
-                - `/`
-                    - `a` DirToFile RenamedFrom `x`
-                        - `b` Deleted
-                        - `c/` Deleted
-                            - `d` Deleted
+                `/`
+                    `a` DirToFile RenamedFrom `x`
+                        `b` Deleted
+                        `c/` Deleted
+                            `d` Deleted
             """
         )
     }
@@ -509,9 +509,9 @@ class DeltaTest {
                 file("a", 1)
             },
             """
-                - `/`
-                    - `a` DirToFile MovedFrom `/a/b`
-                        - `x` Deleted
+                `/`
+                    `a` DirToFile MovedFrom `/a/b`
+                        `x` Deleted
             """
         )
     }
@@ -537,10 +537,10 @@ class DeltaTest {
                 dir("d3")
             },
             """
-                - `/`
-                    - `d2/`
-                        - `e` Deleted
-                    - `d3/` New
+                `/`
+                    `d2/`
+                        `e` Deleted
+                    `d3/` New
             """
         )
     }
@@ -555,8 +555,8 @@ class DeltaTest {
                 file("e", 1)
             },
             """
-                - `/`
-                    - `e` RenamedFrom `a`
+                `/`
+                    `e` RenamedFrom `a`
             """
         )
     }
@@ -573,9 +573,9 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `d/` New
-                        - `e` MovedFrom `/e`
+                `/`
+                    `d/` New
+                        `e` MovedFrom `/e`
             """
         )
     }
@@ -592,9 +592,9 @@ class DeltaTest {
                 file("e", 1)
             },
             """
-                - `/`
-                    - `d/` Deleted
-                    - `e` MovedFrom `/d/e`
+                `/`
+                    `d/` Deleted
+                    `e` MovedFrom `/d/e`
             """
         )
     }
@@ -615,9 +615,9 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `d/` MovedFrom `/z/d`
-                    - `z/` Deleted
+                `/`
+                    `d/` MovedFrom `/z/d`
+                    `z/` Deleted
             """
         )
     }
@@ -633,10 +633,10 @@ class DeltaTest {
                 file("e", 1)
             },
             """
-                - `/`
-                    - `a` Deleted
-                    - `b` Deleted
-                    - `e` New
+                `/`
+                    `a` Deleted
+                    `b` Deleted
+                    `e` New
             """
         )
     }
@@ -652,10 +652,10 @@ class DeltaTest {
                 file("f", 1)
             },
             """
-                - `/`
-                    - `a` Deleted
-                    - `e` New
-                    - `f` New
+                `/`
+                    `a` Deleted
+                    `e` New
+                    `f` New
             """
         )
     }
@@ -705,18 +705,18 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `a/`
-                        - `s` MovedFrom `/r`
-                        - `y` RenamedFrom `x`
-                    - `c` MovedFrom `/a/b`
-                    - `i/`
-                        - `ii/`
-                            - `iii/`
-                                - `iiii/`
-                                    - `j` MovedFrom `/i/j`
-                                    - `n` RenamedFrom `m`
-                        - `jjjj` MovedFrom `/i/ii/iii/iiii/jjjj`
+                `/`
+                    `a/`
+                        `s` MovedFrom `/r`
+                        `y` RenamedFrom `x`
+                    `c` MovedFrom `/a/b`
+                    `i/`
+                        `ii/`
+                            `iii/`
+                                `iiii/`
+                                    `j` MovedFrom `/i/j`
+                                    `n` RenamedFrom `m`
+                        `jjjj` MovedFrom `/i/ii/iii/iiii/jjjj`
             """
         )
     }
@@ -772,11 +772,11 @@ class DeltaTest {
                 file("r", 3)
             },
             """
-                - `/`
-                    - `i/`
-                        - `ii/`
-                            - `a/` MovedFrom `/a`
-                            - `iii2/` RenamedFrom `iii`
+                `/`
+                    `i/`
+                        `ii/`
+                            `a/` MovedFrom `/a`
+                            `iii2/` RenamedFrom `iii`
             """
         )
     }
@@ -803,8 +803,8 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `y/` RenamedFrom `x`
+                `/`
+                    `y/` RenamedFrom `x`
             """
         )
     }
@@ -835,9 +835,9 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `z/` New
-                        - `x/` MovedFrom `/x`
+                `/`
+                    `z/` New
+                        `x/` MovedFrom `/x`
             """
         )
     }
@@ -864,8 +864,8 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `t/` RenamedFrom `u`
+                `/`
+                    `t/` RenamedFrom `u`
             """
         )
     }
@@ -891,15 +891,15 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `t/` New
-                        - `v/` New
-                            - `d1/` New
-                            - `d2/` New
-                            - `same` MovedFrom `/u/v/same`
-                    - `u/` Deleted
-                        - `v/` Deleted
-                            - `d1/` Deleted
+                `/`
+                    `t/` New
+                        `v/` New
+                            `d1/` New
+                            `d2/` New
+                            `same` MovedFrom `/u/v/same`
+                    `u/` Deleted
+                        `v/` Deleted
+                            `d1/` Deleted
             """
         )
     }
@@ -926,16 +926,16 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `t/` New
-                        - `v/` New
-                            - `d1/` New
-                            - `d3/` New
-                            - `same` MovedFrom `/u/v/same`
-                    - `u/` Deleted
-                        - `v/` Deleted
-                            - `d1/` Deleted
-                            - `d2/` Deleted
+                `/`
+                    `t/` New
+                        `v/` New
+                            `d1/` New
+                            `d3/` New
+                            `same` MovedFrom `/u/v/same`
+                    `u/` Deleted
+                        `v/` Deleted
+                            `d1/` Deleted
+                            `d2/` Deleted
             """
         )
     }
@@ -962,16 +962,16 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `t/` New
-                        - `v/` New
-                            - `d1/` New
-                            - `d2` New
-                            - `same` MovedFrom `/u/v/same`
-                    - `u/` Deleted
-                        - `v/` Deleted
-                            - `d1/` Deleted
-                            - `d2/` Deleted
+                `/`
+                    `t/` New
+                        `v/` New
+                            `d1/` New
+                            `d2` New
+                            `same` MovedFrom `/u/v/same`
+                    `u/` Deleted
+                        `v/` Deleted
+                            `d1/` Deleted
+                            `d2/` Deleted
             """
         )
     }
@@ -1000,17 +1000,17 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `t/` New
-                        - `v/` New
-                            - `d1/` New
-                            - `d2/` New
-                            - `same` MovedFrom `/u/v/same`
-                    - `u/` Deleted
-                        - `v/` Deleted
-                            - `d1/` Deleted
-                            - `d2/` Deleted
-                                - `x` Deleted
+                `/`
+                    `t/` New
+                        `v/` New
+                            `d1/` New
+                            `d2/` New
+                            `same` MovedFrom `/u/v/same`
+                    `u/` Deleted
+                        `v/` Deleted
+                            `d1/` Deleted
+                            `d2/` Deleted
+                                `x` Deleted
             """
         )
     }
@@ -1033,12 +1033,12 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `t/` New
-                        - `u/` New
-                            - `same` MovedFrom `/u/same`
-                            - `y` MovedFrom `/u/x`
-                    - `u/` Deleted
+                `/`
+                    `t/` New
+                        `u/` New
+                            `same` MovedFrom `/u/same`
+                            `y` MovedFrom `/u/x`
+                    `u/` Deleted
             """
         )
     }
@@ -1063,12 +1063,12 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `v/`
-                        - `c` Deleted
-                    - `w/` New
-                        - `b` MovedFrom `/v/b`
-                        - `c` New
+                `/`
+                    `v/`
+                        `c` Deleted
+                    `w/` New
+                        `b` MovedFrom `/v/b`
+                        `c` New
             """
         )
     }
@@ -1093,8 +1093,8 @@ class DeltaTest {
                 }
             },
             """
-                - `/`
-                    - `x/` MovedFrom `/u/v`
+                `/`
+                    `x/` MovedFrom `/u/v`
             """
         )
     }
@@ -1113,9 +1113,9 @@ class DeltaTest {
                 file("c", 2, 1)
             },
             """
-                - `/`
-                    - `a` Smaller
-                    - `b` Bigger
+                `/`
+                    `a` Smaller
+                    `b` Bigger
             """
         )
     }

@@ -141,14 +141,14 @@ class NodeTest {
             {01=[/a1, /f/ff/a2, /f/ff/a3], 02=[/b1, /f/ff/b2], 03=[/c], 04=[/f/ff/c]}
         """) { println(digestToPaths.toString()) }
         assertOutput("""
-            - Duplicates
-                - 01
-                    - `/a1`
-                    - `/f/ff/a2`
-                    - `/f/ff/a3`
-                - 02
-                    - `/b1`
-                    - `/f/ff/b2`
+            Duplicates
+                01
+                    `/a1`
+                    `/f/ff/a2`
+                    `/f/ff/a3`
+                02
+                    `/b1`
+                    `/f/ff/b2`
         """) { printDuplicates(digestToPaths) }
     }
 
@@ -173,14 +173,14 @@ class NodeTest {
     @Test
     fun createDirectoryNode() {
         assertOutput("""
-            - ``
-                - `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                - `b`
-                    - `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                    - `e`
-                        - `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
-                    - `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                - `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+            ``
+                `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                `b`
+                    `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                    `e`
+                        `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
+                    `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
         """) { createDirectoryNode(ALGORITHM, TEST_DIR).print() }
     }
 
@@ -188,12 +188,12 @@ class NodeTest {
     fun goodName() {
         assertFalse(goodName(""))
         assertFalse(goodName("+"))
-        assertTrue(goodName(" "))
+        assertFalse(goodName(" "))
         assertTrue(goodName("."))
         assertTrue(goodName("-"))
         assertTrue(goodName("_"))
         @Suppress("SpellCheckingInspection")
-        assertTrue(goodName("..  --__aazzAAZZ0099"))
+        assertTrue(goodName("..--__aazzAAZZ0099"))
     }
 
     @Test
@@ -205,12 +205,12 @@ class NodeTest {
             }.printBadPaths()
         }
         assertOutput("""
-            - BadPaths
-                - '/bad*dir/'
-                - '/bad*dir/bad*file'
-                - '/bad*file'
-                - '/good-dir/bad*file'
-                - '/good-dir/bad*file 2'
+            BadPaths
+                `/bad*dir/`
+                `/bad*dir/bad*file`
+                `/bad*file`
+                `/good-dir/bad*file`
+                `/good-dir/bad*file 2`
         """) {
             root {
                 file("bad*file", 1)

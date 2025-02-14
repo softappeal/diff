@@ -57,25 +57,25 @@ class MainTest {
 
         redirectStdIn(oldNode) {
             assertOutput("""
-                - ``
-                    - `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                    - `b`
-                        - `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                        - `e`
-                            - `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
-                        - `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                    - `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                ``
+                    `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                    `b`
+                        `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                        `e`
+                            `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
+                        `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
+                    `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
             """) { main("printNode") }
         }
 
         redirectStdIn(oldNode) {
             assertOutput("""
-                - Duplicates
-                    - CFCD208495D565EF66E7DFF9F98764DA
-                        - `/a.txt`
-                        - `/b/d.txt`
-                        - `/b/f.txt`
-                        - `/c.txt`
+                Duplicates
+                    CFCD208495D565EF66E7DFF9F98764DA
+                        `/a.txt`
+                        `/b/d.txt`
+                        `/b/f.txt`
+                        `/c.txt`
             """) { main("printDuplicates") }
         }
 
@@ -101,22 +101,22 @@ class MainTest {
             }
         })) {
             assertOutput("""
-                - <no-ext>
-                    - 5 KB `/d.`
-                    - 4 KB `/c`
-                    - 0 KB `/.`
-                - `.A`
-                    - 9 KB `/h.A`
-                - `.a`
-                    - 8 KB `/g.a`
-                - `.pdf`
-                    - 7 KB `/f.pdf`
-                    - 6 KB `/e.pdf`
-                - `.txt`
-                    - 10 KB `/dir/x.txt`
-                    - 3 KB `/b.txt`
-                    - 2 KB `/a.txt`
-                    - 1 KB `/.txt`
+                <no-ext>
+                    5 KB `/d.`
+                    4 KB `/c`
+                    0 KB `/.`
+                `.A`
+                    9 KB `/h.A`
+                `.a`
+                    8 KB `/g.a`
+                `.pdf`
+                    7 KB `/f.pdf`
+                    6 KB `/e.pdf`
+                `.txt`
+                    10 KB `/dir/x.txt`
+                    3 KB `/b.txt`
+                    2 KB `/a.txt`
+                    1 KB `/.txt`
             """) { main("printSizes") }
         }
 
@@ -130,13 +130,13 @@ class MainTest {
         oldNodeFile.writeBytes(oldNode)
         redirectStdIn(newNode) {
             assertOutput("""
-                - `/`
-                    - `b/` Deleted
-                        - `d.txt` Deleted
-                        - `e/` Deleted
-                            - `g.txt` Deleted
-                        - `f.txt` Deleted
-                    - `c.txt` Deleted
+                `/`
+                    `b/` Deleted
+                        `d.txt` Deleted
+                        `e/` Deleted
+                            `g.txt` Deleted
+                        `f.txt` Deleted
+                    `c.txt` Deleted
             """) { main("diff", oldNodeFile.toString()) }
         }
     }
@@ -149,12 +149,12 @@ class MainTest {
 
             <no-bad-paths>
 
-            - Duplicates
-                - CFCD208495D565EF66E7DFF9F98764DA
-                    - `/a.txt`
-                    - `/b/d.txt`
-                    - `/b/f.txt`
-                    - `/c.txt`
+            Duplicates
+                CFCD208495D565EF66E7DFF9F98764DA
+                    `/a.txt`
+                    `/b/d.txt`
+                    `/b/f.txt`
+                    `/c.txt`
             
             DONE
    
@@ -165,16 +165,16 @@ class MainTest {
 
                 <no-bad-paths>
 
-                - Duplicates
-                    - CFCD208495D565EF66E7DFF9F98764DA
-                        - `/a.txt`
-                        - `/b/d.txt`
-                        - `/b/f.txt`
-                        - `/c.txt`
+                Duplicates
+                    CFCD208495D565EF66E7DFF9F98764DA
+                        `/a.txt`
+                        `/b/d.txt`
+                        `/b/f.txt`
+                        `/c.txt`
                 
-                - `/`
-                    - `b/`
-                        - `node.yass` New
+                `/`
+                    `b/`
+                        `node.yass` New
                 
                 type <y> to accept changes (else abort): 
                 DONE
@@ -187,16 +187,16 @@ class MainTest {
 
                 <no-bad-paths>
 
-                - Duplicates
-                    - CFCD208495D565EF66E7DFF9F98764DA
-                        - `/a.txt`
-                        - `/b/d.txt`
-                        - `/b/f.txt`
-                        - `/c.txt`
+                Duplicates
+                    CFCD208495D565EF66E7DFF9F98764DA
+                        `/a.txt`
+                        `/b/d.txt`
+                        `/b/f.txt`
+                        `/c.txt`
                 
-                - `/`
-                    - `b/`
-                        - `node.yass` Bigger
+                `/`
+                    `b/`
+                        `node.yass` Bigger
                 
                 type <y> to accept changes (else abort): 
                 ABORTED
@@ -216,11 +216,10 @@ class MainTest {
     @Ignore
     @Test
     fun testExternalDir() {
-        val dir = Path("/Users/guru/Library/CloudStorage/OneDrive-Personal/data/major")
-        val oldNode = dir.resolve("diff/node.yass").readNode()
-        val newNode = createDirectoryNode(ALGORITHM, dir)
-        val newNodeDigestToPaths = NodeDigestToPaths(newNode)
-        printDuplicates(newNodeDigestToPaths.digestToPaths)
-        createDirectoryDelta(NodeDigestToPaths(oldNode), newNodeDigestToPaths).print()
+        val newNode = createDirectoryNode(ALGORITHM, Path("/Users/guru/Library/CloudStorage/OneDrive-Personal/data/major"))
+        newNode.print()
+        newNode.printFilesBySize()
+        newNode.printBadPaths()
+        printDuplicates(NodeDigestToPaths(newNode).digestToPaths)
     }
 }
