@@ -6,6 +6,7 @@
     "RemoveRedundantQualifierName",
     "SpellCheckingInspection",
     "RedundantVisibilityModifier",
+    "REDUNDANT_VISIBILITY_MODIFIER",
     "RedundantNullableReturnType",
     "KotlinRedundantDiagnosticSuppress",
     "RedundantSuppression",
@@ -44,12 +45,12 @@ public fun createBinarySerializer(): ch.softappeal.yass2.serialize.binary.Binary
                         writeRequired(i.size, 3)
                     },
                     {
-                        val i = ch.softappeal.diff.FileNode(
+                        ch.softappeal.diff.FileNode(
                             readRequired(2) as kotlin.String,
-                        )
-                        i.digest = readRequired(4) as kotlin.ByteArray
-                        i.size = readRequired(3) as kotlin.Int
-                        i
+                        ).apply {
+                            digest = readRequired(4) as kotlin.ByteArray
+                            size = readRequired(3) as kotlin.Int
+                        }
                     }
                 ),
                 ch.softappeal.yass2.serialize.binary.BinaryEncoder(
@@ -59,11 +60,10 @@ public fun createBinarySerializer(): ch.softappeal.yass2.serialize.binary.Binary
                         writeRequired(i.nodes, 1)
                     },
                     {
-                        val i = ch.softappeal.diff.DirectoryNode(
+                        ch.softappeal.diff.DirectoryNode(
                             readRequired(2) as kotlin.String,
                             readRequired(1) as kotlin.collections.List<ch.softappeal.diff.Node>,
                         )
-                        i
                     }
                 ),
             )
