@@ -1,7 +1,7 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.readBytes
-import ch.softappeal.yass2.serialize.writeBytes
+import ch.softappeal.yass2.core.serialize.readBytes
+import ch.softappeal.yass2.core.serialize.writeBytes
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date

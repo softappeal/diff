@@ -1,6 +1,6 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.writeBytes
+import ch.softappeal.yass2.core.serialize.writeBytes
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream

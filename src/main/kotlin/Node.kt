@@ -1,8 +1,8 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.binary.ByteArrayBinaryEncoder
-import ch.softappeal.yass2.serialize.binary.IntBinaryEncoder
-import ch.softappeal.yass2.serialize.binary.StringBinaryEncoder
+import ch.softappeal.yass2.core.serialize.binary.ByteArrayBinaryEncoder
+import ch.softappeal.yass2.core.serialize.binary.IntBinaryEncoder
+import ch.softappeal.yass2.core.serialize.binary.StringBinaryEncoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

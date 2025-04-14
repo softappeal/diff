@@ -2,16 +2,13 @@
     "UNCHECKED_CAST",
     "USELESS_CAST",
     "PARAMETER_NAME_CHANGED_ON_OVERRIDE",
-    "unused",
     "RemoveRedundantQualifierName",
     "SpellCheckingInspection",
     "RedundantVisibilityModifier",
     "REDUNDANT_VISIBILITY_MODIFIER",
-    "RedundantNullableReturnType",
-    "KotlinRedundantDiagnosticSuppress",
     "RedundantSuppression",
     "UNUSED_ANONYMOUS_PARAMETER",
-    "TrailingComma",
+    "KotlinRedundantDiagnosticSuppress",
 )
 
 package ch.softappeal.diff
@@ -30,14 +27,14 @@ package ch.softappeal.diff
         name: required 2
         nodes: required 1
 */
-public fun createBinarySerializer(): ch.softappeal.yass2.serialize.binary.BinarySerializer =
-    object : ch.softappeal.yass2.serialize.binary.BinarySerializer() {
+public fun createBinarySerializer(): ch.softappeal.yass2.core.serialize.binary.BinarySerializer =
+    object : ch.softappeal.yass2.core.serialize.binary.BinarySerializer() {
         init {
             initialize(
-                ch.softappeal.yass2.serialize.binary.StringBinaryEncoder,
-                ch.softappeal.yass2.serialize.binary.IntBinaryEncoder,
-                ch.softappeal.yass2.serialize.binary.ByteArrayBinaryEncoder,
-                ch.softappeal.yass2.serialize.binary.BinaryEncoder(
+                ch.softappeal.yass2.core.serialize.binary.StringBinaryEncoder,
+                ch.softappeal.yass2.core.serialize.binary.IntBinaryEncoder,
+                ch.softappeal.yass2.core.serialize.binary.ByteArrayBinaryEncoder,
+                ch.softappeal.yass2.core.serialize.binary.BinaryEncoder(
                     ch.softappeal.diff.FileNode::class,
                     { i ->
                         writeRequired(i.name, 2)
@@ -53,7 +50,7 @@ public fun createBinarySerializer(): ch.softappeal.yass2.serialize.binary.Binary
                         }
                     }
                 ),
-                ch.softappeal.yass2.serialize.binary.BinaryEncoder(
+                ch.softappeal.yass2.core.serialize.binary.BinaryEncoder(
                     ch.softappeal.diff.DirectoryNode::class,
                     { i ->
                         writeRequired(i.name, 2)

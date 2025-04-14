@@ -1,8 +1,8 @@
 [versions]
 
 kotlin             = "2.1.20" # https://github.com/JetBrains/kotlin
-kotlinx-coroutines = "1.10.1" # https://github.com/Kotlin/kotlinx.coroutines
-yass2              = "21.0.0" # https://github.com/softappeal/yass2
+kotlinx-coroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines
+yass2              = "22.0.1" # https://github.com/softappeal/yass2
 
 [libraries]
 
