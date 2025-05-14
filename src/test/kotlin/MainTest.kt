@@ -1,6 +1,6 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.core.serialize.writeBytes
+import ch.softappeal.yass2.core.serialize.toByteArray
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -37,7 +37,7 @@ private fun redirectStdIn(bytes: ByteArray, block: () -> Unit) {
 class MainTest {
     @Test
     fun wrongUsage() {
-        fun test(vararg args: String) = assertEquals(USAGE, assertFailsWith<IllegalArgumentException> { testMain(*args) }.message)
+        fun test(vararg args: String) = assertEquals(USAGE, assertFailsWith<IllegalArgumentException> { main(*args) }.message)
         test()
         test("xxx")
         test("createNode", "x", "x", "x")
@@ -85,7 +85,7 @@ class MainTest {
             """) { main("printBadPaths") }
         }
 
-        redirectStdIn(NodeSerializer.writeBytes(root {
+        redirectStdIn(NodeSerializer.toByteArray(root {
             file(".", 0, 0)
             file(".txt", 1000, 0)
             file("a.txt", 2000, 0)

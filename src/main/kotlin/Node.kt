@@ -1,5 +1,7 @@
 package ch.softappeal.diff
 
+import ch.softappeal.yass2.core.serialize.ConcreteAndEnumClasses
+import ch.softappeal.yass2.core.serialize.binary.BinaryEncoderObjects
 import ch.softappeal.yass2.core.serialize.binary.ByteArrayBinaryEncoder
 import ch.softappeal.yass2.core.serialize.binary.IntBinaryEncoder
 import ch.softappeal.yass2.core.serialize.binary.StringBinaryEncoder
@@ -62,9 +64,9 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(nam
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
 
-internal val EncoderObjects = listOf(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
-internal val ConcreteClasses = listOf(FileNode::class, DirectoryNode::class)
-val NodeSerializer = createBinarySerializer()
+@BinaryEncoderObjects(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
+@ConcreteAndEnumClasses(FileNode::class, DirectoryNode::class)
+val NodeSerializer = BinarySerializer
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
 
@@ -182,7 +184,7 @@ fun Path.ignoredFile(basePath: Path) = ignored(basePath) { ".DS_Store" == name }
 fun Path.ignoredDir(basePath: Path) = ignored(basePath) { relativePath -> ".git" == relativePath }
 
 fun DirectoryNode.printFilesBySize() {
-    val extToPathSizes = buildMap<String?, MutableList<PathInfo<Int>>> {
+    val extToPathSizes = buildMap {
         paths { size }.forEach { pathSize ->
             val path = pathSize.path
             val lastDot = path.lastIndexOf('.')

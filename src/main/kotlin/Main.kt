@@ -1,7 +1,7 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.core.serialize.readBytes
-import ch.softappeal.yass2.core.serialize.writeBytes
+import ch.softappeal.yass2.core.serialize.fromByteArray
+import ch.softappeal.yass2.core.serialize.toByteArray
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -11,11 +11,11 @@ import kotlin.io.path.readBytes
 import kotlin.io.path.writeBytes
 import kotlin.system.exitProcess
 
-fun Path.readNode() = NodeSerializer.readBytes(readBytes()) as DirectoryNode
-private fun readNodeFromStdIn() = NodeSerializer.readBytes(System.`in`.readAllBytes()) as DirectoryNode
+fun Path.readNode() = NodeSerializer.fromByteArray(readBytes()) as DirectoryNode
+private fun readNodeFromStdIn() = NodeSerializer.fromByteArray(System.`in`.readAllBytes()) as DirectoryNode
 
-private fun DirectoryNode.writeToStdOut() = System.out.writeBytes(NodeSerializer.writeBytes(this))
-private fun DirectoryNode.writeToFile(file: Path) = file.writeBytes(NodeSerializer.writeBytes(this))
+private fun DirectoryNode.writeToStdOut() = System.out.writeBytes(NodeSerializer.toByteArray(this))
+private fun DirectoryNode.writeToFile(file: Path) = file.writeBytes(NodeSerializer.toByteArray(this))
 
 fun Path.nodeFile(): Path = resolve("node.yass")
 
@@ -84,5 +84,3 @@ fun main(vararg args: String) {
         else -> throwInvalidArgs()
     }
 }
-
-fun testMain(vararg args: String) = main(*args)
