@@ -1,9 +1,8 @@
 [versions]
 
-kotlin        = "2.1.21"       # https://github.com/JetBrains/kotlin
-ksp           = "2.1.21-2.0.1" # https://github.com/google/ksp
-coroutines    = "1.10.2"       # https://github.com/Kotlin/kotlinx.coroutines
-yass2         = "23.0.1"       # https://github.com/softappeal/yass2
+kotlin     = "2.2.0"   # https://github.com/JetBrains/kotlin
+coroutines = "1.10.2"  # https://github.com/Kotlin/kotlinx.coroutines
+yass2      = "24.0.0"  # https://github.com/softappeal/yass2
 
 [libraries]
 
@@ -15,4 +14,3 @@ yass2-generate = { module = "ch.softappeal.yass2:yass2-generate", version.ref = 
 [plugins]
 
 jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

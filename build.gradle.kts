@@ -2,7 +2,6 @@ defaultTasks("clean", "build", "installDist")
 
 plugins {
     alias(libs.plugins.jvm)
-    alias(libs.plugins.ksp)
     application
 }
 
@@ -13,8 +12,8 @@ repositories {
 dependencies {
     implementation(libs.yass2.core)
     implementation(libs.coroutines.core)
+    testImplementation(libs.yass2.generate)
     testImplementation(kotlin("test"))
-    ksp(libs.yass2.generate)
 }
 
 application {
