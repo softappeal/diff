@@ -28,15 +28,7 @@ private fun Node.checkName() {
 
 sealed class Node(open val name: String)
 
-class FileNode(override val name: String) : Node(name) {
-    var size: Int = 0
-    lateinit var digest: ByteArray
-
-    constructor(name: String, size: Int, digest: ByteArray) : this(name) {
-        this.size = size
-        this.digest = digest
-    }
-
+class FileNode(override val name: String, var size: Int, var digest: ByteArray) : Node(name) {
     init {
         checkName()
     }
@@ -206,7 +198,7 @@ fun createDirectoryNode(digestAlgorithm: String, sourceDirectory: Path): Directo
                     require(!path.isSymbolicLink()) { "'$path' is a symbolic link" }
                     if (path.isRegularFile()) {
                         if (path.ignoredFile(sourceDirectory)) return@forEach
-                        add(FileNode(path.name).apply {
+                        add(FileNode(path.name, 0, byteArrayOf()).apply {
                             launch {
                                 val bytes = path.readBytes()
                                 size = bytes.size
