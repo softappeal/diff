@@ -28,9 +28,11 @@ private fun Node.checkName() {
     require(!name.contains(DIR_SEP)) { "node name '$name' must not contain '$DIR_SEP'" }
 }
 
-sealed class Node(open val name: String)
+sealed class Node {
+    abstract val name: String
+}
 
-class FileNode(override val name: String, var size: Int, var digest: ByteArray) : Node(name) {
+class FileNode(override val name: String, var size: Int, var digest: ByteArray) : Node() {
     init {
         checkName()
     }
@@ -38,16 +40,10 @@ class FileNode(override val name: String, var size: Int, var digest: ByteArray) 
     override fun toString() = "FileNode(name=`$name`,size=$size,digest=${digest.toHex()})"
 }
 
-class DirectoryNode(override val name: String, val nodes: List<Node>) : Node(name) {
+class DirectoryNode(override val name: String, val nodes: List<Node>) : Node() {
     init {
         checkName()
-        fun isSorted(): Boolean {
-            for (n in 0 until nodes.size - 1) {
-                if (nodes[n].name > nodes[n + 1].name) return false
-            }
-            return true
-        }
-        require(isSorted()) { "nodes $nodes must be sorted" }
+        require(nodes.zipWithNext().all { (first, second) -> first.name <= second.name }) { "nodes $nodes must be sorted" }
         require(nodes.map { it.name }.toSet().size == nodes.size) {
             "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}"
         }
@@ -73,7 +69,7 @@ fun Node.print(indent: Int = 0) {
     }
 }
 
-@Suppress("SpellCheckingInspection") private val HexChars = "0123456789ABCDEF".toCharArray()
+private val HexChars = "0123456789ABCDEF".toCharArray()
 internal fun ByteArray.toHex(): String {
     val hexDigits = CharArray(2 * size)
     var i = 0

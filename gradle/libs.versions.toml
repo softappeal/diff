@@ -1,9 +1,9 @@
 [versions]
 
-kotlin     = "2.3.10"     # https://github.com/JetBrains/kotlin
+kotlin     = "2.3.21"     # https://github.com/JetBrains/kotlin
 coroutines = "1.10.2"     # https://github.com/Kotlin/kotlinx.coroutines
-yass2      = "27.0.0"     # https://github.com/softappeal/yass2
-ksp        = "2.3.5"      # https://github.com/google/ksp
+yass2      = "28.0.0"     # https://github.com/softappeal/yass2
+ksp        = "2.3.7"      # https://github.com/google/ksp
 
 [libraries]
 
