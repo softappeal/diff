@@ -192,6 +192,7 @@ class NodeTest {
         assertTrue(goodName("."))
         assertTrue(goodName("-"))
         assertTrue(goodName("_"))
+        assertTrue(goodName("@"))
         @Suppress("SpellCheckingInspection")
         assertTrue(goodName("..--__aazzAAZZ0099"))
     }

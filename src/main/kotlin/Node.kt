@@ -113,7 +113,7 @@ fun printDuplicates(digestToPaths: DigestToPaths) {
     }
 }
 
-private val GoodName = Pattern.compile("[a-zA-Z0-9-_.]+")
+private val GoodName = Pattern.compile("[a-zA-Z0-9-_.@]+")
 fun goodName(name: String) = GoodName.matcher(name).matches()
 private fun DirectoryNode.badPaths(): List<String> = buildList {
     fun Node.visit(path: String) {
