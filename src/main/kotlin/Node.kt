@@ -181,9 +181,9 @@ fun DirectoryNode.printFilesBySize() {
             pathSizes.add(pathSize)
         }
     }
-    extToPathSizes.entries.sortedBy { it.key }.forEach { (ext, pathSizes) ->
+    extToPathSizes.entries.sortedBy { it.key }.forEach { (ext = key, pathSizes = value) ->
         println(if (ext == null) "<no-ext>" else "`$ext`")
-        pathSizes.sortedByDescending { it.info }.forEach { (path, size) -> println("    ${size / 1000} KB `$path`") }
+        pathSizes.sortedByDescending { it.info }.forEach { (path, size = info) -> println("    ${size / 1000} KB `$path`") }
     }
 }
 

@@ -10,6 +10,14 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    compilerOptions {
+        extraWarnings.set(true)
+        freeCompilerArgs.add("-Xname-based-destructuring=complete")
+        allWarningsAsErrors.set(true)
+    }
+}
+
 dependencies {
     implementation(libs.yass2.core)
     implementation(libs.coroutines.core)

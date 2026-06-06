@@ -43,8 +43,8 @@ data class NodeDigestToPaths(
 
 fun createDirectoryDelta(oldNodeDigestToPaths: NodeDigestToPaths, newNodeDigestToPaths: NodeDigestToPaths) =
     DirectoryDelta(null, "", DeltaState.Same, null).apply {
-        val (oldNode, oldDigestToPaths) = oldNodeDigestToPaths
-        val (newNode, newDigestToPaths) = newNodeDigestToPaths
+        val (oldNode = node, oldDigestToPaths = digestToPaths) = oldNodeDigestToPaths
+        val (newNode = node, newDigestToPaths = digestToPaths) = newNodeDigestToPaths
         val deletedDigestToDelta = mutableMapOf<String, Delta>()
 
         fun DirectoryDelta.compare(oldDirectoryNode: DirectoryNode, newDirectoryNode: DirectoryNode) {
