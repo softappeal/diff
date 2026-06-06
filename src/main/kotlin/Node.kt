@@ -43,7 +43,7 @@ class FileNode(override val name: String, var size: Int, var digest: ByteArray) 
 class DirectoryNode(override val name: String, val nodes: List<Node>) : Node() {
     init {
         checkName()
-        require(nodes.zipWithNext().all { (first, second) -> first.name <= second.name }) { "nodes $nodes must be sorted" }
+        require(nodes.isSortedBy(Node::name)) { "nodes $nodes must be sorted" }
         require(nodes.map { it.name }.toSet().size == nodes.size) {
             "DirectoryNode '$name' has duplicated nodes ${nodes.map { "'${it.name}'" }}"
         }
