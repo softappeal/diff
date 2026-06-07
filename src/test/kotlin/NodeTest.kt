@@ -194,7 +194,7 @@ class NodeTest {
         assertTrue(goodName("_"))
         assertTrue(goodName("@"))
         @Suppress("SpellCheckingInspection")
-        assertTrue(goodName("..--__aazzAAZZ0099"))
+        assertTrue(goodName("..--__aazzAAZZ0099@@"))
     }
 
     @Test
