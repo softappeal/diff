@@ -1,7 +1,5 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.core.serialize.ConcreteAndEnumClasses
-import ch.softappeal.yass2.core.serialize.binary.BinaryEncoderObjects
 import ch.softappeal.yass2.core.serialize.binary.ByteArrayBinaryEncoder
 import ch.softappeal.yass2.core.serialize.binary.IntBinaryEncoder
 import ch.softappeal.yass2.core.serialize.binary.StringBinaryEncoder
@@ -52,8 +50,8 @@ class DirectoryNode(override val name: String, val nodes: List<Node>) : Node() {
     override fun toString() = "DirectoryNode(name=`$name`,nodes=${nodes.size})"
 }
 
-@BinaryEncoderObjects(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
-@ConcreteAndEnumClasses(FileNode::class, DirectoryNode::class)
+val BinaryEncoderObjects = listOf(StringBinaryEncoder::class, IntBinaryEncoder::class, ByteArrayBinaryEncoder::class)
+val ConcreteAndEnumClasses = listOf(FileNode::class, DirectoryNode::class)
 val NodeSerializer = binarySerializer()
 
 fun createDirectoryNode(name: String, nodes: List<Node>) = DirectoryNode(name, nodes.sortedBy(Node::name))
