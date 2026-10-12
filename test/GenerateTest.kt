@@ -7,7 +7,7 @@ import kotlin.test.Test
 class GenerateTest {
     @Test
     fun generate() {
-        generateFile("src/main/kotlin") {
+        generateFile("src") {
             generateBinarySerializer(BinaryEncoderObjects, ConcreteAndEnumClasses)
         }
     }

@@ -7,7 +7,6 @@ import java.io.PrintStream
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.writeBytes
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -36,8 +35,8 @@ private fun redirectStdIn(bytes: ByteArray, block: () -> Unit) {
 
 class MainTest {
     @Test
-    fun wrongUsage() {
-        fun test(vararg args: String) = assertEquals(USAGE, assertFailsWith<IllegalArgumentException> { main(*args) }.message)
+    fun wrongCLI() {
+        fun test(vararg args: String) = assertEquals(CLI, assertFailsWith<IllegalArgumentException> { main(*args) }.message)
         test()
         test("xxx")
         test("createNode", "x", "x", "x")
@@ -211,15 +210,5 @@ class MainTest {
         }
 
         toolDirectory.nodeFile().deleteExisting()
-    }
-
-    @Ignore
-    @Test
-    fun testExternalDir() {
-        val newNode = createDirectoryNode(ALGORITHM, Path("/Users/guru/Library/CloudStorage/OneDrive-Personal/data/major"))
-        newNode.print()
-        newNode.printFilesBySize()
-        newNode.printBadPaths()
-        printDuplicates(NodeDigestToPaths(newNode).digestToPaths)
     }
 }

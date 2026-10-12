@@ -1,0 +1,22 @@
+# https://kotlin-toolchain.org
+
+product: jvm/app
+
+dependencies:
+  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0
+  - ch.softappeal.yass2:yass2-core:30.0.0
+
+test-dependencies:
+  - ch.softappeal.yass2:yass2-generate:30.0.0
+
+settings:
+  kotlin:
+    version: 2.4.21
+    allWarningsAsErrors: true
+    freeCompilerArgs: [ "-Xname-based-destructuring=complete" ]
+  jvm:
+    mainClass: ch.softappeal.diff.MainKt
+    jdk:
+      version: 25
+      distributions: [ temurin ]
+      selectionMode: alwaysProvision

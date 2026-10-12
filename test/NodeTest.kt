@@ -46,7 +46,7 @@ fun assertOutput(expected: String, printBlock: () -> Unit) {
     assertEquals((expected + "\n").trimIndent(), bytes.toString(charset))
 }
 
-val TEST_DIR: Path = Path("src/test/resources/test")
+val TEST_DIR: Path = Path("testFiles/test")
 val TEST2_DIR: Path = TEST_DIR.resolveSibling("test2")
 
 class NodeTest {
