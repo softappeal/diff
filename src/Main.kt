@@ -1,86 +1,51 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.core.serialize.fromByteArray
-import ch.softappeal.yass2.core.serialize.toByteArray
-import java.nio.file.Path
-import java.text.SimpleDateFormat
-import java.util.Date
+import ch.softappeal.yass2.serialize.fromByteArray
+import ch.softappeal.yass2.serialize.toByteArray
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.readBytes
 import kotlin.io.path.writeBytes
-import kotlin.system.exitProcess
 
-val CLI = """
-    Command Line Interface:
-        'createNode' algorithm directory > nodeFile
-        'printNode' < nodeFile
-        'printDuplicates' < nodeFile
-        'printBadPaths' < nodeFile
-        'printSizes' < nodeFile
-        'diff' oldNodeFile < newNodeFile
-        ( 'script' | 'scriptWithGui' ) algorithm [ archivePrefix ]
-""".trimIndent()
+const val NODE_FILE = "node.yass"
 
-fun main(vararg args: String) {
-    fun throwInvalidArgs(): Nothing = throw IllegalArgumentException(CLI)
-    if (args.isEmpty()) throwInvalidArgs()
-    val command = args[0]
-    when {
-        command == "createNode" && args.size == 3 -> createDirectoryNode(args[1], Path(args[2])).writeToStdOut()
-        command == "printNode" && args.size == 1 -> readNodeFromStdIn().print()
-        command == "printDuplicates" && args.size == 1 -> printDuplicates(readNodeFromStdIn().calculateDigestToPaths())
-        command == "printBadPaths" && args.size == 1 -> readNodeFromStdIn().printBadPaths()
-        command == "printSizes" && args.size == 1 -> readNodeFromStdIn().printFilesBySize()
-        command == "diff" && args.size == 2 ->
-            createDirectoryDelta(NodeDigestToPaths(Path(args[1]).readNode()), NodeDigestToPaths(readNodeFromStdIn())).print()
-        (command == "script" || command == "scriptWithGui") && (args.size == 2 || args.size == 3) ->
-            script(Path(""), args[1], if (args.size == 2) null else args[2], command == "scriptWithGui")
-        else -> throwInvalidArgs()
+fun script(stdOut: Appendable, stdIn: InputStream, toolDir: Path) {
+    with(stdOut) {
+        appendLine()
+        appendLine("diff ${Node::class.java.`package`.implementationVersion}")
+        appendLine()
+        val newNode = DirectoryNode("$toolDir/..", "SHA3-256")
+        val newNodeDesc = NodeDesc(newNode)
+        printDuplicates(newNodeDesc.digestToPaths)
+        val nodePath = Path("$toolDir/$NODE_FILE")
+        if (nodePath.exists()) {
+            val oldNode = NodeSerializer.fromByteArray(nodePath.readBytes()) as DirectoryNode
+            val delta = DirectoryDelta(NodeDesc(oldNode), newNodeDesc)
+            appendLine("DELTA")
+            printDeltas(delta)
+            appendLine()
+            append("type <y> to accept changes (else abort): ")
+            val answer = BufferedReader(InputStreamReader(stdIn)).readLine()
+            appendLine()
+            if (answer != "y") {
+                appendLine("ABORTED")
+                appendLine()
+                return
+            }
+        } else {
+            appendLine("NODE")
+            printNodes(newNode)
+            appendLine()
+        }
+        nodePath.writeBytes(NodeSerializer.toByteArray(newNode))
+        appendLine("DONE")
+        appendLine()
     }
 }
 
-fun Path.readNode() = NodeSerializer.fromByteArray(readBytes()) as DirectoryNode
-private fun readNodeFromStdIn() = NodeSerializer.fromByteArray(System.`in`.readAllBytes()) as DirectoryNode
-
-private fun DirectoryNode.writeToStdOut() = System.out.writeBytes(NodeSerializer.toByteArray(this))
-private fun DirectoryNode.writeToFile(file: Path) = file.writeBytes(NodeSerializer.toByteArray(this))
-
-fun Path.nodeFile(): Path = resolve("node.yass")
-
-fun script(toolDirectory: Path, algorithm: String, archivePrefix: String?, withGui: Boolean = false) {
-    println()
-    val root = toolDirectory.resolve("..")
-    val rootNode = createDirectoryNode(algorithm, root)
-    rootNode.printBadPaths()
-    println()
-    val newNodeDigestToPaths = NodeDigestToPaths(rootNode)
-    printDuplicates(newNodeDigestToPaths.digestToPaths)
-    println()
-    val node = toolDirectory.nodeFile()
-    if (node.exists()) {
-        val delta = createDirectoryDelta(NodeDigestToPaths(node.readNode()), newNodeDigestToPaths)
-        if (withGui) gui(delta)
-        delta.print()
-        println()
-        print("type <y> to accept changes (else abort): ")
-        val answer = readln()
-        println()
-        if (answer != "y") {
-            println("ABORTED")
-            println()
-            if (withGui) exitProcess(1)
-            return
-        }
-    }
-    newNodeDigestToPaths.node.writeToFile(node)
-    if (archivePrefix != null) {
-        val zipFile = "$archivePrefix${SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(Date())}.zip"
-        createZipFile(root, Path(zipFile))
-        println("archive '$zipFile' written")
-        println()
-    }
-    println("DONE")
-    println()
-    if (withGui) exitProcess(0)
+fun main() {
+    script(System.out, System.`in`, ".")
 }

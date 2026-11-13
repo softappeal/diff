@@ -1,280 +1,225 @@
+@file:Suppress("SpellCheckingInspection")
+
 package ch.softappeal.diff
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
-val OLD_EVERYTHING = root {
-    dir("FileToDir") {
-        dir("simple") {
-            file("a", 0)
-        }
-        dir("renamed") {
-            file("a", 10)
-        }
-        dir("moved") {
-            file("a", 20)
-        }
-    }
-    dir("DirToFile") {
-        dir("simple") {
-            dir("a") {
-                file("b", 30)
-            }
-        }
-        dir("renamed") {
-            dir("a") {
-                file("b", 40)
-            }
-            file("c", 41)
-        }
-        dir("moved") {
-            dir("a") {
-                file("b", 50)
-            }
-        }
-    }
-    dir("Changed") {
-        file("e", 2, 60)
-        file("a", 2, 60)
-        file("s", 2, 60)
-        file("b", 2, 60)
-    }
-    dir("Deleted") {
-        dir("a") {
-            dir("b") {
-                file("c", 70)
-            }
-        }
-    }
-    dir("New") {
-    }
-    dir("RenamedFrom") {
-        dir("a") {
-            file("b", 90)
-        }
-    }
-    dir("MovedFrom") {
-        dir("a") {
-            file("b", 100)
-        }
-    }
-}
-
-val NEW_EVERYTHING = root {
-    dir("FileToDir") {
-        dir("simple") {
-            dir("a") {
-                file("b", 1)
-            }
-        }
-        dir("renamed") {
-            dir("a") {
-                file("b", 11)
-            }
-            file("c", 10)
-        }
-        dir("moved") {
-            dir("a") {
-                file("b", 20)
-            }
-        }
-    }
-    dir("DirToFile") {
-        dir("simple") {
-            file("a", 31)
-        }
-        dir("renamed") {
-            file("a", 41)
-        }
-        dir("moved") {
-            file("a", 50)
-        }
-    }
-    dir("Changed") {
-        file("e", 2, 60)
-        file("a", 2, 61)
-        file("s", 1, 60)
-        file("b", 3, 60)
-    }
-    dir("Deleted") {
-    }
-    dir("New") {
-        dir("a") {
-            dir("b") {
-                file("c", 80)
-            }
-        }
-    }
-    dir("RenamedFrom") {
-        dir("c") {
-            file("b", 90)
-        }
-    }
-    dir("MovedFrom") {
-        dir("c") {
-            dir("a") {
-                file("b", 100)
-            }
-        }
-    }
-}
-
-private fun assertEquals(old: DirectoryNode, new: DirectoryNode, expected: String) {
-    assertOutput(expected) { createDirectoryDelta(NodeDigestToPaths(old), NodeDigestToPaths(new)).print() }
+private fun assertDiff(old: DirectoryNode, new: DirectoryNode, expected: String) {
+    assertEquals(
+        (expected.split("\n").joinToString("\n") { it.replaceFirst(Regex("\\S"), "- $0") } + "\n").trimIndent(),
+        toString { printDeltas(DirectoryDelta(NodeDesc(old), NodeDesc(new))) },
+    )
 }
 
 class DeltaTest {
     @Test
-    fun everything() {
-        assertEquals(
-            OLD_EVERYTHING,
-            NEW_EVERYTHING,
+    fun doNotConsolidateMovedDirectoryAndDropUnmatchedEmptySourceDirectory() {
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                    dir("empty")
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                }
+            },
             """
-                `/`
-                    `Changed/`
+                ``
+                    `destination` New
+                        `f` MovedFrom `/source/f`
+                    `source` Deleted
+                        `empty` Deleted
+            """
+        )
+    }
+
+    @Test
+    fun doNotConsolidateMovedDirectoriesWithDifferentSourcesOrContents2() {
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                }
+                dir("source")
+            },
+            """
+                ``
+                    `destination` New
+                        `f` MovedFrom `/source/f`
+            """
+        )
+    }
+
+    @Test
+    fun everything() {
+        assertDiff(
+            root {
+                dir("FileToDir") {
+                    dir("simple") {
+                        file("a", 0)
+                    }
+                    dir("renamed") {
+                        file("a", 10)
+                    }
+                    dir("moved") {
+                        file("a", 20)
+                    }
+                }
+                dir("DirToFile") {
+                    dir("simple") {
+                        dir("a") {
+                            file("b", 30)
+                        }
+                    }
+                    dir("renamed") {
+                        dir("a") {
+                            file("b", 40)
+                        }
+                        file("c", 41)
+                    }
+                    dir("moved") {
+                        dir("a") {
+                            file("b", 50)
+                        }
+                    }
+                }
+                dir("Changed") {
+                    file("e", 60)
+                    file("a", 60)
+                    file("s", 60)
+                    file("b", 60)
+                }
+                dir("Deleted") {
+                    dir("a") {
+                        dir("b") {
+                            file("c", 70)
+                        }
+                    }
+                }
+                dir("New") {
+                }
+                dir("RenamedFrom") {
+                    dir("a") {
+                        file("b", 90)
+                    }
+                }
+                dir("MovedFrom") {
+                    dir("a") {
+                        file("b", 100)
+                    }
+                }
+            },
+            root {
+                dir("FileToDir") {
+                    dir("simple") {
+                        dir("a") {
+                            file("b", 1)
+                        }
+                    }
+                    dir("renamed") {
+                        dir("a") {
+                            file("b", 11)
+                        }
+                        file("c", 10)
+                    }
+                    dir("moved") {
+                        dir("a") {
+                            file("b", 20)
+                        }
+                    }
+                }
+                dir("DirToFile") {
+                    dir("simple") {
+                        file("a", 31)
+                    }
+                    dir("renamed") {
+                        file("a", 41)
+                    }
+                    dir("moved") {
+                        file("a", 50)
+                    }
+                }
+                dir("Changed") {
+                    file("e", 60)
+                    file("a", 61)
+                    file("s", 60)
+                    file("b", 60)
+                }
+                dir("Deleted") {
+                }
+                dir("New") {
+                    dir("a") {
+                        dir("b") {
+                            file("c", 80)
+                        }
+                    }
+                }
+                dir("RenamedFrom") {
+                    dir("c") {
+                        file("b", 90)
+                    }
+                }
+                dir("MovedFrom") {
+                    dir("c") {
+                        dir("a") {
+                            file("b", 100)
+                        }
+                    }
+                }
+            },
+            """
+                ``
+                    `Changed`
                         `a` Changed
-                        `b` Bigger
-                        `s` Smaller
-                    `Deleted/`
-                        `a/` Deleted
-                            `b/` Deleted
+                    `Deleted`
+                        `a` Deleted
+                            `b` Deleted
                                 `c` Deleted
-                    `DirToFile/`
-                        `moved/`
+                    `DirToFile`
+                        `moved`
                             `a` DirToFile MovedFrom `/DirToFile/moved/a/b`
-                        `renamed/`
+                        `renamed`
                             `a` DirToFile RenamedFrom `c`
                                 `b` Deleted
-                        `simple/`
+                        `simple`
                             `a` DirToFile
                                 `b` Deleted
-                    `FileToDir/`
-                        `moved/`
-                            `a/` FileToDir
+                    `FileToDir`
+                        `moved`
+                            `a` FileToDir
                                 `b` MovedFrom `/FileToDir/moved/a`
-                        `renamed/`
-                            `a/` FileToDir
+                        `renamed`
+                            `a` FileToDir
                                 `b` New
                             `c` RenamedFrom `a`
-                        `simple/`
-                            `a/` FileToDir
+                        `simple`
+                            `a` FileToDir
                                 `b` New
-                    `MovedFrom/`
-                        `c/` New
-                            `a/` MovedFrom `/MovedFrom/a`
-                    `New/`
-                        `a/` New
-                            `b/` New
+                    `MovedFrom`
+                        `c` New
+                            `a` MovedFrom `/MovedFrom/a`
+                    `New`
+                        `a` New
+                            `b` New
                                 `c` New
-                    `RenamedFrom/`
-                        `c/` RenamedFrom `a`
-            """
-        )
-    }
-
-    @Test
-    fun compareFlatEmpty() {
-        assertEquals(
-            root {
-            },
-            root {
-            },
-            """
-                `/`
-            """
-        )
-    }
-
-    @Test
-    fun compareFlatDeleted() {
-        assertEquals(
-            root {
-                file("a", 0)
-            },
-            root {
-            },
-            """
-                `/`
-                    `a` Deleted
-            """
-        )
-    }
-
-    @Test
-    fun compareFlatNew() {
-        assertEquals(
-            root {
-            },
-            root {
-                file("a", 0)
-            },
-            """
-                `/`
-                    `a` New
-            """
-        )
-    }
-
-    @Test
-    fun compareFlatSame() {
-        assertEquals(
-            root {
-                file("a", 0)
-            },
-            root {
-                file("a", 0)
-            },
-            """
-                `/`
-            """
-        )
-    }
-
-    @Test
-    fun compareFlatChanged() {
-        assertEquals(
-            root {
-                file("a", 0)
-            },
-            root {
-                file("a", 1)
-            },
-            """
-                `/`
-                    `a` Changed
-            """
-        )
-    }
-
-    @Test
-    fun compareFlatMany() {
-        assertEquals(
-            root {
-                file("a", 1)
-                file("d", 2)
-                file("e", 3)
-                file("g", 4)
-            },
-            root {
-                file("b", 5)
-                file("c", 6)
-                file("f", 7)
-            },
-            """
-                `/`
-                    `a` Deleted
-                    `b` New
-                    `c` New
-                    `d` Deleted
-                    `e` Deleted
-                    `f` New
-                    `g` Deleted
+                    `RenamedFrom`
+                        `c` RenamedFrom `a`
             """
         )
     }
 
     @Test
     fun compareDirs() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 0)
                 dir("d1") {
@@ -318,15 +263,15 @@ class DeltaTest {
                 }
             },
             """
-                `/`
+                ``
                     `a` Changed
-                    `d1/`
-                        `d2/`
-                            `d3/`
+                    `d1`
+                        `d2`
+                            `d3`
                                 `c` New
-                        `d3/`
+                        `d3`
                             `b` Deleted
-                            `d3/` New
+                            `d3` New
                                 `a` New
                                 `b` New
             """
@@ -334,8 +279,109 @@ class DeltaTest {
     }
 
     @Test
+    fun compareFlatEmpty() {
+        assertDiff(
+            root {
+            },
+            root {
+            },
+            """
+                ``
+            """
+        )
+    }
+
+    @Test
+    fun compareFlatDeleted() {
+        assertDiff(
+            root {
+                file("a", 0)
+            },
+            root {
+            },
+            """
+                ``
+                    `a` Deleted
+            """
+        )
+    }
+
+    @Test
+    fun compareFlatNew() {
+        assertDiff(
+            root {
+            },
+            root {
+                file("a", 0)
+            },
+            """
+                ``
+                    `a` New
+            """
+        )
+    }
+
+    @Test
+    fun compareFlatSame() {
+        assertDiff(
+            root {
+                file("a", 0)
+            },
+            root {
+                file("a", 0)
+            },
+            """
+                ``
+            """
+        )
+    }
+
+    @Test
+    fun compareFlatChanged() {
+        assertDiff(
+            root {
+                file("a", 0)
+            },
+            root {
+                file("a", 1)
+            },
+            """
+                ``
+                    `a` Changed
+            """
+        )
+    }
+
+    @Test
+    fun compareFlatMany() {
+        assertDiff(
+            root {
+                file("a", 1)
+                file("d", 2)
+                file("e", 3)
+                file("g", 4)
+            },
+            root {
+                file("b", 5)
+                file("c", 6)
+                file("f", 7)
+            },
+            """
+                ``
+                    `a` Deleted
+                    `b` New
+                    `c` New
+                    `d` Deleted
+                    `e` Deleted
+                    `f` New
+                    `g` Deleted
+            """
+        )
+    }
+
+    @Test
     fun addNodeDeleted() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
                 dir("b") {
@@ -348,11 +394,11 @@ class DeltaTest {
             root {
             },
             """
-                `/`
+                ``
                     `a` Deleted
-                    `b/` Deleted
+                    `b` Deleted
                         `c` Deleted
-                        `d/` Deleted
+                        `d` Deleted
                             `e` Deleted
             """
         )
@@ -360,7 +406,7 @@ class DeltaTest {
 
     @Test
     fun addNodeNew() {
-        assertEquals(
+        assertDiff(
             root {
             },
             root {
@@ -373,11 +419,11 @@ class DeltaTest {
                 }
             },
             """
-                `/`
+                ``
                     `a` New
-                    `b/` New
+                    `b` New
                         `c` New
-                        `d/` New
+                        `d` New
                             `e` New
             """
         )
@@ -385,7 +431,7 @@ class DeltaTest {
 
     @Test
     fun addNodeTypeChangedFileToDir() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
             },
@@ -398,10 +444,10 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `a/` FileToDir
+                ``
+                    `a` FileToDir
                         `b` New
-                        `c/` New
+                        `c` New
                             `d` New
             """
         )
@@ -409,7 +455,7 @@ class DeltaTest {
 
     @Test
     fun addNodeTypeChangedFileToDirRenamed() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
             },
@@ -420,8 +466,8 @@ class DeltaTest {
                 file("b", 1)
             },
             """
-                `/`
-                    `a/` FileToDir
+                ``
+                    `a` FileToDir
                         `b` New
                     `b` RenamedFrom `a`
             """
@@ -430,7 +476,7 @@ class DeltaTest {
 
     @Test
     fun addNodeTypeChangedFileToDirMoved() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
             },
@@ -440,8 +486,8 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `a/` FileToDir
+                ``
+                    `a` FileToDir
                         `b` MovedFrom `/a`
             """
         )
@@ -449,7 +495,7 @@ class DeltaTest {
 
     @Test
     fun addNodeTypeChangedDirToFile() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("a") {
                     file("b", 1)
@@ -462,10 +508,10 @@ class DeltaTest {
                 file("a", 3)
             },
             """
-                `/`
+                ``
                     `a` DirToFile
                         `b` Deleted
-                        `c/` Deleted
+                        `c` Deleted
                             `d` Deleted
             """
         )
@@ -473,7 +519,7 @@ class DeltaTest {
 
     @Test
     fun addNodeTypeChangedDirToFileRenamed() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("a") {
                     file("b", 1)
@@ -487,10 +533,10 @@ class DeltaTest {
                 file("a", 9)
             },
             """
-                `/`
+                ``
                     `a` DirToFile RenamedFrom `x`
                         `b` Deleted
-                        `c/` Deleted
+                        `c` Deleted
                             `d` Deleted
             """
         )
@@ -498,7 +544,7 @@ class DeltaTest {
 
     @Test
     fun addNodeTypeChangedDirToFileMoved() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("a") {
                     file("b", 1)
@@ -509,7 +555,7 @@ class DeltaTest {
                 file("a", 1)
             },
             """
-                `/`
+                ``
                     `a` DirToFile MovedFrom `/a/b`
                         `x` Deleted
             """
@@ -518,7 +564,7 @@ class DeltaTest {
 
     @Test
     fun pruneEqualDirectory() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
                 dir("d") {
@@ -537,17 +583,17 @@ class DeltaTest {
                 dir("d3")
             },
             """
-                `/`
-                    `d2/`
+                ``
+                    `d2`
                         `e` Deleted
-                    `d3/` New
+                    `d3` New
             """
         )
     }
 
     @Test
     fun renamed() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
             },
@@ -555,7 +601,7 @@ class DeltaTest {
                 file("e", 1)
             },
             """
-                `/`
+                ``
                     `e` RenamedFrom `a`
             """
         )
@@ -563,7 +609,7 @@ class DeltaTest {
 
     @Test
     fun movedDown() {
-        assertEquals(
+        assertDiff(
             root {
                 file("e", 1)
             },
@@ -573,8 +619,8 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `d/` New
+                ``
+                    `d` New
                         `e` MovedFrom `/e`
             """
         )
@@ -582,7 +628,7 @@ class DeltaTest {
 
     @Test
     fun movedUp1() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("d") {
                     file("e", 1)
@@ -592,8 +638,8 @@ class DeltaTest {
                 file("e", 1)
             },
             """
-                `/`
-                    `d/` Deleted
+                ``
+                    `d` Deleted
                     `e` MovedFrom `/d/e`
             """
         )
@@ -601,7 +647,7 @@ class DeltaTest {
 
     @Test
     fun movedUp2() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("z") {
                     dir("d") {
@@ -615,16 +661,16 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `d/` MovedFrom `/z/d`
-                    `z/` Deleted
+                ``
+                    `d` MovedFrom `/z/d`
+                    `z` Deleted
             """
         )
     }
 
     @Test
     fun renamedOldDuplicated() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
                 file("b", 1)
@@ -633,7 +679,7 @@ class DeltaTest {
                 file("e", 1)
             },
             """
-                `/`
+                ``
                     `a` Deleted
                     `b` Deleted
                     `e` New
@@ -643,7 +689,7 @@ class DeltaTest {
 
     @Test
     fun renamedNewDuplicated() {
-        assertEquals(
+        assertDiff(
             root {
                 file("a", 1)
             },
@@ -652,7 +698,7 @@ class DeltaTest {
                 file("f", 1)
             },
             """
-                `/`
+                ``
                     `a` Deleted
                     `e` New
                     `f` New
@@ -660,10 +706,9 @@ class DeltaTest {
         )
     }
 
-    @Suppress("SpellCheckingInspection")
     @Test
     fun manyRenamedAndMoved() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("a") {
                     file("b", 1)
@@ -705,15 +750,15 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `a/`
+                ``
+                    `a`
                         `s` MovedFrom `/r`
                         `y` RenamedFrom `x`
                     `c` MovedFrom `/a/b`
-                    `i/`
-                        `ii/`
-                            `iii/`
-                                `iiii/`
+                    `i`
+                        `ii`
+                            `iii`
+                                `iiii`
                                     `j` MovedFrom `/i/j`
                                     `n` RenamedFrom `m`
                         `jjjj` MovedFrom `/i/ii/iii/iiii/jjjj`
@@ -721,10 +766,9 @@ class DeltaTest {
         )
     }
 
-    @Suppress("SpellCheckingInspection")
     @Test
     fun manyRenamedAndMovedDir() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("a") {
                     file("b", 1)
@@ -772,18 +816,18 @@ class DeltaTest {
                 file("r", 3)
             },
             """
-                `/`
-                    `i/`
-                        `ii/`
-                            `a/` MovedFrom `/a`
-                            `iii2/` RenamedFrom `iii`
+                ``
+                    `i`
+                        `ii`
+                            `a` MovedFrom `/a`
+                            `iii2` RenamedFrom `iii`
             """
         )
     }
 
     @Test
     fun renamedDir() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("x") {
                     file("a", 1)
@@ -803,15 +847,15 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `y/` RenamedFrom `x`
+                ``
+                    `y` RenamedFrom `x`
             """
         )
     }
 
     @Test
     fun movedDir() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("x") {
                     file("a", 1)
@@ -835,16 +879,16 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `z/` New
-                        `x/` MovedFrom `/x`
+                ``
+                    `z` New
+                        `x` MovedFrom `/x`
             """
         )
     }
 
     @Test
     fun mergeMovedDirectoryOk() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     dir("v") {
@@ -864,15 +908,15 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `t/` RenamedFrom `u`
+                ``
+                    `t` RenamedFrom `u`
             """
         )
     }
 
     @Test
     fun mergeMovedDirectoryWrongSize() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     dir("v") {
@@ -891,22 +935,22 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `t/` New
-                        `v/` New
-                            `d1/` New
-                            `d2/` New
+                ``
+                    `t` New
+                        `v` New
+                            `d1` New
+                            `d2` New
                             `same` MovedFrom `/u/v/same`
-                    `u/` Deleted
-                        `v/` Deleted
-                            `d1/` Deleted
+                    `u` Deleted
+                        `v` Deleted
+                            `d1` Deleted
             """
         )
     }
 
     @Test
     fun mergeMovedDirectoryWrongName() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     dir("v") {
@@ -926,23 +970,23 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `t/` New
-                        `v/` New
-                            `d1/` New
-                            `d3/` New
+                ``
+                    `t` New
+                        `v` New
+                            `d1` New
+                            `d3` New
                             `same` MovedFrom `/u/v/same`
-                    `u/` Deleted
-                        `v/` Deleted
-                            `d1/` Deleted
-                            `d2/` Deleted
+                    `u` Deleted
+                        `v` Deleted
+                            `d1` Deleted
+                            `d2` Deleted
             """
         )
     }
 
     @Test
     fun mergeMovedDirectoryFile() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     dir("v") {
@@ -962,23 +1006,23 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `t/` New
-                        `v/` New
-                            `d1/` New
+                ``
+                    `t` New
+                        `v` New
+                            `d1` New
                             `d2` New
                             `same` MovedFrom `/u/v/same`
-                    `u/` Deleted
-                        `v/` Deleted
-                            `d1/` Deleted
-                            `d2/` Deleted
+                    `u` Deleted
+                        `v` Deleted
+                            `d1` Deleted
+                            `d2` Deleted
             """
         )
     }
 
     @Test
     fun mergeMovedDirectoryNotEmptyDirectory() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     dir("v") {
@@ -1000,16 +1044,16 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `t/` New
-                        `v/` New
-                            `d1/` New
-                            `d2/` New
+                ``
+                    `t` New
+                        `v` New
+                            `d1` New
+                            `d2` New
                             `same` MovedFrom `/u/v/same`
-                    `u/` Deleted
-                        `v/` Deleted
-                            `d1/` Deleted
-                            `d2/` Deleted
+                    `u` Deleted
+                        `v` Deleted
+                            `d1` Deleted
+                            `d2` Deleted
                                 `x` Deleted
             """
         )
@@ -1017,7 +1061,7 @@ class DeltaTest {
 
     @Test
     fun mergeMovedDirectoryRenamed() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     file("same", 123)
@@ -1033,19 +1077,19 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `t/` New
-                        `u/` New
+                ``
+                    `t` New
+                        `u` New
                             `same` MovedFrom `/u/same`
                             `y` MovedFrom `/u/x`
-                    `u/` Deleted
+                    `u` Deleted
             """
         )
     }
 
     @Test
     fun mergeMovedDirectoryMovedParent() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("v") {
                     file("b", 2)
@@ -1063,10 +1107,10 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `v/`
+                ``
+                    `v`
                         `c` Deleted
-                    `w/` New
+                    `w` New
                         `b` MovedFrom `/v/b`
                         `c` New
             """
@@ -1075,7 +1119,7 @@ class DeltaTest {
 
     @Test
     fun pruneEqualDirectoryAfterMergeMovedDirectory() {
-        assertEquals(
+        assertDiff(
             root {
                 dir("u") {
                     dir("v") {
@@ -1093,29 +1137,316 @@ class DeltaTest {
                 }
             },
             """
-                `/`
-                    `x/` MovedFrom `/u/v`
+                ``
+                    `x` MovedFrom `/u/v`
             """
         )
     }
 
     @Test
-    fun smallerBigger() {
-        assertEquals(
+    fun compareNodeStates() {
+        assertDiff(
             root {
-                file("a", 2, 1)
-                file("b", 2, 1)
-                file("c", 2, 1)
+                file("as-dir", 5)
+                dir("as-file") { file("gone", 4) }
+                file("changed", 1)
+                file("removed", 3)
+                file("same", 2)
             },
             root {
-                file("a", 1, 1)
-                file("b", 3, 1)
-                file("c", 2, 1)
+                dir("as-dir") { file("child", 8) }
+                file("as-file", 7)
+                file("added", 6)
+                file("changed", 10)
+                file("same", 2)
             },
             """
-                `/`
-                    `a` Smaller
-                    `b` Bigger
+                ``
+                    `added` New
+                    `as-dir` FileToDir
+                        `child` New
+                    `as-file` DirToFile
+                        `gone` Deleted
+                    `changed` Changed
+                    `removed` Deleted
+            """
+        )
+    }
+
+    @Test
+    fun detectMovesAndAvoidAmbiguousDigests() {
+        assertDiff(
+            root { file("old", 1) },
+            root { file("new", 1) },
+            """
+                ``
+                    `new` RenamedFrom `old`
+            """
+        )
+        assertDiff(
+            root {
+                dir("a") { file("f", 1) }
+                dir("b")
+            },
+            root {
+                dir("a")
+                dir("b") { file("f", 1) }
+            },
+            """
+                ``
+                    `b`
+                        `f` MovedFrom `/a/f`
+            """
+        )
+        assertDiff(
+            root {
+                file("a", 1)
+                file("b", 1)
+            },
+            root { file("c", 1) },
+            """
+                ``
+                    `a` Deleted
+                    `b` Deleted
+                    `c` New
+            """
+        )
+        assertDiff(
+            root { file("a", 1) },
+            root {
+                file("b", 1)
+                file("c", 1)
+            },
+            """
+                ``
+                    `a` Deleted
+                    `b` New
+                    `c` New
+            """
+        )
+    }
+
+    @Test
+    fun fileDirectoryTransitionsCanMatchMoves() {
+        assertDiff(
+            root { file("a", 1) },
+            root { dir("a") { file("child", 1) } },
+            """
+                ``
+                    `a` FileToDir
+                        `child` MovedFrom `/a`
+            """
+        )
+        assertDiff(
+            root {
+                dir("a")
+                file("old", 1)
+            },
+            root { file("a", 1) },
+            """
+                ``
+                    `a` DirToFile RenamedFrom `old`
+            """
+        )
+    }
+
+    @Test
+    fun consolidateMovedDirectoryWithEmptySubdirectory() {
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                    dir("empty")
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                    dir("empty")
+                }
+            },
+            """
+                ``
+                    `destination` RenamedFrom `source`
+            """
+        )
+    }
+
+    @Test
+    fun doNotConsolidateMovedDirectoryWhenUnmovedChildrenCountDiffers() {
+        assertDiff(
+            root { dir("source") { file("f", 1) } },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                    file("extra", 2)
+                }
+            },
+            """
+                ``
+                    `destination` New
+                        `extra` New
+                        `f` MovedFrom `/source/f`
+                    `source` Deleted
+            """
+        )
+    }
+
+    @Test
+    fun doNotConsolidateMovedDirectoryWithNonemptyUnmovedChild() {
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                    dir("nested")
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                    dir("nested") { file("extra", 2) }
+                }
+            },
+            """
+                ``
+                    `destination` New
+                        `f` MovedFrom `/source/f`
+                        `nested` New
+                            `extra` New
+                    `source` Deleted
+                        `nested` Deleted
+            """
+        )
+    }
+
+    @Test
+    fun doNotConsolidateMovedDirectoriesWithDifferentSourcesOrContents() {
+        assertDiff(
+            root { dir("source") { file("f", 1) } },
+            root {
+                dir("destination") { file("f", 1) }
+                dir("source")
+            },
+            """
+                ``
+                    `destination` New
+                        `f` MovedFrom `/source/f`
+            """
+        )
+        assertDiff(
+            root {
+                dir("source1") { file("a", 1) }
+                dir("source2") { file("b", 2) }
+            },
+            root {
+                dir("destination") {
+                    file("a", 1)
+                    file("b", 2)
+                }
+            },
+            """
+                ``
+                    `destination` New
+                        `a` MovedFrom `/source1/a`
+                        `b` MovedFrom `/source2/b`
+                    `source1` Deleted
+                    `source2` Deleted
+            """
+        )
+        assertDiff(
+            root { dir("source") { file("old", 1) } },
+            root { dir("destination") { file("new", 1) } },
+            """
+                ``
+                    `destination` New
+                        `new` MovedFrom `/source/old`
+                    `source` Deleted
+            """
+        )
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                    file("extra", 2)
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                    file("extra", 3)
+                }
+            },
+            """
+                ``
+                    `destination` New
+                        `extra` New
+                        `f` MovedFrom `/source/f`
+                    `source` Deleted
+                        `extra` Deleted
+            """
+        )
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                    dir("empty-old")
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                    dir("empty-new")
+                }
+            },
+            """
+                ``
+                    `destination` New
+                        `empty-new` New
+                        `f` MovedFrom `/source/f`
+                    `source` Deleted
+                        `empty-old` Deleted
+            """
+        )
+        assertDiff(
+            root {
+                dir("source") {
+                    file("f", 1)
+                    dir("not-empty") { file("gone", 2) }
+                }
+            },
+            root {
+                dir("destination") {
+                    file("f", 1)
+                    dir("not-empty")
+                }
+            },
+            """
+                ``
+                    `destination` New
+                        `f` MovedFrom `/source/f`
+                        `not-empty` New
+                    `source` Deleted
+                        `not-empty` Deleted
+                            `gone` Deleted
+            """
+        )
+    }
+
+    @Test
+    fun obsoleteDirectories() {
+        assertDiff(
+            root {
+                dir("empty")
+                dir("kept") { file("f", 1) }
+            },
+            root {
+                dir("empty")
+                dir("kept") { file("f", 1) }
+                dir("new-empty")
+            },
+            """
+                ``
+                    `new-empty` New
             """
         )
     }

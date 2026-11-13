@@ -8,38 +8,35 @@ The file `diff.jar` must be copied into a directory directly below the directory
 
 The current content is tracked in `node.yass`.
 
-The tool is started with `java -jar diff.jar`. See [Command Line Interface](src/Main.kt).
+The tool is started with `java -jar diff.jar`.
+
+The output is Markdown.
 
 You can add a double-clickable file:
 
-- `start.command` for Mac
+- `diff.command` for Mac
 
     ```
     cd `dirname "$0"`
-    java -jar diff.jar script SHA3-256
+    java -jar diff.jar
     ```
 
-- `start.bat` for Windows
+- `diff.bat` for Windows
 
     ```
-    cmd /c java -jar diff.jar script SHA3-256
+    cmd /c java -jar diff.jar
     pause
     ```
 
 Directory layout:
 
 ```
-  directoryToBeTracked/
-      diffToolDir/
-          diff.jar
-          start.command
-          node.yass
-      mySubDir1/
-          ...
-      mySubDir2/
-          ...
-      ...   
-      myFile1
-      myFile2
-      ... 
+    toBeTracked/
+        diff/
+            diff.jar
+            diff.command
+            node.yass
+        ...
+        .../
+            ...
 ```

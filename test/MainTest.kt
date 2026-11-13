@@ -1,214 +1,82 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.core.serialize.toByteArray
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
-import kotlin.io.path.writeBytes
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
-private fun redirectStdOut(block: () -> Unit): ByteArray {
-    val bytes = ByteArrayOutputStream()
-    val out = System.out
-    System.setOut(PrintStream(bytes, true))
-    try {
-        block()
-    } finally {
-        System.setOut(out)
-    }
-    return bytes.toByteArray()
-}
+private const val TOOL_DIRECTORY = "testResources/diff"
 
-private fun redirectStdIn(bytes: ByteArray, block: () -> Unit) {
-    val `in` = System.`in`
-    System.setIn(ByteArrayInputStream(bytes))
-    try {
-        block()
-    } finally {
-        System.setIn(`in`)
-    }
+private fun assert(expected: String, input: Boolean) {
+    val stdIn = ByteArrayInputStream("${if (input) "y" else "n"}\n".toByteArray())
+    val stdOut = StringBuffer()
+    script(stdOut, stdIn, TOOL_DIRECTORY)
+    assertEquals((expected + "\n").trimIndent(), stdOut.toString())
 }
 
 class MainTest {
     @Test
-    fun wrongCLI() {
-        fun test(vararg args: String) = assertEquals(CLI, assertFailsWith<IllegalArgumentException> { main(*args) }.message)
-        test()
-        test("xxx")
-        test("createNode", "x", "x", "x")
-        test("printNode", "x", "x", "x")
-        test("printDuplicates", "x", "x", "x")
-        test("diff", "x", "x", "x")
-        test("script")
-        test("script", "x", "x", "x")
-        test("scriptNoDuplicates")
-        test("scriptNoDuplicates", "x", "x", "x")
-    }
-
-    @Test
     fun test() {
-        val oldNode = redirectStdOut { main("createNode", ALGORITHM, TEST_DIR.toString()) }
-        val newNode = redirectStdOut { main("createNode", ALGORITHM, TEST2_DIR.toString()) }
+        val duplicates = """
+            diff null
 
-        redirectStdIn(oldNode) {
-            assertOutput("""
-                ``
-                    `a.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                    `b`
-                        `d.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                        `e`
-                            `g.txt` 1 C4CA4238A0B923820DCC509A6F75849B
-                        `f.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-                    `c.txt` 1 CFCD208495D565EF66E7DFF9F98764DA
-            """) { main("printNode") }
-        }
+            - DUPLICATES
+                - `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
+                    - `/a.txt`
+                    - `/diff/a.txt`
+        """
 
-        redirectStdIn(oldNode) {
-            assertOutput("""
-                Duplicates
-                    CFCD208495D565EF66E7DFF9F98764DA
-                        `/a.txt`
-                        `/b/d.txt`
-                        `/b/f.txt`
-                        `/c.txt`
-            """) { main("printDuplicates") }
-        }
+        assert(
+            """
+            $duplicates
+            NODE
+            - ``
+                - `a.txt` `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
+                - `diff`
+                    - `a.txt` `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
+                    - `b.txt` `Z7F2cFtGIGYUIZ9HoFrueuaj7b6FC7viFMU2uYmupNI=`
 
-        redirectStdIn(oldNode) {
-            assertOutput("""
-                <no-bad-paths>
-            """) { main("printBadPaths") }
-        }
-
-        redirectStdIn(NodeSerializer.toByteArray(root {
-            file(".", 0, 0)
-            file(".txt", 1000, 0)
-            file("a.txt", 2000, 0)
-            file("b.txt", 3000, 0)
-            file("c", 4000, 0)
-            file("d.", 5000, 0)
-            file("e.pdf", 6000, 0)
-            file("f.pdf", 7000, 0)
-            file("g.a", 8000, 0)
-            file("h.A", 9000, 0)
-            dir("dir") {
-                file("x.txt", 10000, 0)
-            }
-        })) {
-            assertOutput("""
-                <no-ext>
-                    5 KB `/d.`
-                    4 KB `/c`
-                    0 KB `/.`
-                `.A`
-                    9 KB `/h.A`
-                `.a`
-                    8 KB `/g.a`
-                `.pdf`
-                    7 KB `/f.pdf`
-                    6 KB `/e.pdf`
-                `.txt`
-                    10 KB `/dir/x.txt`
-                    3 KB `/b.txt`
-                    2 KB `/a.txt`
-                    1 KB `/.txt`
-            """) { main("printSizes") }
-        }
-
-        redirectStdIn(newNode) {
-            assertOutput("""
-                <no-duplicates>
-            """) { main("printDuplicates") }
-        }
-
-        val oldNodeFile = Path("build/oldNode.yass")
-        oldNodeFile.writeBytes(oldNode)
-        redirectStdIn(newNode) {
-            assertOutput("""
-                `/`
-                    `b/` Deleted
-                        `d.txt` Deleted
-                        `e/` Deleted
-                            `g.txt` Deleted
-                        `f.txt` Deleted
-                    `c.txt` Deleted
-            """) { main("diff", oldNodeFile.toString()) }
-        }
-    }
-
-    @Test
-    fun scriptTest() {
-        val toolDirectory = TEST_DIR.resolve("b")
-
-        assertOutput("""
-
-            <no-bad-paths>
-
-            Duplicates
-                CFCD208495D565EF66E7DFF9F98764DA
-                    `/a.txt`
-                    `/b/d.txt`
-                    `/b/f.txt`
-                    `/c.txt`
-            
             DONE
-   
-        """) { script(toolDirectory, ALGORITHM, null) }
 
-        redirectStdIn("y\n".toByteArray()) {
-            assertOutput("""
+            """,
+            true,
+        )
 
-                <no-bad-paths>
+        fun call(input: Boolean) {
+            assert(
+                """
+            $duplicates
+            DELTA
+            - ``
+                - `diff`
+                    - `node.yass` New
 
-                Duplicates
-                    CFCD208495D565EF66E7DFF9F98764DA
-                        `/a.txt`
-                        `/b/d.txt`
-                        `/b/f.txt`
-                        `/c.txt`
-                
-                `/`
-                    `b/`
-                        `node.yass` New
-                
-                type <y> to accept changes (else abort): 
-                DONE
-                
-            """) { script(toolDirectory, ALGORITHM, null) }
+            type <y> to accept changes (else abort): 
+            ${if (input) "DONE" else "ABORTED"}
+
+            """,
+                input,
+            )
         }
+        call(false)
+        call(true)
 
-        redirectStdIn("\n".toByteArray()) {
-            assertOutput("""
+        assert(
+            """
+            $duplicates
+            DELTA
+            - ``
+                - `diff`
+                    - `node.yass` Changed
 
-                <no-bad-paths>
+            type <y> to accept changes (else abort): 
+            DONE
 
-                Duplicates
-                    CFCD208495D565EF66E7DFF9F98764DA
-                        `/a.txt`
-                        `/b/d.txt`
-                        `/b/f.txt`
-                        `/c.txt`
-                
-                `/`
-                    `b/`
-                        `node.yass` Bigger
-                
-                type <y> to accept changes (else abort): 
-                ABORTED
-                
-            """) { script(toolDirectory, ALGORITHM, null) }
+            """,
+            true,
+        )
 
-            toolDirectory.nodeFile().deleteExisting()
-        }
-
-        redirectStdIn("y\n".toByteArray()) {
-            script(toolDirectory, ALGORITHM, "build/backup_")
-        }
-
-        toolDirectory.nodeFile().deleteExisting()
+        Path("$TOOL_DIRECTORY/$NODE_FILE").deleteExisting()
     }
 }
