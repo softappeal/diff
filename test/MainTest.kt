@@ -3,6 +3,7 @@ package ch.softappeal.diff
 import java.io.ByteArrayInputStream
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
+import kotlin.io.path.deleteIfExists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -18,6 +19,10 @@ private fun assert(expected: String, input: Boolean) {
 class MainTest {
     @Test
     fun test() {
+        val nodeFile = Path("$TOOL_DIRECTORY/$NODE_FILE")
+
+        nodeFile.deleteIfExists()
+
         val duplicates = """
             diff null
 
@@ -77,6 +82,6 @@ class MainTest {
             true,
         )
 
-        Path("$TOOL_DIRECTORY/$NODE_FILE").deleteExisting()
+        nodeFile.deleteExisting()
     }
 }
