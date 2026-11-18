@@ -2,14 +2,10 @@ on:
   workflow_dispatch:
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./gradlew build -Pversion=`git describe`
-          cp build/libs/diff-`git describe`.jar diff.jar
-          gh release create `git describe` diff.jar
+    uses: ./.github/workflows/common.yml
+    secrets: inherit
+    with:
+      run: |
+        ./gradlew build -Pversion=`git describe`
+        cp build/libs/diff-`git describe`.jar diff.jar
+        gh release create `git describe` diff.jar

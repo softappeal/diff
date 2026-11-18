@@ -12,18 +12,19 @@ import kotlin.io.path.writeBytes
 
 const val NODE_FILE = "node.yass"
 
+private val NodeSerializer = BinarySerializer()
+
 fun script(stdOut: Appendable, stdIn: InputStream, toolDir: Path) {
     with(stdOut) {
         appendLine()
         appendLine("diff ${Node::class.java.`package`.implementationVersion}")
         appendLine()
-        val newNode = DirectoryNode("$toolDir/..", "SHA3-256")
-        val newNodeDesc = NodeDesc(newNode)
-        printDuplicates(newNodeDesc.digestToPaths)
+        val newNode = DirNode("$toolDir/..", "SHA3-256")
+        printDuplicates(newNode)
         val nodePath = Path("$toolDir/$NODE_FILE")
         if (nodePath.exists()) {
-            val oldNode = NodeSerializer.fromByteArray(nodePath.readBytes()) as DirectoryNode
-            val delta = DirectoryDelta(NodeDesc(oldNode), newNodeDesc)
+            val oldNode = NodeSerializer.fromByteArray(nodePath.readBytes()) as DirNode
+            val delta = DirDelta(oldNode, newNode)
             appendLine("DELTA")
             printDeltas(delta)
             appendLine()

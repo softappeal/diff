@@ -14,14 +14,14 @@ class NodeBuilder {
     fun dir(name: String, block: NodeBuilder.() -> Unit = {}) {
         val builder = NodeBuilder()
         builder.block()
-        nodes.add(DirectoryNode(name, builder.nodes))
+        nodes.add(DirNode(name, builder.nodes))
     }
 }
 
-fun root(block: NodeBuilder.() -> Unit): DirectoryNode {
+fun root(block: NodeBuilder.() -> Unit): DirNode {
     val builder = NodeBuilder()
     builder.block()
-    return DirectoryNode("", builder.nodes)
+    return DirNode("", builder.nodes)
 }
 
 fun toString(print: Appendable.() -> Unit) = StringBuffer().apply { print() }.toString()
@@ -31,11 +31,11 @@ class NodeTest {
     fun illegalNodeName() {
         assertEquals(
             "node name 'a/b' must not contain '/'",
-            assertFailsWith<IllegalArgumentException> { DirectoryNode("a/b", listOf()) }.message
+            assertFailsWith<IllegalArgumentException> { DirNode("a/b", listOf()) }.message
         )
         assertEquals(
             "node name 'a`b' must not contain '`'",
-            assertFailsWith<IllegalArgumentException> { DirectoryNode("a`b", listOf()) }.message
+            assertFailsWith<IllegalArgumentException> { DirNode("a`b", listOf()) }.message
         )
     }
 
@@ -44,10 +44,12 @@ class NodeTest {
         assertEquals(
             "",
             toString {
-                printDuplicates(root {
-                    file("a", 0)
-                    file("b", 1)
-                }.DigestToPaths())
+                printDuplicates(
+                    root {
+                        file("a", 0)
+                        file("b", 1)
+                    }
+                )
             },
         )
     }
@@ -59,11 +61,11 @@ class NodeTest {
                 - DUPLICATES
                     - `AQ==`
                         - `/a1`
-                        - `/f/ff/a2`
-                        - `/f/ff/a3`
+                        - `/dir/a2`
+                        - `/dir/a3`
                     - `Ag==`
                         - `/b1`
-                        - `/f/ff/b2`
+                        - `/dir/b2`
 
 
             """.trimIndent(),
@@ -71,25 +73,23 @@ class NodeTest {
                 printDuplicates(
                     root {
                         file("a1", 1)
-                        dir("f") {
-                            dir("ff") {
-                                file("a2", 1)
-                                file("b2", 2)
-                                file("a3", 1)
-                                file("c", 4)
-                            }
+                        dir("dir") {
+                            file("a2", 1)
+                            file("b2", 2)
+                            file("a3", 1)
+                            file("c", 4)
                         }
                         file("b1", 2)
                         file("c", 3)
-                    }.DigestToPaths()
+                    }
                 )
             },
         )
     }
 
     @Test
-    fun createDirectoryNode() {
-        // System.out.printNodes((DirectoryNode("/Users/guru/OneDrive/data/minor", "MD5")))
+    fun createDirNode() {
+        // System.out.printNodes((DirNode("/Users/guru/OneDrive/data/minor", "MD5")))
         assertEquals(
             """
                 - ``
@@ -99,7 +99,7 @@ class NodeTest {
                         - `b.txt` `xMpCOKC5I4INzFCab3WEmw==`
 
             """.trimIndent(),
-            toString { printNodes(DirectoryNode("testResources", "MD5")) },
+            toString { printNodes(DirNode("testResources", "MD5")) },
         )
     }
 }

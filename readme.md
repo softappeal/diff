@@ -10,8 +10,6 @@ The current content is tracked in `node.yass`.
 
 The tool is started with `java -jar diff.jar`.
 
-The output is Markdown.
-
 You can add a double-clickable file:
 
 - `diff.command` for Mac
