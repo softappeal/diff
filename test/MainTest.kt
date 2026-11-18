@@ -7,19 +7,19 @@ import kotlin.io.path.deleteIfExists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-private const val TOOL_DIRECTORY = "testResources/diff"
+private const val TOOL_DIR = "testResources/diff"
 
 private fun assert(expected: String, input: Boolean) {
     val stdIn = ByteArrayInputStream("${if (input) "y" else "n"}\n".toByteArray())
     val stdOut = StringBuffer()
-    script(stdOut, stdIn, TOOL_DIRECTORY)
+    script(stdOut, stdIn, TOOL_DIR)
     assertEquals((expected + "\n").trimIndent(), stdOut.toString())
 }
 
 class MainTest {
     @Test
     fun test() {
-        val nodeFile = Path("$TOOL_DIRECTORY/$NODE_FILE")
+        val nodeFile = Path("$TOOL_DIR/$NODE_FILE")
 
         nodeFile.deleteIfExists()
 
@@ -53,8 +53,8 @@ class MainTest {
                 """
             $duplicates
             DELTA
-            - ``
-                - `diff`
+            - `/`
+                - `diff/`
                     - `node.yass` New
 
             type <y> to accept changes (else abort): 
@@ -71,8 +71,8 @@ class MainTest {
             """
             $duplicates
             DELTA
-            - ``
-                - `diff`
+            - `/`
+                - `diff/`
                     - `node.yass` Changed
 
             type <y> to accept changes (else abort): 

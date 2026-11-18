@@ -22,17 +22,19 @@
 
 # How the code works
 
-- `FileNode` and `DirectoryNode` in `src/Node.kt` represent files (with `SHA3-256` digests) and directories in the tracked tree.
+- `FileNode` and `DirNode` in `src/Node.kt` represent files (with `SHA3-256` digests) and directories in the tracked tree.
   Symbolic links are not supported.
-- `DirectoryDelta` in `src/Delta.kt` compares two tree snapshots.
+- `DirDelta` in `src/Delta.kt` compares two tree snapshots.
   `FileDelta` is an implementation detail; changes are represented by file and directory deltas.
   These changes are calculated by comparing the current directory tree with the previous one
-  with the function `fun DirectoryDelta(oldNodeDesc: NodeDesc, newNodeDesc: NodeDesc)` in the file `src/Delta.kt`.
-  Duplicate file contents are reported; moves and renames are inferred only when the digest is unique in both snapshots.
-  The function `fun Appendable.printDeltas(delta: Delta, indent: Int = 0)` in the file `src/Delta.kt`
-  prints changes of the directory tree to be tracked in a human-readable format.
+  with the function `fun DirDelta(oldDir: DirNode, newDir: DirNode)` in the file `src/Delta.kt`.
+  Duplicate file contents are reported; a move is inferred only when exactly one new and one deleted file share a digest.
+  Otherwise, additions and deletions remain separate.
+  The function `fun Appendable.printDeltas(delta: Delta, indent: Int = 0, withDigest: Boolean = false)` in the file `src/Delta.kt`
+  prints changes of the directory tree to be tracked, optionally including file digests.
 - The function `fun main()` in `src/Main.kt` is the entry point.
-  It scans the parent of the working directory (including the tool directory) and
-  stores the snapshot as `node.yass` in the working directory.
+  It scans the parent of the working directory (including the tool directory) and stores the snapshot as `node.yass`
+  in the working directory. Since the snapshot is inside the scanned tree, it appears as a new file on the first
+  comparison after creation and as a changed file after a later snapshot update.
   Replacing an existing snapshot requires an exact `y` response.
 - See [readme.md](readme.md) for instructions on running the packaged tool.

@@ -34,7 +34,7 @@ class FileNode(override val name: String, var digest: ByteArray) : Node() {
     }
 }
 
-class DirectoryNode(override val name: String, nodes: List<Node>) : Node() {
+class DirNode(override val name: String, nodes: List<Node>) : Node() {
     val nodes = nodes.sortedBy(Node::name)
 
     init {
@@ -43,13 +43,13 @@ class DirectoryNode(override val name: String, nodes: List<Node>) : Node() {
 }
 
 @BinaryEncoders(StringBinaryEncoder::class, ByteArrayBinaryEncoder::class)
-@ConcreteAndEnumClasses(FileNode::class, DirectoryNode::class)
+@ConcreteAndEnumClasses(FileNode::class, DirNode::class)
 val NodeSerializer = BinarySerializer()
 
 typealias Path = String
 
-fun DirectoryNode(root: Path, digestAlgorithm: String) = runBlocking(Dispatchers.Default) {
-    fun directoryNode(current: Path, name: String): DirectoryNode = DirectoryNode(
+fun DirNode(root: Path, digestAlgorithm: String) = runBlocking(Dispatchers.Default) {
+    fun DirNode(current: Path, name: String): DirNode = DirNode(
         name,
         buildList {
             Files.newDirectoryStream(Path(current)).forEach { path ->
@@ -61,14 +61,14 @@ fun DirectoryNode(root: Path, digestAlgorithm: String) = runBlocking(Dispatchers
                         }
                     )
                     path.isDirectory() -> add(
-                        directoryNode(path.toString(), path.name)
+                        DirNode(path.toString(), path.name)
                     )
                     else -> error("path '$path' has unexpected type")
                 }
             }
         },
     )
-    directoryNode(root, "")
+    DirNode(root, "")
 }
 
 typealias Digest = String
@@ -79,7 +79,7 @@ fun Appendable.printNodes(node: Node, indent: Int = 0) {
     append("${"    ".repeat(indent)}- `${node.name}`")
     when (node) {
         is FileNode -> appendLine(" `${node.digest.toDigest()}`")
-        is DirectoryNode -> {
+        is DirNode -> {
             appendLine()
             node.nodes.forEach { printNodes(it, indent + 1) }
         }
@@ -88,20 +88,17 @@ fun Appendable.printNodes(node: Node, indent: Int = 0) {
 
 fun Path.Path(name: String): Path = "$this$DIR_SEP$name"
 
-typealias DigestToPaths = Map<Digest, List<Path>>
-
-fun DirectoryNode.DigestToPaths(): DigestToPaths = buildMap<Digest, MutableList<Path>> {
-    fun Node.visit(current: Path) {
-        val next = if (name.isEmpty()) "" else current.Path(name)
-        when (this) {
-            is FileNode -> getOrPut(digest.toDigest()) { mutableListOf() }.add(next)
-            is DirectoryNode -> nodes.forEach { it.visit(next) }
+fun Appendable.printDuplicates(node: DirNode) {
+    val digestToPaths = buildMap {
+        fun Node.visit(current: Path) {
+            val next = if (name.isEmpty()) "" else current.Path(name)
+            when (this) {
+                is FileNode -> getOrPut(digest.toDigest()) { mutableListOf() }.add(next)
+                is DirNode -> nodes.forEach { it.visit(next) }
+            }
         }
+        node.visit("")
     }
-    visit("")
-}
-
-fun Appendable.printDuplicates(digestToPaths: DigestToPaths) {
     val duplicates = digestToPaths.filter { it.value.size != 1 }
     if (duplicates.isEmpty()) return
     appendLine("- DUPLICATES")
@@ -111,8 +108,3 @@ fun Appendable.printDuplicates(digestToPaths: DigestToPaths) {
     }
     appendLine()
 }
-
-class NodeDesc(
-    val node: DirectoryNode,
-    val digestToPaths: DigestToPaths = node.DigestToPaths(),
-)
