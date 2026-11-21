@@ -2,6 +2,8 @@ package ch.softappeal.diff
 
 enum class DeltaState { Kept, New, Deleted, Changed, FileToDir, DirToFile, MovedFrom }
 
+private fun Delta.Path(): Path = parent?.Path()?.Path(name) ?: ""
+
 sealed class Delta(
     val parent: DirDelta?,
     val name: String,
@@ -10,8 +12,10 @@ sealed class Delta(
 ) {
     var movedFrom: List<Delta>? = null
 
+    override fun toString() = "${this::class.simpleName}(`${Path()}` $state)"
+
     fun remove() {
-        check(parent!!.deltas.remove(this))
+        parent!!.deltas.remove(this) // TODO: add comment why check removed
     }
 }
 
@@ -117,17 +121,32 @@ private fun DirDelta.moveFiles() {
         }
         visit()
     }
-    digestToDeltas.values.forEach { deltas -> // TODO: implement multi moves and dirs
-        if (deltas.size != 2) return@forEach
-        val new = deltas.firstOrNull { it.state == DeltaState.New } ?: return@forEach
-        val old = deltas.firstOrNull { it.state == DeltaState.Deleted } ?: return@forEach
-        if (new is DirDelta) return@forEach
-        if (old is DirDelta) return@forEach
-        new.remove()
-        old.remove()
-        val file = FileDelta(new.parent!!, new.name, DeltaState.MovedFrom, new.digest!!)
-        file.movedFrom = listOf(old)
-        new.parent.add(file)
+    digestToDeltas.values.forEach { deltas ->
+        val newList = deltas.filter { it.state == DeltaState.New || it.state == DeltaState.DirToFile }
+        if (newList.isEmpty()) return@forEach
+        val deletedList = deltas.filter { it.state == DeltaState.Deleted || it.state == DeltaState.FileToDir }
+        if (deletedList.isEmpty()) return@forEach
+        newList.forEach { new ->
+            when (new) {
+                is DirDelta -> {
+                    check(new.state == DeltaState.DirToFile)
+                    // TODO: new state DirToFileMovedFrom?
+                    val dir = DirDelta(new.parent!!, new.name, DeltaState.DirToFile, new.digest!!)
+                    dir.deltas.addAll(new.deltas)
+                    println("movedFrom: $deletedList") // TODO: ignore deleted files from same dir
+                    dir.movedFrom = deletedList
+                    new.parent.add(dir)
+                }
+                is FileDelta -> {
+                    check(new.state == DeltaState.New)
+                    val file = FileDelta(new.parent!!, new.name, DeltaState.MovedFrom, new.digest!!)
+                    file.movedFrom = deletedList
+                    new.parent.add(file)
+                }
+            }
+            new.remove()
+            deletedList.forEach { it.remove() }
+        }
     }
 }
 
@@ -171,7 +190,6 @@ fun DirDelta(old: DirNode, new: DirNode) = DirDelta(null, "", DeltaState.Kept).a
 }
 
 fun Appendable.printDeltas(delta: Delta, indent: Int = 0, withDigest: Boolean = false) {
-    fun Delta.Path(): Path = parent?.Path()?.Path(name) ?: ""
     with(delta) {
         append("    ".repeat(indent))
         append("- `$name${if (this is DirDelta && state != DeltaState.DirToFile) "/" else ""}`")

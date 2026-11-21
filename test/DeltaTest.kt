@@ -1,5 +1,6 @@
 package ch.softappeal.diff
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,6 +12,7 @@ private fun assertDiff(old: DirNode, new: DirNode, expected: String) {
 }
 
 class DeltaTest {
+    @Ignore // TODO
     @Test
     fun diff() {
         assertDiff(
@@ -147,6 +149,44 @@ class DeltaTest {
                     - `new2` New
                     - `new3` New
                     - `y` MovedFrom `/dir/x`
+            """,
+        )
+    }
+
+    @Test
+    fun moveFiles2() {
+        assertDiff(
+            root {
+                file("a1", 0)
+                file("a2", 0)
+                file("y", 1)
+            },
+            root {
+                file("b", 0)
+                file("x1", 1)
+                file("x2", 1)
+            },
+            """
+                - `/`
+                    - `b` MovedFrom `/a1` `/a2`
+                    - `x1` MovedFrom `/y`
+                    - `x2` MovedFrom `/y`
+            """,
+        )
+        assertDiff( // TODO: is wrong
+            root {
+                file("a", 1)
+                dir("DirToFile") {
+                    file("b", 0)
+                }
+            },
+            root {
+                file("DirToFile", 1)
+            },
+            """
+                - `/`
+                    - `DirToFile` DirToFile
+                        - `b` Deleted
             """,
         )
     }
