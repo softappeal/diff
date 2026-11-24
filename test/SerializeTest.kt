@@ -11,8 +11,8 @@ class SerializeTest {
     @Test
     fun serializer() {
         assertEquals(
-            toString { printNodes(DUPLICATES) },
-            toString { printNodes(DUPLICATES.toByteArray().fromByteArray(1)) },
+            toString { printNode(DUPLICATES) },
+            toString { printNode(DUPLICATES.toByteArray().fromByteArray(1)) },
         )
     }
 

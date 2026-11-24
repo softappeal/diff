@@ -5,7 +5,7 @@ private const val DIR_NODE: Byte = 1
 
 fun DirNode.toByteArray(): ByteArray {
     val writer = Writer(100_000)
-    fun Node.writeNode() {
+    fun Node.write() {
         val name = name.encodeToByteArray(throwOnInvalidSequence = true)
         writer.writeVarInt(name.size)
         writer.writeByteArray(name)
@@ -16,27 +16,27 @@ fun DirNode.toByteArray(): ByteArray {
             }
             is DirNode -> {
                 writer.writeByte(DIR_NODE)
-                writer.writeVarInt(nodes.size)
-                nodes.forEach { it.writeNode() }
+                writer.writeVarInt(children.size)
+                children.forEach { it.write() }
             }
         }
     }
-    writeNode()
+    write()
     return writer.toByteArray()
 }
 
 fun ByteArray.fromByteArray(digestLength: Int): DirNode {
-    fun Reader.readNode(): Node {
+    fun Reader.read(): Node {
         val name = readByteArray(readVarInt()).decodeToString(throwOnInvalidSequence = true)
         return when (readByte()) {
             FILE_NODE -> FileNode(name, readByteArray(digestLength))
-            DIR_NODE -> DirNode(name, List(readVarInt()) { readNode() })
+            DIR_NODE -> DirNode(name, List(readVarInt()) { read() })
             else -> error("")
         }
     }
 
     val reader = Reader(this)
-    return reader.readNode().apply { check(reader.isDrained) } as DirNode
+    return reader.read().apply { check(reader.isDrained) } as DirNode
 }
 
 // copied from https://github.com/softappeal/yass2

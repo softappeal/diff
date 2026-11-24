@@ -24,7 +24,7 @@ fun script(stdOut: Appendable, stdIn: InputStream, toolDir: Path) {
             val oldNode = nodePath.readBytes().fromByteArray(MessageDigest.getInstance(DIGEST_ALGORITHM).digestLength)
             val delta = DirDelta(oldNode, newNode)
             appendLine("DELTA")
-            printDeltas(delta)
+            printDelta(delta)
             appendLine()
             append("type <y> to accept changes (else abort): ")
             val answer = BufferedReader(InputStreamReader(stdIn)).readLine()
@@ -36,7 +36,7 @@ fun script(stdOut: Appendable, stdIn: InputStream, toolDir: Path) {
             }
         } else {
             appendLine("NODE")
-            printNodes(newNode)
+            printNode(newNode)
             appendLine()
         }
         nodePath.writeBytes(newNode.toByteArray())

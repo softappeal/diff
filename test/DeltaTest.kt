@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 private fun assertDiff(old: DirNode, new: DirNode, expected: String) {
     assertEquals(
         (expected + "\n").trimIndent(),
-        toString { printDeltas(DirDelta(old, new)) },
+        toString { printDelta(DirDelta(old, new)) },
     )
 }
 
@@ -54,69 +54,62 @@ class DeltaTest {
     )
 
     @Test
-    fun diff_FileToDir() = assertDiff(
+    fun diff_ToDir() = assertDiff(
         root {
             file("dir", 10)
         },
         root,
         """
             - ``
-                - `dir` FileToDir
+                - `dir` ToDir
                     - `dir-file` New
                 - `file` New
         """,
     )
 
     @Test
-    fun diff_DirToFile() = assertDiff(
+    fun diff_ToFile() = assertDiff(
         root,
         root {
             file("dir", 10)
         },
         """
             - ``
-                - `dir` DirToFile
+                - `dir` ToFile
                     - `dir-file` Deleted
                 - `file` Deleted
         """,
     )
 
     @Test
-    fun diff_FileChanged() = assertDiff(
-        root {
-            file("file", 0)
-        },
+    fun diff_Changed() = assertDiff(
         root {
             file("file", 1)
         },
+        root {
+            file("file", 2)
+        },
         """
             - ``
-                - `file` FileChanged
+                - `file` Changed
         """,
     )
 
     @Test
-    fun tryPruneKeptDirs() = assertDiff(
+    fun moveFiles_Changed() = assertDiff(
         root {
+            file("changed", 1)
             dir("dir") {
-                file("dir-file", 1)
-            }
-            dir("dir2") {
-                file("dir2-file", 2)
+                file("deleted", 2)
             }
         },
         root {
-            dir("dir") {
-                file("dir-file", 1)
-            }
-            dir("dir2")
-            dir("empty")
+            file("changed", 2)
+            dir("dir")
         },
         """
             - ``
-                - `dir2`
-                    - `dir2-file` Deleted
-                - `empty` New
+                - `changed` Changed < `/dir/deleted`
         """,
     )
 
@@ -129,38 +122,65 @@ class DeltaTest {
         root {
             file("x1", 1)
             file("x2", 1)
+            file("new", 1)
         },
         """
             - ``
-                - `x1` New movedFrom: `/a1` `/a2`
-                - `x2` New movedFrom: `/a1` `/a2`
+                - `new` New < `/a1` `/a2`
+                - `x1` New < `/a1` `/a2`
+                - `x2` New < `/a1` `/a2`
         """,
     )
 
     @Test
-    fun moveFiles_DirToFile() = assertDiff(
+    fun moveFiles_ToDir() = assertDiff(
+        root {
+            file("dir", 1)
+        },
+        root,
+        """
+            - ``
+                - `dir` ToDir
+                    - `dir-file` New < `/dir`
+                - `file` New
+        """,
+    )
+
+    @Test
+    fun moveFiles_ToFile() = assertDiff(
         root,
         root {
             file("dir", 1)
         },
         """
             - ``
-                - `dir` DirToFile movedFrom: `/dir/dir-file`
+                - `dir` ToFile < `/dir/dir-file`
                 - `file` Deleted
         """,
     )
 
     @Test
-    fun moveFiles_FileToDir() = assertDiff(
+    fun tryPruneKept() = assertDiff(
         root {
-            file("dir", 1)
+            dir("dir1") {
+                file("dir1-file", 1)
+            }
+            dir("dir2") {
+                file("dir2-file", 2)
+            }
         },
-        root,
+        root {
+            dir("dir1") {
+                file("dir1-file", 1)
+            }
+            dir("dir2")
+            dir("newDir")
+        },
         """
             - ``
-                - `dir` FileToDir
-                    - `dir-file` New movedFrom: `/dir`
-                - `file` New
+                - `dir2`
+                    - `dir2-file` Deleted
+                - `newDir` New
         """,
     )
 }

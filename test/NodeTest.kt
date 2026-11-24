@@ -19,23 +19,23 @@ val DUPLICATES = root {
 }
 
 class NodeBuilder {
-    val nodes = mutableListOf<Node>()
+    val children = mutableListOf<Node>()
 
     fun file(name: String, digest: Byte) {
-        nodes.add(FileNode(name, byteArrayOf(digest)))
+        children.add(FileNode(name, byteArrayOf(digest)))
     }
 
     fun dir(name: String, block: NodeBuilder.() -> Unit = {}) {
         val builder = NodeBuilder()
         builder.block()
-        nodes.add(DirNode(name, builder.nodes))
+        children.add(DirNode(name, builder.children.sortedBy(Node::name)))
     }
 }
 
 fun root(block: NodeBuilder.() -> Unit): DirNode {
     val builder = NodeBuilder()
     builder.block()
-    return DirNode("", builder.nodes)
+    return DirNode("", builder.children.sortedBy(Node::name))
 }
 
 fun toString(print: Appendable.() -> Unit) = StringBuffer().apply { print() }.toString()
@@ -45,7 +45,7 @@ class NodeTest {
     fun illegalNodeName() {
         assertEquals(
             "node name 'a/b' must not contain '/'",
-            assertFailsWith<IllegalArgumentException> { DirNode("a/b", listOf()) }.message
+            assertFailsWith<IllegalArgumentException> { FileNode("a/b", byteArrayOf()) }.message
         )
         assertEquals(
             "node name 'a`b' must not contain '`'",
@@ -98,7 +98,7 @@ class NodeTest {
                         - `b.txt` `xMpCOKC5I4INzFCab3WEmw==`
 
             """.trimIndent(),
-            toString { printNodes(DirNode(TEST_RESOURCES, "MD5")) },
+            toString { printNode(DirNode(TEST_RESOURCES, "MD5")) },
         )
     }
 }

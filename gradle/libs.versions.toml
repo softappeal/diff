@@ -2,7 +2,7 @@
 
 kotlin     = "2.4.21"     # https://github.com/JetBrains/kotlin
 coroutines = "1.11.0"     # https://github.com/Kotlin/kotlinx.coroutines
-boot       = "4.1.2"      # https://github.com/spring-projects/spring-boot
+boot       = "4.2.0"      # https://github.com/spring-projects/spring-boot
 
 [libraries]
 

@@ -30,11 +30,10 @@ class FileNode(override val name: String, var digest: ByteArray) : Node() {
     }
 }
 
-class DirNode(override val name: String, nodes: List<Node>) : Node() {
-    val nodes = nodes.sortedBy(Node::name)
-
+class DirNode(override val name: String, val children: List<Node>) : Node() {
     init {
         checkName()
+        check(children.isSortedBy(Node::name))
     }
 }
 
@@ -58,7 +57,7 @@ fun DirNode(root: Path, digestAlgorithm: String) = runBlocking(Dispatchers.Defau
                     else -> error("path '$path' has unexpected type")
                 }
             }
-        },
+        }.sortedBy(Node::name),
     )
     DirNode(root, "")
 }
@@ -67,13 +66,13 @@ typealias Digest = String
 
 fun ByteArray.toDigest(): Digest = Base64.encode(this)
 
-fun Appendable.printNodes(node: Node, indent: Int = 0) {
+fun Appendable.printNode(node: Node, indent: Int = 0) {
     append("${"    ".repeat(indent)}- `${node.name}`")
     when (node) {
         is FileNode -> appendLine(" `${node.digest.toDigest()}`")
         is DirNode -> {
             appendLine()
-            node.nodes.forEach { printNodes(it, indent + 1) }
+            node.children.forEach { printNode(it, indent + 1) }
         }
     }
 }
@@ -86,7 +85,7 @@ fun Appendable.printDuplicates(node: DirNode) {
             val next = if (name.isEmpty()) "" else current.Path(name)
             when (this) {
                 is FileNode -> getOrPut(digest.toDigest()) { mutableListOf() }.add(next)
-                is DirNode -> nodes.forEach { it.visit(next) }
+                is DirNode -> children.forEach { it.visit(next) }
             }
         }
         node.visit("")

@@ -73,7 +73,7 @@ class MainTest {
             DELTA
             - ``
                 - `diff`
-                    - `diff.ser` FileChanged
+                    - `diff.ser` Changed
 
             type <y> to accept changes (else abort): 
             DONE
