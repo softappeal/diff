@@ -1,29 +1,27 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.fromByteArray
-import ch.softappeal.yass2.serialize.toByteArray
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.readBytes
 import kotlin.io.path.writeBytes
 
-const val NODE_FILE = "node.yass"
-
-private val NodeSerializer = BinarySerializer()
+const val NODE_FILE = "diff.ser"
+private const val DIGEST_ALGORITHM = "SHA3-256"
 
 fun script(stdOut: Appendable, stdIn: InputStream, toolDir: Path) {
     with(stdOut) {
         appendLine()
         appendLine("diff ${Node::class.java.`package`.implementationVersion}")
         appendLine()
-        val newNode = DirNode("$toolDir/..", "SHA3-256")
+        val newNode = DirNode("$toolDir/..", DIGEST_ALGORITHM)
         printDuplicates(newNode)
         val nodePath = Path("$toolDir/$NODE_FILE")
         if (nodePath.exists()) {
-            val oldNode = NodeSerializer.fromByteArray(nodePath.readBytes()) as DirNode
+            val oldNode = nodePath.readBytes().fromByteArray(MessageDigest.getInstance(DIGEST_ALGORITHM).digestLength)
             val delta = DirDelta(oldNode, newNode)
             appendLine("DELTA")
             printDeltas(delta)
@@ -41,7 +39,7 @@ fun script(stdOut: Appendable, stdIn: InputStream, toolDir: Path) {
             printNodes(newNode)
             appendLine()
         }
-        nodePath.writeBytes(NodeSerializer.toByteArray(newNode))
+        nodePath.writeBytes(newNode.toByteArray())
         appendLine("DONE")
         appendLine()
     }

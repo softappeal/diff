@@ -1,9 +1,5 @@
 package ch.softappeal.diff
 
-import ch.softappeal.yass2.serialize.ConcreteAndEnumClasses
-import ch.softappeal.yass2.serialize.binary.BinaryEncoders
-import ch.softappeal.yass2.serialize.binary.ByteArrayBinaryEncoder
-import ch.softappeal.yass2.serialize.binary.StringBinaryEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -24,8 +20,6 @@ private fun Node.checkName() {
     require(!name.contains('`')) { "node name '$name' must not contain '`'" }
 }
 
-@BinaryEncoders(StringBinaryEncoder::class, ByteArrayBinaryEncoder::class)
-@ConcreteAndEnumClasses(FileNode::class, DirNode::class)
 sealed class Node {
     abstract val name: String
 }

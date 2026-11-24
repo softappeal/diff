@@ -7,7 +7,7 @@ import kotlin.io.path.deleteIfExists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-private const val TOOL_DIR = "testResources/diff"
+private const val TOOL_DIR = "$TEST_RESOURCES/diff"
 
 private fun assert(expected: String, input: Boolean) {
     val stdIn = ByteArrayInputStream("${if (input) "y" else "n"}\n".toByteArray())
@@ -55,7 +55,7 @@ class MainTest {
             DELTA
             - ``
                 - `diff`
-                    - `node.yass` New
+                    - `diff.ser` New
 
             type <y> to accept changes (else abort): 
             ${if (input) "DONE" else "ABORTED"}
@@ -73,7 +73,7 @@ class MainTest {
             DELTA
             - ``
                 - `diff`
-                    - `node.yass` FileChanged
+                    - `diff.ser` FileChanged
 
             type <y> to accept changes (else abort): 
             DONE

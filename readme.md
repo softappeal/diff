@@ -6,7 +6,7 @@ Precondition: a `JRE` must be installed.
 
 The file `diff.jar` must be copied into a directory directly below the directory to be tracked.
 
-The current content is tracked in `node.yass`.
+The current content is tracked in `diff.ser`.
 
 The tool is started with `java -jar diff.jar`.
 
@@ -33,7 +33,7 @@ Directory layout:
         diff/
             diff.jar
             diff.command
-            node.yass
+            diff.ser
         ...
         .../
             ...

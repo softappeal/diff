@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.jvm)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.boot)
 }
 
@@ -27,10 +26,8 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.yass2.serialize)
     implementation(libs.coroutines.core)
     testImplementation(kotlin("test"))
-    ksp(libs.yass2.generate)
 }
 
 tasks.bootJar {

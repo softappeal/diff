@@ -4,6 +4,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+const val TEST_RESOURCES = "testResources"
+
+val DUPLICATES = root {
+    file("a1", 1)
+    dir("dir") {
+        file("a2", 1)
+        file("b2", 2)
+        file("a3", 1)
+        file("c", 4)
+    }
+    file("b1", 2)
+    file("c", 3)
+}
+
 class NodeBuilder {
     val nodes = mutableListOf<Node>()
 
@@ -69,27 +83,12 @@ class NodeTest {
 
 
             """.trimIndent(),
-            toString {
-                printDuplicates(
-                    root {
-                        file("a1", 1)
-                        dir("dir") {
-                            file("a2", 1)
-                            file("b2", 2)
-                            file("a3", 1)
-                            file("c", 4)
-                        }
-                        file("b1", 2)
-                        file("c", 3)
-                    }
-                )
-            },
+            toString { printDuplicates(DUPLICATES) },
         )
     }
 
     @Test
     fun createDirNode() {
-        // System.out.printNodes((DirNode("/Users/guru/OneDrive/data/minor", "MD5")))
         assertEquals(
             """
                 - ``
@@ -99,7 +98,7 @@ class NodeTest {
                         - `b.txt` `xMpCOKC5I4INzFCab3WEmw==`
 
             """.trimIndent(),
-            toString { printNodes(DirNode("testResources", "MD5")) },
+            toString { printNodes(DirNode(TEST_RESOURCES, "MD5")) },
         )
     }
 }
