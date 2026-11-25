@@ -1,18 +1,19 @@
 package ch.softappeal.diff
 
-import ch.softappeal.diff.DeltaState.Changed
-import ch.softappeal.diff.DeltaState.Deleted
-import ch.softappeal.diff.DeltaState.Kept
-import ch.softappeal.diff.DeltaState.New
-import ch.softappeal.diff.DeltaState.ToDir
-import ch.softappeal.diff.DeltaState.ToFile
+import ch.softappeal.diff.DeltaState.ChangedFile
+import ch.softappeal.diff.DeltaState.DeletedDir
+import ch.softappeal.diff.DeltaState.DeletedFile
+import ch.softappeal.diff.DeltaState.DirToFile
+import ch.softappeal.diff.DeltaState.FileToDir
+import ch.softappeal.diff.DeltaState.KeptDir
+import ch.softappeal.diff.DeltaState.NewDir
+import ch.softappeal.diff.DeltaState.NewFile
 
 private const val DEBUG = false
 
 enum class DeltaState {
-    New, Deleted, // Delta
-    Changed, // FileDelta
-    Kept, ToDir, ToFile, // DirDelta
+    NewFile, DeletedFile, ChangedFile, // FileDelta
+    NewDir, DeletedDir, KeptDir, FileToDir, DirToFile, // DirDelta
 }
 
 private fun Delta.Path(): Path = parent?.Path()?.Path(name) ?: ""
@@ -37,7 +38,7 @@ private class FileDelta(
     digest: ByteArray,
 ) : Delta(parent, name, state, digest.toDigest()) {
     init {
-        check(state == New || state == Deleted || state == Changed)
+        check(state == NewFile || state == DeletedFile || state == ChangedFile)
     }
 }
 
@@ -48,8 +49,8 @@ class DirDelta(
     digest: ByteArray?,
 ) : Delta(parent, name, state, digest?.toDigest()) {
     init {
-        check(state != Changed)
-        check(digest == null || state == ToFile || state == ToDir)
+        check(state == NewDir || state == DeletedDir || state == KeptDir || state == FileToDir || state == DirToFile)
+        check(digest == null || state == FileToDir || state == DirToFile)
     }
 
     val children = mutableListOf<Delta>()
@@ -59,13 +60,13 @@ class DirDelta(
     }
 }
 
-private fun diff(dirDelta: DirDelta, oldDir: DirNode, newDir: DirNode) {
-    fun DirDelta.addChild(node: Node, state: DeltaState) {
+private fun DirDelta.diff(oldDir: DirNode, newDir: DirNode) {
+    fun DirDelta.addChild(node: Node, new: Boolean) {
         addChild(
             when (node) {
-                is FileNode -> FileDelta(this, node.name, state, node.digest)
-                is DirNode -> DirDelta(this, node.name, state, null).apply {
-                    node.children.forEach { addChild(it, state) }
+                is FileNode -> FileDelta(this, node.name, if (new) NewFile else DeletedFile, node.digest)
+                is DirNode -> DirDelta(this, node.name, if (new) NewDir else DeletedDir, null).apply {
+                    node.children.forEach { addChild(it, new) }
                 }
             }
         )
@@ -87,22 +88,22 @@ private fun diff(dirDelta: DirDelta, oldDir: DirNode, newDir: DirNode) {
             compareTo == 0 -> {
                 when (old!!) {
                     is FileNode -> when (new!!) {
-                        is FileNode -> if (!old.digest.contentEquals(new.digest)) dirDelta.addChild(
-                            FileDelta(dirDelta, new.name, Changed, new.digest)
+                        is FileNode -> if (!old.digest.contentEquals(new.digest)) addChild(
+                            FileDelta(this, new.name, ChangedFile, new.digest)
                         )
-                        is DirNode -> DirDelta(dirDelta, new.name, ToDir, old.digest).apply {
-                            new.children.forEach { addChild(it, New) }
-                            dirDelta.addChild(this)
+                        is DirNode -> DirDelta(this, new.name, FileToDir, old.digest).apply {
+                            new.children.forEach { addChild(it, true) }
+                            this@diff.addChild(this)
                         }
                     }
                     is DirNode -> when (new!!) {
-                        is FileNode -> DirDelta(dirDelta, old.name, ToFile, new.digest).apply {
-                            old.children.forEach { addChild(it, Deleted) }
-                            dirDelta.addChild(this)
+                        is FileNode -> DirDelta(this, old.name, DirToFile, new.digest).apply {
+                            old.children.forEach { addChild(it, false) }
+                            this@diff.addChild(this)
                         }
-                        is DirNode -> dirDelta.addChild(
-                            DirDelta(dirDelta, new.name, Kept, null).apply {
-                                diff(this, old, new)
+                        is DirNode -> addChild(
+                            DirDelta(this, new.name, KeptDir, null).apply {
+                                diff(old, new)
                             }
                         )
                     }
@@ -111,62 +112,60 @@ private fun diff(dirDelta: DirDelta, oldDir: DirNode, newDir: DirNode) {
                 new = newIter.nextOrNull()
             }
             compareTo < 0 -> {
-                dirDelta.addChild(old!!, Deleted)
+                addChild(old!!, false)
                 old = oldIter.nextOrNull()
             }
             else -> {
-                dirDelta.addChild(new!!, New)
+                addChild(new!!, true)
                 new = newIter.nextOrNull()
             }
         }
     }
 }
 
-private fun moveFiles(root: DirDelta) {
+private fun DirDelta.moveFiles() {
     val digestToDeltas = buildMap {
         fun Delta.visit() {
             if (digest != null) getOrPut(digest) { mutableListOf() }.add(this)
             if (this is DirDelta) children.forEach { it.visit() }
         }
-        root.visit()
+        visit()
     }
     digestToDeltas.values.forEach { deltas ->
         if (DEBUG) println("deltas: $deltas")
-        val newList = deltas.filter { it.state == New || it.state == ToFile || it.state == Changed }
-        if (newList.isEmpty()) return@forEach
-        val deletedList = deltas.filter { it.state == Deleted || it.state == ToDir }
-        if (deletedList.isEmpty()) return@forEach
-        newList.forEach { new ->
-            new.movedFrom = deletedList
-            deletedList.forEach { deleted ->
-                if (deleted.state == ToDir) return@forEach
-                deleted.siblings.remove(deleted) // deleted could only be in siblings once
+        val newFiles = deltas.filter { it.state == NewFile || it.state == DirToFile || it.state == ChangedFile }
+        if (newFiles.isEmpty()) return@forEach
+        val deletedFiles = deltas.filter { it.state == DeletedFile || it.state == FileToDir }
+        if (deletedFiles.isEmpty()) return@forEach
+        newFiles.forEach { newFile ->
+            newFile.movedFrom = deletedFiles
+            deletedFiles.forEach { deletedFile ->
+                if (deletedFile.state == FileToDir) return@forEach
+                deletedFile.siblings.remove(deletedFile) // deletedFile could only be in siblings once
             }
         }
     }
 }
 
-private fun DirDelta.tryPruneKept(): Boolean {
-    children.removeAll { it is DirDelta && it.tryPruneKept() }
-    return children.isEmpty() && state == Kept
+private fun DirDelta.tryPruneKeptDir(): Boolean {
+    children.removeAll { it is DirDelta && it.tryPruneKeptDir() }
+    return children.isEmpty() && state == KeptDir
 }
 
-fun DirDelta(old: DirNode, new: DirNode): DirDelta {
-    val root = DirDelta(null, "", Kept, null)
-    diff(root, old, new)
-    if (DEBUG) println("diff:\n${root.printDelta()}")
-    root.tryPruneKept()
-    moveFiles(root)
-    if (DEBUG) println("moveFiles:\n${root.printDelta()}")
-    root.tryPruneKept()
-    return root
+fun DirDelta(old: DirNode, new: DirNode) = DirDelta(null, "", KeptDir, null).apply {
+    diff(old, new)
+    if (DEBUG) print("diff:\n${printDelta()}")
+    tryPruneKeptDir()
+    moveFiles()
+    if (DEBUG) print("moveFiles:\n${printDelta()}")
+    tryPruneKeptDir()
 }
 
 fun Appendable.printDelta(delta: Delta, indent: Int = 0, debug: Boolean = false) {
     with(delta) {
         append("    ".repeat(indent))
         append("- `$name`")
-        if (debug || state != Kept) append(" $state")
+        if (debug || state != KeptDir) append(" $state")
         if (movedFrom != null) {
             append(" <")
             movedFrom!!.forEach { append(" `${it.Path()}`") }

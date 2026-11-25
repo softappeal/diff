@@ -55,7 +55,7 @@ class MainTest {
             DELTA
             - ``
                 - `diff`
-                    - `diff.ser` New
+                    - `diff.ser` NewFile
 
             type <y> to accept changes (else abort): 
             ${if (input) "DONE" else "ABORTED"}
@@ -73,7 +73,7 @@ class MainTest {
             DELTA
             - ``
                 - `diff`
-                    - `diff.ser` Changed
+                    - `diff.ser` ChangedFile
 
             type <y> to accept changes (else abort): 
             DONE

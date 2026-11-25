@@ -34,9 +34,9 @@ class DeltaTest {
         },
         """
             - ``
-                - `dir` Deleted
-                    - `dir-file` Deleted
-                - `file` Deleted
+                - `dir` DeletedDir
+                    - `dir-file` DeletedFile
+                - `file` DeletedFile
         """,
     )
 
@@ -47,42 +47,42 @@ class DeltaTest {
         root,
         """
             - ``
-                - `dir` New
-                    - `dir-file` New
-                - `file` New
+                - `dir` NewDir
+                    - `dir-file` NewFile
+                - `file` NewFile
         """,
     )
 
     @Test
-    fun diff_ToDir() = assertDiff(
+    fun diff_FileToDir() = assertDiff(
         root {
             file("dir", 10)
         },
         root,
         """
             - ``
-                - `dir` ToDir
-                    - `dir-file` New
-                - `file` New
+                - `dir` FileToDir
+                    - `dir-file` NewFile
+                - `file` NewFile
         """,
     )
 
     @Test
-    fun diff_ToFile() = assertDiff(
+    fun diff_DirToFile() = assertDiff(
         root,
         root {
             file("dir", 10)
         },
         """
             - ``
-                - `dir` ToFile
-                    - `dir-file` Deleted
-                - `file` Deleted
+                - `dir` DirToFile
+                    - `dir-file` DeletedFile
+                - `file` DeletedFile
         """,
     )
 
     @Test
-    fun diff_Changed() = assertDiff(
+    fun diff_ChangedFile() = assertDiff(
         root {
             file("file", 1)
         },
@@ -91,12 +91,12 @@ class DeltaTest {
         },
         """
             - ``
-                - `file` Changed
+                - `file` ChangedFile
         """,
     )
 
     @Test
-    fun moveFiles_Changed() = assertDiff(
+    fun moveFiles_ChangedFile() = assertDiff(
         root {
             file("changed", 1)
             dir("dir") {
@@ -109,12 +109,12 @@ class DeltaTest {
         },
         """
             - ``
-                - `changed` Changed < `/dir/deleted`
+                - `changed` ChangedFile < `/dir/deleted`
         """,
     )
 
     @Test
-    fun moveFiles_New() = assertDiff(
+    fun moveFiles_NewFile() = assertDiff(
         root {
             file("a1", 1)
             file("a2", 1)
@@ -126,41 +126,41 @@ class DeltaTest {
         },
         """
             - ``
-                - `new` New < `/a1` `/a2`
-                - `x1` New < `/a1` `/a2`
-                - `x2` New < `/a1` `/a2`
+                - `new` NewFile < `/a1` `/a2`
+                - `x1` NewFile < `/a1` `/a2`
+                - `x2` NewFile < `/a1` `/a2`
         """,
     )
 
     @Test
-    fun moveFiles_ToDir() = assertDiff(
+    fun moveFiles_FileToDir() = assertDiff(
         root {
             file("dir", 1)
         },
         root,
         """
             - ``
-                - `dir` ToDir
-                    - `dir-file` New < `/dir`
-                - `file` New
+                - `dir` FileToDir
+                    - `dir-file` NewFile < `/dir`
+                - `file` NewFile
         """,
     )
 
     @Test
-    fun moveFiles_ToFile() = assertDiff(
+    fun moveFiles_DirToFile() = assertDiff(
         root,
         root {
             file("dir", 1)
         },
         """
             - ``
-                - `dir` ToFile < `/dir/dir-file`
-                - `file` Deleted
+                - `dir` DirToFile < `/dir/dir-file`
+                - `file` DeletedFile
         """,
     )
 
     @Test
-    fun tryPruneKept() = assertDiff(
+    fun tryPruneKeptDir() = assertDiff(
         root {
             dir("dir1") {
                 file("dir1-file", 1)
@@ -179,8 +179,41 @@ class DeltaTest {
         """
             - ``
                 - `dir2`
-                    - `dir2-file` Deleted
-                - `newDir` New
+                    - `dir2-file` DeletedFile
+                - `newDir` NewDir
+        """,
+    )
+
+    @Test
+    fun moveDirectories() = assertDiff(
+        root {
+            dir("old") {
+                file("file1", 1)
+                dir("dir1") {
+                    file("file2", 2)
+                }
+                dir("dir2")
+            }
+        },
+        root {
+            dir("new") {
+                file("file1", 1)
+                dir("dir1") {
+                    file("file2", 2)
+                }
+                dir("dir2")
+            }
+        },
+        """
+            - ``
+                - `new` NewDir
+                    - `dir1` NewDir
+                        - `file2` NewFile < `/old/dir1/file2`
+                    - `dir2` NewDir
+                    - `file1` NewFile < `/old/file1`
+                - `old` DeletedDir
+                    - `dir1` DeletedDir
+                    - `dir2` DeletedDir
         """,
     )
 }
