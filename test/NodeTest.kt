@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-const val TEST_RESOURCES = "testResources"
+const val TEST_DATA = "test/data"
 
 val DUPLICATES = root {
     file("a1", 1)
@@ -93,12 +93,12 @@ class NodeTest {
             """
                 - ``
                     - `a.txt` `z80ghJXVZe9m59/5+Ydk2g==`
-                    - `diff`
+                    - `d`
                         - `a.txt` `z80ghJXVZe9m59/5+Ydk2g==`
                         - `b.txt` `xMpCOKC5I4INzFCab3WEmw==`
 
             """.trimIndent(),
-            toString { printNode(DirNode(TEST_RESOURCES, "MD5")) },
+            toString { printNode(DirNode(TEST_DATA, "MD5")) },
         )
     }
 }

@@ -9,13 +9,8 @@ repositories {
 
 kotlin {
     sourceSets {
-        main {
-            kotlin.srcDir("src")
-        }
-        test {
-            kotlin.srcDir("test")
-            resources.srcDir("testResources")
-        }
+        main { kotlin.srcDir("src") }
+        test { kotlin.srcDir("test") }
     }
 
     compilerOptions {
