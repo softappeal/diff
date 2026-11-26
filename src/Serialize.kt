@@ -12,7 +12,7 @@ fun DirNode.toByteArray(): ByteArray {
         when (this) {
             is FileNode -> {
                 writer.writeByte(FILE_NODE)
-                writer.writeByteArray(digest)
+                writer.writeByteArray(digest.bytes)
             }
             is DirNode -> {
                 writer.writeByte(DIR_NODE)
@@ -29,8 +29,8 @@ fun ByteArray.fromByteArray(digestLength: Int): DirNode {
     fun Reader.read(): Node {
         val name = readByteArray(readVarInt()).decodeToString(throwOnInvalidSequence = true)
         return when (readByte()) {
-            FILE_NODE -> FileNode(name, readByteArray(digestLength))
-            DIR_NODE -> DirNode(name, List(readVarInt()) { read() })
+            FILE_NODE -> FileNode(name, FileState.NewFile, Digest(readByteArray(digestLength)))
+            DIR_NODE -> DirNode(name, DirState.NewDir, List(readVarInt()) { read() })
             else -> error("")
         }
     }

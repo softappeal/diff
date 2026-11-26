@@ -6,36 +6,24 @@ import kotlin.test.assertFailsWith
 
 const val TEST_DATA = "test/data"
 
-val DUPLICATES = root {
-    file("a1", 1)
-    dir("dir") {
-        file("a2", 1)
-        file("b2", 2)
-        file("a3", 1)
-        file("c", 4)
-    }
-    file("b1", 2)
-    file("c", 3)
-}
-
 class NodeBuilder {
     val children = mutableListOf<Node>()
 
     fun file(name: String, digest: Byte) {
-        children.add(FileNode(name, byteArrayOf(digest)))
+        children.add(FileNode(name, FileState.NewFile, Digest(byteArrayOf(digest))))
     }
 
     fun dir(name: String, block: NodeBuilder.() -> Unit = {}) {
         val builder = NodeBuilder()
         builder.block()
-        children.add(DirNode(name, builder.children.sortedBy(Node::name)))
+        children.add(DirNode(name, DirState.NewDir, builder.children.sortedBy(Node::name)))
     }
 }
 
 fun root(block: NodeBuilder.() -> Unit): DirNode {
     val builder = NodeBuilder()
     builder.block()
-    return DirNode("", builder.children.sortedBy(Node::name))
+    return DirNode("", DirState.NewDir, builder.children.sortedBy(Node::name))
 }
 
 fun toString(print: Appendable.() -> Unit) = StringBuffer().apply { print() }.toString()
@@ -45,60 +33,26 @@ class NodeTest {
     fun illegalNodeName() {
         assertEquals(
             "node name 'a/b' must not contain '/'",
-            assertFailsWith<IllegalArgumentException> { FileNode("a/b", byteArrayOf()) }.message
+            assertFailsWith<IllegalArgumentException> { FileNode("a/b", FileState.NewFile, Digest(byteArrayOf())) }.message
         )
         assertEquals(
             "node name 'a`b' must not contain '`'",
-            assertFailsWith<IllegalArgumentException> { DirNode("a`b", listOf()) }.message
+            assertFailsWith<IllegalArgumentException> { DirNode("a`b", DirState.NewDir, listOf()) }.message
         )
     }
 
     @Test
-    fun noDuplicates() {
-        assertEquals(
-            "",
-            toString {
-                printDuplicates(
-                    root {
-                        file("a", 0)
-                        file("b", 1)
-                    }
-                )
-            },
-        )
-    }
-
-    @Test
-    fun duplicates() {
+    fun createDirNodeFromFileSystem() {
         assertEquals(
             """
-                - DUPLICATES
-                    - `AQ==`
-                        - `/a1`
-                        - `/dir/a2`
-                        - `/dir/a3`
-                    - `Ag==`
-                        - `/b1`
-                        - `/dir/b2`
-
+                - `` NewDir
+                    - `a.txt` NewFile `z80ghJXVZe9m59/5+Ydk2g==`
+                    - `d` NewDir
+                        - `a.txt` NewFile `z80ghJXVZe9m59/5+Ydk2g==`
+                        - `b.txt` NewFile `xMpCOKC5I4INzFCab3WEmw==`
 
             """.trimIndent(),
-            toString { printDuplicates(DUPLICATES) },
-        )
-    }
-
-    @Test
-    fun createDirNode() {
-        assertEquals(
-            """
-                - ``
-                    - `a.txt` `z80ghJXVZe9m59/5+Ydk2g==`
-                    - `d`
-                        - `a.txt` `z80ghJXVZe9m59/5+Ydk2g==`
-                        - `b.txt` `xMpCOKC5I4INzFCab3WEmw==`
-
-            """.trimIndent(),
-            toString { printNode(DirNode(TEST_DATA, "MD5")) },
+            toString { printNode(createDirNodeFromFileSystem(TEST_DATA, "MD5")) },
         )
     }
 }

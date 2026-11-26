@@ -1,19 +1,18 @@
 package ch.softappeal.diff
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.nio.file.Files
-import java.security.MessageDigest
 import kotlin.io.encoding.Base64
-import kotlin.io.path.Path
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.isSymbolicLink
-import kotlin.io.path.name
-import kotlin.io.path.readBytes
+
+class Digest(val bytes: ByteArray) {
+    override fun hashCode() = bytes.contentHashCode()
+    override fun equals(other: Any?) = other is Digest && bytes.contentEquals(other.bytes)
+    override fun toString() = Base64.encode(bytes)
+}
 
 private const val DIR_SEP = '/'
+
+typealias Path = String
+
+fun Path.Path(name: String): Path = "$this$DIR_SEP$name"
 
 private fun Node.checkName() {
     require(!name.contains(DIR_SEP)) { "node name '$name' must not contain '$DIR_SEP'" }
@@ -22,80 +21,47 @@ private fun Node.checkName() {
 
 sealed class Node {
     abstract val name: String
+    var movedPaths: List<Path>? = null
 }
 
-class FileNode(override val name: String, var digest: ByteArray) : Node() {
+enum class FileState { NewFile, DeletedFile, ChangedFile }
+
+class FileNode(override val name: String, val state: FileState, var digest: Digest) : Node() {
     init {
         checkName()
     }
+
+    override fun toString() = "`${Path()}`:$state"
 }
 
-class DirNode(override val name: String, val children: List<Node>) : Node() {
+enum class DirState { NewDir, DeletedDir, KeptDir, FileToDir, DirToFile }
+
+class DirNode(override val name: String, val state: DirState, val children: List<Node>) : Node() {
     init {
         checkName()
         check(children.isSortedBy(Node::name))
+        check(children.distinctBy(Node::name).size == children.size)
     }
+
+    override fun toString() = "`${Path()}`:$state"
 }
-
-typealias Path = String
-
-fun DirNode(root: Path, digestAlgorithm: String) = runBlocking(Dispatchers.Default) {
-    fun DirNode(current: Path, name: String): DirNode = DirNode(
-        name,
-        buildList {
-            Files.newDirectoryStream(Path(current)).forEach { path ->
-                require(!path.isSymbolicLink()) { "path '$path' is a symbolic link" }
-                when {
-                    path.isRegularFile() -> add(
-                        FileNode(path.name, byteArrayOf()).apply {
-                            launch { digest = MessageDigest.getInstance(digestAlgorithm).digest(path.readBytes()) }
-                        }
-                    )
-                    path.isDirectory() -> add(
-                        DirNode(path.toString(), path.name)
-                    )
-                    else -> error("path '$path' has unexpected type")
-                }
-            }
-        }.sortedBy(Node::name),
-    )
-    DirNode(root, "")
-}
-
-typealias Digest = String
-
-fun ByteArray.toDigest(): Digest = Base64.encode(this)
 
 fun Appendable.printNode(node: Node, indent: Int = 0) {
+    fun movedPaths() {
+        if (node.movedPaths != null) append(" < ${node.movedPaths}")
+    }
     append("${"    ".repeat(indent)}- `${node.name}`")
     when (node) {
-        is FileNode -> appendLine(" `${node.digest.toDigest()}`")
+        is FileNode -> {
+            append(" ${node.state}")
+            movedPaths()
+            appendLine(" `${node.digest}`")
+        }
         is DirNode -> {
+            append(" ${node.state}")
+            movedPaths()
             appendLine()
             node.children.forEach { printNode(it, indent + 1) }
         }
     }
-}
-
-fun Path.Path(name: String): Path = "$this$DIR_SEP$name"
-
-fun Appendable.printDuplicates(node: DirNode) {
-    val digestToPaths = buildMap {
-        fun Node.visit(current: Path) {
-            val next = if (name.isEmpty()) "" else current.Path(name)
-            when (this) {
-                is FileNode -> getOrPut(digest.toDigest()) { mutableListOf() }.add(next)
-                is DirNode -> children.forEach { it.visit(next) }
-            }
-        }
-        node.visit("")
-    }
-    val duplicates = digestToPaths.filter { it.value.size != 1 }
-    if (duplicates.isEmpty()) return
-    appendLine("- DUPLICATES")
-    duplicates.forEach { [digest, paths] ->
-        appendLine("    - `$digest`")
-        paths.forEach { appendLine("        - `$it`") }
-    }
-    appendLine()
 }
