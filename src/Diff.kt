@@ -112,7 +112,7 @@ fun createDiff(old: DirNode, new: DirNode): DirNode {
 
                 val sources = dirPathsBySignature[signature]
                 if (sources != null) {
-                    DirNode(child.name, DirState.KeptDir, emptyList()).also { it.movedPaths = sources.toList() }
+                    DirNode(child.name, DirState.NewDir, emptyList()).also { it.movedPaths = sources.toList() }
                 } else {
                     val moved = walk(child, childPath)
                     if (moved.isEmpty()) null else DirNode(child.name, DirState.NewDir, moved)

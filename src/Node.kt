@@ -57,7 +57,8 @@ fun Appendable.printNode(node: Node, diff: Boolean = true, indent: Int = 0) {
         is FileNode -> {
             if (diff) append(" ${node.state}")
             movedPaths()
-            if (node.digest != null) appendLine(" `${node.digest}`")
+            if (node.digest != null) append(" `${node.digest}`")
+            appendLine()
         }
         is DirNode -> {
             if (diff && node.state != DirState.KeptDir) append(" ${node.state}")
