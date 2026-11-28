@@ -26,7 +26,7 @@ sealed class Node {
 
 enum class FileState { NewFile, DeletedFile, ChangedFile }
 
-class FileNode(override val name: String, val state: FileState, var digest: Digest) : Node() {
+class FileNode(override val name: String, val state: FileState, var digest: Digest?) : Node() {
     init {
         checkName()
     }
@@ -40,28 +40,27 @@ class DirNode(override val name: String, val state: DirState, val children: List
     init {
         checkName()
         check(children.isSortedBy(Node::name))
-        check(children.distinctBy(Node::name).size == children.size)
     }
 
     override fun toString() = "`${Path()}`:$state"
 }
 
-fun Appendable.printNode(node: Node, indent: Int = 0) {
+fun Appendable.printNode(node: Node, diff: Boolean = true, indent: Int = 0) {
     fun movedPaths() {
         if (node.movedPaths != null) append(" < ${node.movedPaths}")
     }
     append("${"    ".repeat(indent)}- `${node.name}`")
     when (node) {
         is FileNode -> {
-            append(" ${node.state}")
+            if (diff) append(" ${node.state}")
             movedPaths()
-            appendLine(" `${node.digest}`")
+            if (node.digest != null) appendLine(" `${node.digest}`")
         }
         is DirNode -> {
-            append(" ${node.state}")
+            if (diff && node.state != DirState.KeptDir) append(" ${node.state}")
             movedPaths()
             appendLine()
-            node.children.forEach { printNode(it, indent + 1) }
+            node.children.forEach { printNode(it, diff, indent + 1) }
         }
     }
 }

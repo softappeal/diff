@@ -12,7 +12,7 @@ fun DirNode.toByteArray(): ByteArray {
         when (this) {
             is FileNode -> {
                 writer.writeByte(FILE_NODE)
-                writer.writeByteArray(digest.bytes)
+                writer.writeByteArray(digest!!.bytes)
             }
             is DirNode -> {
                 writer.writeByte(DIR_NODE)

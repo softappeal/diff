@@ -33,7 +33,7 @@ class NodeTest {
     fun illegalNodeName() {
         assertEquals(
             "node name 'a/b' must not contain '/'",
-            assertFailsWith<IllegalArgumentException> { FileNode("a/b", FileState.NewFile, Digest(byteArrayOf())) }.message
+            assertFailsWith<IllegalArgumentException> { FileNode("a/b", FileState.NewFile, null) }.message
         )
         assertEquals(
             "node name 'a`b' must not contain '`'",
@@ -45,14 +45,14 @@ class NodeTest {
     fun createDirNodeFromFileSystem() {
         assertEquals(
             """
-                - `` NewDir
-                    - `a.txt` NewFile `z80ghJXVZe9m59/5+Ydk2g==`
-                    - `d` NewDir
-                        - `a.txt` NewFile `z80ghJXVZe9m59/5+Ydk2g==`
-                        - `b.txt` NewFile `xMpCOKC5I4INzFCab3WEmw==`
+                - ``
+                    - `a.txt` `z80ghJXVZe9m59/5+Ydk2g==`
+                    - `d`
+                        - `a.txt` `z80ghJXVZe9m59/5+Ydk2g==`
+                        - `b.txt` `xMpCOKC5I4INzFCab3WEmw==`
 
             """.trimIndent(),
-            toString { printNode(createDirNodeFromFileSystem(TEST_DATA, "MD5")) },
+            toString { printNode(createDirNodeFromFileSystem(TEST_DATA, "MD5"), false) },
         )
     }
 }

@@ -10,13 +10,8 @@ class DiffTest {
             with(node) {
                 append("${"    ".repeat(indent)}- '$name'")
                 if (movedPaths != null) append(" $movedPaths")
-                when (this) {
-                    is FileNode -> appendLine(" ${digest.bytes.toList()}")
-                    is DirNode -> {
-                        appendLine()
-                        children.forEach { print(it, indent + 1) }
-                    }
-                }
+                appendLine()
+                if (this is DirNode) children.forEach { print(it, indent + 1) }
             }
         }
         assertEquals(
@@ -74,8 +69,8 @@ class DiffTest {
         },
         """
             - ''
-                - 'file5' [/file1, /file2] [3]
-                - 'file6' [/dir/file3] [4]
+                - 'file5' [/file1, /file2]
+                - 'file6' [/dir/file3]
         """,
     )
 
@@ -119,7 +114,7 @@ class DiffTest {
         """
             - ''
                 - 'd2' [/d]
-                - 'y' [/x] [5]
+                - 'y' [/x]
         """,
     )
 
@@ -144,7 +139,7 @@ class DiffTest {
         """
             - ''
                 - 'keep'
-                    - 'f2' [/keep/f] [7]
+                    - 'f2' [/keep/f]
                     - 'sub2' [/keep/sub]
         """,
     )
@@ -175,7 +170,7 @@ class DiffTest {
         },
         """
             - ''
-                - 'h' [/f] [2]
+                - 'h' [/f]
         """,
     )
 
@@ -192,7 +187,7 @@ class DiffTest {
         """
             - ''
                 - 'x'
-                    - 'a' [/x] [1]
+                    - 'a' [/x]
         """,
     )
 
@@ -208,7 +203,7 @@ class DiffTest {
         },
         """
             - ''
-                - 'x' [/x/a] [1]
+                - 'x' [/x/a]
         """,
     )
 
@@ -297,8 +292,8 @@ class DiffTest {
         },
         """
             - ''
-                - 'a' [/b] [2]
-                - 'b' [/a] [1]
+                - 'a' [/b]
+                - 'b' [/a]
         """,
     )
 
@@ -318,7 +313,7 @@ class DiffTest {
         },
         """
             - ''
-                - 'a' [/d/a] [1]
+                - 'a' [/d/a]
         """,
     )
 
@@ -386,7 +381,7 @@ class DiffTest {
         """
             - ''
                 - 'd2'
-                    - 'a' [/d/a] [1]
+                    - 'a' [/d/a]
         """,
     )
 
@@ -432,7 +427,7 @@ class DiffTest {
         },
         """
             - ''
-                - 'n' [/a, /b/x, /c] [1]
+                - 'n' [/a, /b/x, /c]
         """,
     )
 

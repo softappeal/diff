@@ -50,7 +50,7 @@ so a type change inside a directory makes its signature different, as it should.
 fun createDiff(old: DirNode, new: DirNode): DirNode {
     // Interns digests and directory signatures as small ints so comparing them is O(1).
     val digestIds = mutableMapOf<Digest, Int>()
-    fun digestId(file: FileNode): Int = digestIds.getOrPut(file.digest) { digestIds.size }
+    fun digestId(file: FileNode): Int = digestIds.getOrPut(file.digest!!) { digestIds.size }
 
     // Signature of a child: (name, isDirectory, digest id or directory signature id).
     // The isDirectory flag keeps a file and a directory with the same name from ever being equal.
@@ -103,7 +103,7 @@ fun createDiff(old: DirNode, new: DirNode): DirNode {
                 val digest = digestId(child)
                 if (fileDigestByPath[childPath] == digest) return@mapNotNull null // unchanged
                 val sources = filePathsByDigest[digest] ?: return@mapNotNull null
-                FileNode(child.name, FileState.NewFile, child.digest).also { it.movedPaths = sources.toList() }
+                FileNode(child.name, FileState.NewFile, null).also { it.movedPaths = sources.toList() }
             }
             is DirNode -> {
                 if (child.children.isEmpty()) return@mapNotNull null
@@ -112,7 +112,7 @@ fun createDiff(old: DirNode, new: DirNode): DirNode {
 
                 val sources = dirPathsBySignature[signature]
                 if (sources != null) {
-                    DirNode(child.name, DirState.NewDir, emptyList()).also { it.movedPaths = sources.toList() }
+                    DirNode(child.name, DirState.KeptDir, emptyList()).also { it.movedPaths = sources.toList() }
                 } else {
                     val moved = walk(child, childPath)
                     if (moved.isEmpty()) null else DirNode(child.name, DirState.NewDir, moved)

@@ -89,7 +89,7 @@ class MainTest {
             """
         $duplicates
             DIFF
-            - `` KeptDir
+            - ``
             """
         )
 
@@ -97,7 +97,7 @@ class MainTest {
             """
             $duplicates
             DIFF
-            - `` KeptDir
+            - ``
             """
         )
 

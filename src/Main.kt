@@ -14,7 +14,7 @@ fun Appendable.printDuplicates(node: DirNode) {
         fun Node.visit(current: Path) {
             val next = if (name.isEmpty()) "" else current.Path(name)
             when (this) {
-                is FileNode -> getOrPut(digest) { mutableListOf() }.add(next)
+                is FileNode -> getOrPut(digest!!) { mutableListOf() }.add(next)
                 is DirNode -> children.forEach { it.visit(next) }
             }
         }
