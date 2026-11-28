@@ -77,11 +77,11 @@ class MainTest {
             """
             $duplicates
             NODE
-            - `` NewDir
-                - `a.txt` NewFile `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
-                - `d` NewDir
-                    - `a.txt` NewFile `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
-                    - `b.txt` NewFile `Z7F2cFtGIGYUIZ9HoFrueuaj7b6FC7viFMU2uYmupNI=`
+            - ``
+                - `a.txt` `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
+                - `d`
+                    - `a.txt` `+eLqqkLZ/p5VipuO8b82bxkKrKqDutJkHuEG6QQQluQ=`
+                    - `b.txt` `Z7F2cFtGIGYUIZ9HoFrueuaj7b6FC7viFMU2uYmupNI=`
             """
         )
 

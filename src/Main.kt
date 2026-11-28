@@ -42,7 +42,7 @@ fun Appendable.script(rootDir: Path) {
         printNode(createDiff(oldNode, newNode))
     } else {
         appendLine("NODE")
-        printNode(newNode)
+        printNode(newNode, false)
     }
     nodePath.writeBytes(newNode.toByteArray())
 }
