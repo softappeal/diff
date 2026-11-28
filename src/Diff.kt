@@ -123,3 +123,75 @@ fun createDiff(old: DirNode, new: DirNode): DirNode {
 
     return DirNode("", DirState.KeptDir, walk(new, ""))
 }
+
+
+/*
+
+private fun DirDelta.diff(oldDir: DirNode, newDir: DirNode) {
+    fun DirDelta.addChild(node: Node, new: Boolean) {
+        addChild(
+            when (node) {
+                is FileNode -> FileDelta(this, node.name, if (new) NewFile else DeletedFile, node.digest)
+                is DirNode -> DirDelta(this, node.name, if (new) NewDir else DeletedDir, null).apply {
+                    node.children.forEach { addChild(it, new) }
+                }
+            }
+        )
+    }
+
+    fun Iterator<Node>.nextOrNull() = if (hasNext()) next() else null
+
+    val oldIter = oldDir.children.iterator()
+    val newIter = newDir.children.iterator()
+    var old = oldIter.nextOrNull()
+    var new = newIter.nextOrNull()
+    while (true) {
+        val compareTo = when {
+            old == null -> if (new == null) return else 1
+            new == null -> -1
+            else -> old.name.compareTo(new.name)
+        }
+        when {
+            compareTo == 0 -> {
+                when (old!!) {
+                    is FileNode -> when (new!!) {
+                        is FileNode -> if (!old.digest.contentEquals(new.digest)) addChild(
+                            FileDelta(this, new.name, ChangedFile, new.digest)
+                        )
+                        is DirNode -> DirDelta(this, new.name, FileToDir, old.digest).apply {
+                            new.children.forEach { addChild(it, true) }
+                            this@diff.addChild(this)
+                        }
+                    }
+                    is DirNode -> when (new!!) {
+                        is FileNode -> DirDelta(this, old.name, DirToFile, new.digest).apply {
+                            old.children.forEach { addChild(it, false) }
+                            this@diff.addChild(this)
+                        }
+                        is DirNode -> addChild(
+                            DirDelta(this, new.name, KeptDir, null).apply {
+                                diff(old, new)
+                            }
+                        )
+                    }
+                }
+                old = oldIter.nextOrNull()
+                new = newIter.nextOrNull()
+            }
+            compareTo < 0 -> {
+                addChild(old!!, false)
+                old = oldIter.nextOrNull()
+            }
+            else -> {
+                addChild(new!!, true)
+                new = newIter.nextOrNull()
+            }
+        }
+    }
+}
+
+private fun DirDelta.tryPruneKeptDir(): Boolean {
+    children.removeAll { it is DirDelta && it.tryPruneKeptDir() }
+    return children.isEmpty() && state == KeptDir
+}
+*/

@@ -47,7 +47,10 @@ class DirNode(override val name: String, val state: DirState, val children: List
 
 fun Appendable.printNode(node: Node, diff: Boolean = true, indent: Int = 0) {
     fun movedPaths() {
-        if (node.movedPaths != null) append(" < ${node.movedPaths}")
+        if (node.movedPaths != null) {
+            append(" <")
+            node.movedPaths!!.forEach { append(" `$it`") }
+        }
     }
     append("${"    ".repeat(indent)}- `${node.name}`")
     when (node) {
