@@ -4,22 +4,14 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class DiffTest {
-    fun assertDiff(old: DirNode, new: DirNode, expected: String) {
-        fun Appendable.print(node: Node, indent: Int = 0) {
-            with(node) {
-                append("${"    ".repeat(indent)}- '$name'")
-                if (movedPaths != null) append(" $movedPaths")
-                appendLine()
-                if (this is DirNode) children.forEach { print(it, indent + 1) }
-            }
-        }
-        assertEquals(
-            "${expected.trimIndent()}\n",
-            toString { print(createDiff(old, new)) }
-        )
-    }
+private fun assertDiff(old: DirNode, new: DirNode, expected: String) {
+    assertEquals(
+        "${expected.trimIndent()}\n",
+        toString { printNode(createDiff(old, new)) },
+    )
+}
 
+class DiffTest {
     @Test
     fun movedSubTrees() = assertDiff(
         root {
@@ -49,8 +41,8 @@ class DiffTest {
             dir("newDir")
         },
         """
-            - ''
-                - 'renamed' [/dir/toBeMoved, /toBeMoved]
+            - ``
+                - `renamed` NewDir < `/dir/toBeMoved` `/toBeMoved`
         """,
     )
 
@@ -68,9 +60,9 @@ class DiffTest {
             file("file6", 4)
         },
         """
-            - ''
-                - 'file5' [/file1, /file2]
-                - 'file6' [/dir/file3]
+            - ``
+                - `file5` NewFile < `/file1` `/file2`
+                - `file6` NewFile < `/dir/file3`
         """,
     )
 
@@ -89,7 +81,7 @@ class DiffTest {
             }
         },
         """
-            - ''
+            - ``
         """,
     )
 
@@ -112,9 +104,9 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'd2' [/d]
-                - 'y' [/x]
+            - ``
+                - `d2` NewDir < `/d`
+                - `y` NewFile < `/x`
         """,
     )
 
@@ -137,10 +129,10 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'keep'
-                    - 'f2' [/keep/f]
-                    - 'sub2' [/keep/sub]
+            - ``
+                - `keep` NewDir
+                    - `f2` NewFile < `/keep/f`
+                    - `sub2` NewDir < `/keep/sub`
         """,
     )
 
@@ -155,7 +147,7 @@ class DiffTest {
             dir("e")
         },
         """
-            - ''
+            - ``
         """,
     )
 
@@ -169,8 +161,8 @@ class DiffTest {
             file("h", 2)
         },
         """
-            - ''
-                - 'h' [/f]
+            - ``
+                - `h` NewFile < `/f`
         """,
     )
 
@@ -185,9 +177,9 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'x'
-                    - 'a' [/x]
+            - ``
+                - `x` NewDir
+                    - `a` NewFile < `/x`
         """,
     )
 
@@ -202,8 +194,8 @@ class DiffTest {
             file("x", 1)
         },
         """
-            - ''
-                - 'x' [/x/a]
+            - ``
+                - `x` NewFile < `/x/a`
         """,
     )
 
@@ -221,8 +213,8 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'x' [/old]
+            - ``
+                - `x` NewDir < `/old`
         """,
     )
 
@@ -235,7 +227,7 @@ class DiffTest {
             file("a", 3)
         },
         """
-            - ''
+            - ``
         """,
     )
 
@@ -253,7 +245,7 @@ class DiffTest {
             }
         },
         """
-            - ''
+            - ``
         """,
     )
 
@@ -276,7 +268,7 @@ class DiffTest {
             }
         },
         """
-            - ''
+            - ``
         """,
     )
 
@@ -291,9 +283,9 @@ class DiffTest {
             file("b", 1)
         },
         """
-            - ''
-                - 'a' [/b]
-                - 'b' [/a]
+            - ``
+                - `a` NewFile < `/b`
+                - `b` NewFile < `/a`
         """,
     )
 
@@ -312,8 +304,8 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'a' [/d/a]
+            - ``
+                - `a` NewFile < `/d/a`
         """,
     )
 
@@ -338,10 +330,10 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'r'
-                    - 's'
-                        - 'moved' [/p/q/dir]
+            - ``
+                - `r` NewDir
+                    - `s` NewDir
+                        - `moved` NewDir < `/p/q/dir`
         """,
     )
 
@@ -360,8 +352,8 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'd2' [/d]
+            - ``
+                - `d2` NewDir < `/d`
         """,
     )
 
@@ -379,9 +371,9 @@ class DiffTest {
             }
         },
         """
-            - ''
-                - 'd2'
-                    - 'a' [/d/a]
+            - ``
+                - `d2` NewDir
+                    - `a` NewFile < `/d/a`
         """,
     )
 
@@ -395,7 +387,7 @@ class DiffTest {
             }
         },
         """
-            - ''
+            - ``
         """,
     )
 
@@ -409,7 +401,7 @@ class DiffTest {
         },
         root {},
         """
-            - ''
+            - ``
         """,
     )
 
@@ -426,8 +418,8 @@ class DiffTest {
             file("n", 1)
         },
         """
-            - ''
-                - 'n' [/a, /b/x, /c]
+            - ``
+                - `n` NewFile < `/a` `/b/x` `/c`
         """,
     )
 
@@ -446,20 +438,13 @@ class DiffTest {
             }
         },
         """
-            - ''
+            - ``
         """,
     )
 }
 
 @Ignore
 class DeltaTest {
-    fun assertDiff(old: DirNode, new: DirNode, expected: String) {
-        assertEquals(
-            (expected + "\n").trimIndent(),
-            toString { printNode(createDiff(old, new)) },
-        )
-    }
-
     val root = root {
         dir("dir") {
             file("dir-file", 1)
