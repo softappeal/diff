@@ -4,14 +4,14 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-private fun assertDiff(old: DirNode, new: DirNode, expected: String) {
-    assertEquals(
-        "${expected.trimIndent()}\n",
-        toString { printNode(createDiff(old, new)) },
-    )
-}
-
 class DiffTest {
+    fun assertDiff(old: DirNode, new: DirNode, expected: String) {
+        assertEquals(
+            "${expected.trimIndent()}\n",
+            toString { printNode(createDiff(old, new)) },
+        )
+    }
+
     @Test
     fun movedSubTrees() = assertDiff(
         root {
@@ -443,8 +443,14 @@ class DiffTest {
     )
 }
 
-@Ignore
 class DeltaTest {
+    fun assertDiff(old: DirNode, new: DirNode, expected: String) {
+        assertEquals(
+            "${expected.trimIndent()}\n",
+            toString { printNode(createDiffOld(old, new)) },
+        )
+    }
+
     val root = root {
         dir("dir") {
             file("dir-file", 1)
@@ -452,6 +458,7 @@ class DeltaTest {
         file("file", 0)
     }
 
+    @Ignore
     @Test
     fun diff_NoChanges() = assertDiff(
         root,
@@ -529,6 +536,7 @@ class DeltaTest {
         """,
     )
 
+    @Ignore
     @Test
     fun moveFiles_ChangedFile() = assertDiff(
         root {
@@ -547,6 +555,7 @@ class DeltaTest {
         """,
     )
 
+    @Ignore
     @Test
     fun moveFiles_NewFile() = assertDiff(
         root {
@@ -566,6 +575,7 @@ class DeltaTest {
         """,
     )
 
+    @Ignore
     @Test
     fun moveFiles_FileToDir() = assertDiff(
         root {
@@ -580,6 +590,7 @@ class DeltaTest {
         """,
     )
 
+    @Ignore
     @Test
     fun moveFiles_DirToFile() = assertDiff(
         root,
@@ -593,6 +604,7 @@ class DeltaTest {
         """,
     )
 
+    @Ignore
     @Test
     fun tryPruneKeptDir() = assertDiff(
         root {
@@ -618,6 +630,7 @@ class DeltaTest {
         """,
     )
 
+    @Ignore
     @Test
     fun moveDirectories() = assertDiff(
         root {

@@ -124,30 +124,30 @@ fun createDiff(old: DirNode, new: DirNode): DirNode {
     return DirNode("", DirState.KeptDir, walk(new, ""))
 }
 
-
-/*
-
-private fun DirDelta.diff(oldDir: DirNode, newDir: DirNode) {
-    fun DirDelta.addChild(node: Node, new: Boolean) {
-        addChild(
-            when (node) {
-                is FileNode -> FileDelta(this, node.name, if (new) NewFile else DeletedFile, node.digest)
-                is DirNode -> DirDelta(this, node.name, if (new) NewDir else DeletedDir, null).apply {
+private fun MutableList<Node>.addChild(node: Node, new: Boolean) {
+    add(
+        when (node) {
+            is FileNode -> FileNode(node.name, if (new) FileState.NewFile else FileState.DeletedFile, null)
+            is DirNode -> DirNode(
+                node.name,
+                if (new) DirState.NewDir else DirState.DeletedDir,
+                buildList {
                     node.children.forEach { addChild(it, new) }
-                }
-            }
-        )
-    }
+                },
+            )
+        }
+    )
+}
 
-    fun Iterator<Node>.nextOrNull() = if (hasNext()) next() else null
-
+private fun diffChildren(oldDir: DirNode, newDir: DirNode): List<Node> = buildList {
     val oldIter = oldDir.children.iterator()
     val newIter = newDir.children.iterator()
+    fun Iterator<Node>.nextOrNull() = if (hasNext()) next() else null
     var old = oldIter.nextOrNull()
     var new = newIter.nextOrNull()
     while (true) {
         val compareTo = when {
-            old == null -> if (new == null) return else 1
+            old == null -> if (new == null) return@buildList else 1
             new == null -> -1
             else -> old.name.compareTo(new.name)
         }
@@ -155,23 +155,31 @@ private fun DirDelta.diff(oldDir: DirNode, newDir: DirNode) {
             compareTo == 0 -> {
                 when (old!!) {
                     is FileNode -> when (new!!) {
-                        is FileNode -> if (!old.digest.contentEquals(new.digest)) addChild(
-                            FileDelta(this, new.name, ChangedFile, new.digest)
+                        is FileNode -> if (old.digest != new.digest) add(
+                            FileNode(new.name, FileState.ChangedFile, null)
                         )
-                        is DirNode -> DirDelta(this, new.name, FileToDir, old.digest).apply {
-                            new.children.forEach { addChild(it, true) }
-                            this@diff.addChild(this)
-                        }
+                        is DirNode -> add(
+                            DirNode(
+                                new.name,
+                                DirState.FileToDir,
+                                buildList {
+                                    new.children.forEach { addChild(it, true) }
+                                },
+                            )
+                        )
                     }
                     is DirNode -> when (new!!) {
-                        is FileNode -> DirDelta(this, old.name, DirToFile, new.digest).apply {
-                            old.children.forEach { addChild(it, false) }
-                            this@diff.addChild(this)
-                        }
-                        is DirNode -> addChild(
-                            DirDelta(this, new.name, KeptDir, null).apply {
-                                diff(old, new)
-                            }
+                        is FileNode -> add(
+                            DirNode(
+                                old.name,
+                                DirState.DirToFile,
+                                buildList {
+                                    old.children.forEach { addChild(it, false) }
+                                },
+                            )
+                        )
+                        is DirNode -> add(
+                            DirNode(new.name, DirState.KeptDir, diffChildren(old, new))
                         )
                     }
                 }
@@ -189,6 +197,10 @@ private fun DirDelta.diff(oldDir: DirNode, newDir: DirNode) {
         }
     }
 }
+
+fun createDiffOld(old: DirNode, new: DirNode) = DirNode("", DirState.KeptDir, diffChildren(old, new))
+
+/*
 
 private fun DirDelta.tryPruneKeptDir(): Boolean {
     children.removeAll { it is DirDelta && it.tryPruneKeptDir() }
